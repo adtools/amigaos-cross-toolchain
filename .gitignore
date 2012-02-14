@@ -1,0 +1,7 @@
+*.lha
+*.tar.gz
+sources/
+stamps/
+build/
+target/
+host/

@@ -1,7 +1,9 @@
 #!/bin/bash -Eeux
 
 readonly TOP_DIR="$(pwd)"
-readonly SRC_DIR="${TOP_DIR}/src"
+readonly ARCHIVES="${TOP_DIR}/archives"
+readonly PATCHES="${TOP_DIR}/patches"
+readonly SOURCES="${TOP_DIR}/sources"
 readonly BUILD_DIR="${TOP_DIR}/build"
 readonly HOST_DIR="${TOP_DIR}/host"
 readonly TARGET_DIR="${TOP_DIR}/target"
@@ -18,7 +20,6 @@ function prepare_target {
   mkdir -p "m68k-amigaos" "lib" "os-include" "os-lib"
   ln -sf "../os-include" "m68k-amigaos/include"
   ln -sf "../lib" "m68k-amigaos/lib"
-  tar -xjf "${TOP_DIR}/${LIBAMIGA_SRC}"
   popd
 
   touch "${STAMP}/prepare-target"
@@ -27,44 +28,56 @@ function prepare_target {
 function unpack_sources {
   [ -f "${STAMP}/unpack-sources" ] && return 0
 
-  rm -rf "${SRC_DIR}"
-  mkdir -p "${SRC_DIR}"
-  pushd "${SRC_DIR}"
+  rm -rf "${SOURCES}"
+  mkdir -p "${SOURCES}"
+  pushd "${SOURCES}"
 
   rm -rf "${BISON}"
-  tar -xjf "${TOP_DIR}/${BISON_SRC}"
+  tar -xzf "${ARCHIVES}/${BISON_SRC}"
 
   rm -rf "${BINUTILS}"
-  tar -xjf "${TOP_DIR}/${BINUTILS_SRC}"
+  tar -xzf "${ARCHIVES}/${BINUTILS_SRC}"
   pushd "${BINUTILS}"
-  zcat "${TOP_DIR}/${BINUTILS_PATCH}" | patch -p1
+  zcat "${PATCHES}/${BINUTILS_PATCH}" | patch -p1
   popd
 
   rm -rf "${GCC}"
-  tar -xjf "${TOP_DIR}/${GCC_CORE_SRC}"
-  tar -xjf "${TOP_DIR}/${GCC_CPP_SRC}"
+  tar -xzf "${ARCHIVES}/${GCC_CORE_SRC}"
+  tar -xzf "${ARCHIVES}/${GCC_CPP_SRC}"
   pushd "${GCC}"
-  zcat "${TOP_DIR}/${GCC_CORE_PATCH}" | patch -p1
-  zcat "${TOP_DIR}/${GCC_CPP_PATCH}" | patch -p1
+  zcat "${PATCHES}/${GCC_CORE_PATCH}" | patch -p1
+  zcat "${PATCHES}/${GCC_CPP_PATCH}" | patch -p1
   popd
 
   rm -rf "${FD2INLINE}"
-  tar -xjf "${TOP_DIR}/${FD2INLINE_SRC}"
+  tar -xzf "${ARCHIVES}/${FD2INLINE_SRC}"
 
   rm -rf "${SFDC}"
-  tar -xjf "${TOP_DIR}/${SFDC_SRC}"
+  lha -xq "${ARCHIVES}/${SFDC_SRC}"
+  tar -xzf "${SFDC}.tar.gz"
+  for file in $(ls -1d sfdc*); do
+    [ -f "${file}" ] && rm "${file}"
+  done
 
   rm -rf "${NDK}"
-  lha x "${TOP_DIR}/${NDK_SRC}"
+  lha -xq "${ARCHIVES}/${NDK_SRC}"
   rm -rf ndk_* *.info
 
   rm -rf "${IXEMUL}"
-  tar -xjf "${TOP_DIR}/${IXEMUL_SRC}"
+  lha -xq "${ARCHIVES}/${IXEMUL_SRC}"
+  mv "ixemul" "${IXEMUL}"
   chmod a+x "${IXEMUL}/configure"
 
   rm -rf "${LIBNIX}"
-  tar -xjf "${TOP_DIR}/${LIBNIX_SRC}"
+  tar -xzf "${ARCHIVES}/${LIBNIX_SRC}"
+  mv "libnix" "${LIBNIX}"
   chmod a+x "${LIBNIX}/mkinstalldirs"
+
+  rm -rf "${LIBAMIGA}"
+  mkdir "${LIBAMIGA}"
+  pushd "${LIBAMIGA}"
+  tar -xzf "${ARCHIVES}/${LIBAMIGA_SRC}"
+  popd
 
   popd
 
@@ -81,7 +94,7 @@ function build_tools {
 	rm -rf "${BISON}"
 	mkdir -p "${BISON}"
   cd "${BISON}"
-  "${SRC_DIR}/${BISON}/configure" \
+  "${SOURCES}/${BISON}/configure" \
     --prefix="${HOST_DIR}"
 	make
 	make install
@@ -97,7 +110,7 @@ function build_binutils {
 	rm -rf "${BINUTILS}"
 	mkdir -p "${BINUTILS}"
   cd "${BINUTILS}"
-  "${SRC_DIR}/${BINUTILS}/configure" \
+  "${SOURCES}/${BINUTILS}/configure" \
     --prefix="${TARGET_DIR}" \
     --target=m68k-amigaos
   make all
@@ -125,11 +138,11 @@ function build_gcc {
 	rm -rf "${GCC}"
 	mkdir -p "${GCC}"
   cd "${GCC}"
-  "${SRC_DIR}/${GCC}/configure" \
+  "${SOURCES}/${GCC}/configure" \
     --prefix="${TARGET_DIR}" \
     --target=m68k-amigaos \
     --enable-languages=c \
-    --with-headers="${SRC_DIR}/${IXEMUL}/include"
+    --with-headers="${SOURCES}/${IXEMUL}/include"
   make all ${FLAGS_FOR_TARGET[*]}
   make install ${FLAGS_FOR_TARGET[*]}
   popd
@@ -144,11 +157,11 @@ function build_gpp {
 	rm -rf "${GCC}"
 	mkdir -p "${GCC}"
   cd "${GCC}"
-  "${SRC_DIR}/${GCC}/configure" \
+  "${SOURCES}/${GCC}/configure" \
     --prefix="${TARGET_DIR}" \
     --target=m68k-amigaos \
     --enable-languages=c++ \
-    --with-headers="${SRC_DIR}/${IXEMUL}/include"
+    --with-headers="${SOURCES}/${IXEMUL}/include"
   make all ${FLAGS_FOR_TARGET[*]}
   make install ${FLAGS_FOR_TARGET[*]}
   popd
@@ -161,7 +174,7 @@ function process_headers {
 
   pushd "${BUILD_DIR}"
 	rm -rf "${SFDC}"
-	cp -a "${SRC_DIR}/${SFDC}" "${SFDC}"
+	cp -a "${SOURCES}/${SFDC}" "${SFDC}"
   cd "${SFDC}"
   ./configure \
     --prefix="${TARGET_DIR}"
@@ -170,14 +183,14 @@ function process_headers {
   popd
 
   pushd "${TARGET_DIR}/include"
-  cp -av "${SRC_DIR}/${NDK}/Include/include_h/"* .
+  cp -av "${SOURCES}/${NDK}/Include/include_h/"* .
   mkdir -p clib proto inline
-  patch -d devices -p0 < ${SRC_DIR}/${FD2INLINE}/patches/timer.h.diff
-  cp -v "${SRC_DIR}/${FD2INLINE}/include-src/inline/alib.h" inline/
-  cp -v "${SRC_DIR}/${FD2INLINE}/include-src/inline/macros.h" inline/
-  cp -v "${SRC_DIR}/${FD2INLINE}/include-src/inline/stubs.h" inline/
-  cp -v "${SRC_DIR}/${FD2INLINE}/include-src/proto/alib.h" proto/
-  for file in ${SRC_DIR}/${NDK}/Include/sfd/*.sfd; do
+  patch -d devices -p0 < ${SOURCES}/${FD2INLINE}/patches/timer.h.diff
+  cp -v "${SOURCES}/${FD2INLINE}/include-src/inline/alib.h" inline/
+  cp -v "${SOURCES}/${FD2INLINE}/include-src/inline/macros.h" inline/
+  cp -v "${SOURCES}/${FD2INLINE}/include-src/inline/stubs.h" inline/
+  cp -v "${SOURCES}/${FD2INLINE}/include-src/proto/alib.h" proto/
+  for file in ${SOURCES}/${NDK}/Include/sfd/*.sfd; do
     base=$(basename ${file%_lib.sfd})
 
     sfdc --target=m68k-amigaos --mode=clib \
@@ -192,6 +205,16 @@ function process_headers {
 	touch "${STAMP}/process-headers"
 }
 
+function install_libamiga {
+  [ -f "${STAMP}/install-libamiga" ] && return 0
+
+  pushd "${TARGET_DIR}"
+  cp -av "${SOURCES}/${LIBAMIGA}/lib" .
+  popd
+
+	touch "${STAMP}/install-libamiga"
+}
+
 function build_libnix {
   [ -f "${STAMP}/build-libnix" ] && return 0
 
@@ -199,7 +222,7 @@ function build_libnix {
 	rm -rf "${LIBNIX}"
 	mkdir -p "${LIBNIX}"
   cd "${LIBNIX}"
-  "${SRC_DIR}/${LIBNIX}/configure" \
+  "${SOURCES}/${LIBNIX}/configure" \
     --prefix="${TARGET_DIR}" \
     --target=m68k-amigaos
   make all \
@@ -228,7 +251,7 @@ function build_ixemul {
   CFLAGS=-noixemul \
   AR=m68k-amigaos-ar \
   RANLIB=m68k-amigaos-ranlib \
-	"${SRC_DIR}/${IXEMUL}/configure" \
+	"${SOURCES}/${IXEMUL}/configure" \
 	      --prefix=${TARGET_DIR} \
 	      --target=m68k-amigaos
   make MAKEINFO=: all
@@ -238,30 +261,37 @@ function build_ixemul {
 	touch "${STAMP}/build-ixemul"
 }
 
+function build {
+  export CC="gcc-3.4"
+
+  prepare_target
+  unpack_sources
+  build_tools
+
+  export PATH="${HOST_DIR}/bin:${PATH}"
+
+  build_binutils
+  build_gcc
+
+  export PATH="${TARGET_DIR}/bin:${PATH}"
+
+  process_headers
+  install_libamiga
+  build_libnix
+  #build_ixemul
+  build_gpp
+}
+
 function main {
   local -r action="${1:-build}"
 
   case "${action}" in
     "build")
-      prepare_target
-      unpack_sources
-      build_tools
-
-      export PATH="${HOST_DIR}/bin:${PATH}"
-
-      build_binutils
-      build_gcc
-
-      export PATH="${TARGET_DIR}/bin:${PATH}"
-
-      process_headers
-      build_libnix
-      #build_ixemul
-      build_gpp
+      build
       ;;
     "clean")
-      for dir in ${SRC_DIR} ${BUILD_DIR} ${HOST_DIR} ${TARGET_DIR} ${STAMP}; do
-        echo rm -rf "${dir}"
+      for dir in ${SOURCES} ${BUILD_DIR} ${HOST_DIR} ${TARGET_DIR} ${STAMP}; do
+        rm -rf "${dir}"
       done
       ;;
     *)

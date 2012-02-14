@@ -1,8 +1,14 @@
-info:   m68k-amigaos gcc toolchain bootstrap
-author: Krystian Bacławski <firstname [dot] lastname [at] gmail [dot] com>
+Info: m68k-amigaos gcc/binutils toolchain bootstrap.
+Author: Krystian Bacławski <firstname [dot] lastname [at] gmail [dot] com>
 
 This project enables one to build m68k-amigaos toolchain on your un*x like
-platform with minimum hassle.
+platform with minimum hassle. Thanks to it you should get complete environment
+targeting m68k-amigaos with:
+ * gcc 2.95.3
+ * g++ 2.95.2 + libstdc++
+ * binutils 2.9.1 (assembler, linker, etc.)
+ * libnix 2.1 (standard ANSI/C library replacement for AmigaOS)
+ * AmigaOS headers & libraries (for AmigaOS 3.9)
 
 Tested on:
  * Ubuntu 10.04 ia32
@@ -12,31 +18,33 @@ Prerequisites (look at bootstrap.conf file):
    - gcc 3.4.6
    - flex
    - make
+   - lha
+   - perl 5.10
  * sources from GNU project:
    - gcc 2.95.3
    - binutils 2.9.1
    - bison 1.28
  * Amiga specific sources & binaries:
-   - libnix 2.1:
-       http://sourceforge.net/projects/libnix/
-   - AmigaOS NDK 3.9:
-       http://www.haage-partner.de/download/AmigaOS/
-   - fd2inline 1.21:
-       http://ftp.back2roots.org/geekgadgets/amiga/m68k/alpha/fd2inline/
-   - sfdc 1.4:
-       http://aminet.net/package/dev/gcc/sfdc/
-   - libamiga-bin:
-       http://ftp.back2roots.org/geekgadgets/amiga/m68k/snapshots/990529/bin/
+   - libnix 2.1
+   - AmigaOS NDK 3.9
+   - fd2inline 1.21
+   - sfdc 1.4
+   - libamiga-bin
 
 Usage:
-  1) Download sources, and put them into archive directory.
+  1) Download sources (use fetch.sh script in archives directory).
   2) Run bootstrap script.
-  3) Wait for the result and if something crashes you can try to reach me.
+  3) Wait for the result.
+  ?) If something fails, you can try to reach me.
 
 TODO:
   * Testing on:
     - MacOS X 10.7
     - Cygwin
   * Remove dependencies:
+    - gcc 3.4
     - fd2inline
     - libamiga-bin
+  * Make it installable into some prefix.
+  * Provide some rudimentary testing (C / C++ sources).
+  * Build ixemul.

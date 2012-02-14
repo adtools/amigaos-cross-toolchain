@@ -1,0 +1,26 @@
+--- gcc-2.95.3/libio/fileops.c	Mon Apr 12 20:27:49 1999
++++ gcc/libio/fileops.c	Sun Jun 30 16:09:44 2002
+@@ -419,7 +419,10 @@
+   return retval;
+ }
+ 
+-_IO_pos_t
++// Changed 2001-04-05 Andreas Wolff <andreas.wolff@dusnet.de>
++// Avoid conflicting types with libioP.h 
++// This may be obsolete for future versions of libio
++_IO_off_t
+ _IO_file_seekoff (fp, offset, dir, mode)
+      _IO_FILE *fp;
+      _IO_off_t offset;
+@@ -587,7 +590,10 @@
+   return read (fp->_fileno, buf, size);
+ }
+ 
+-_IO_pos_t
++// Changed 2001-04-05 Andreas Wolff <andreas.wolff@dusnet.de>
++// Avoid conflicting types with libioP.h 
++// This may be obsolete for future versions of libio
++_IO_off_t
+ _IO_file_seek (fp, offset, dir)
+      _IO_FILE *fp;
+      _IO_off_t offset;

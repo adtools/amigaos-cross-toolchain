@@ -1,0 +1,30 @@
+--- gcc-2.95.3/gcc/prefix.c	Sat Apr 10 06:27:09 1999
++++ gcc/gcc/prefix.c	Thu Sep 27 19:36:10 2001
+@@ -275,7 +275,11 @@
+     prefix = PREFIX;
+ 
+   /* Remove any trailing directory separator from what we got.  */
++#if defined (__amigaos__) || defined (__morphos__)	/* Don't kill ':' on Amiga! */
++  if (prefix[strlen (prefix) - 1] == DIR_SEPARATOR)
++#else
+   if (IS_DIR_SEPARATOR (prefix[strlen (prefix) - 1]))
++#endif
+     {
+       char * temp = save_string (prefix, strlen (prefix));
+       temp[strlen (temp) - 1] = 0;
+@@ -303,6 +307,7 @@
+ 	path = translate_name (path);
+     }
+ 
++#if !defined (__amigaos__) && !defined (__morphos__)	/* Don't convert ':' on Amiga! */
+ #ifdef DIR_SEPARATOR_2
+   /* Convert DIR_SEPARATOR_2 to DIR_SEPARATOR. */
+   if (DIR_SEPARATOR != DIR_SEPARATOR_2)
+@@ -316,6 +321,7 @@
+       path = new_path;
+     }
+ #endif
++#endif
+       
+ #if defined (DIR_SEPARATOR) && !defined (DIR_SEPARATOR_2)
+   if (DIR_SEPARATOR != '/')

@@ -1,0 +1,24 @@
+--- gcc-2.95.3/gcc/calls.c	Thu Jan 25 15:03:00 2001
++++ gcc/gcc/calls.c	Thu Sep 27 19:35:54 2001
+@@ -2613,6 +2613,10 @@
+ 
+   fun = orgfun;
+ 
++#ifdef LIBCALL_ENCODE_SECTION_INFO
++  LIBCALL_ENCODE_SECTION_INFO (fun);
++#endif
++
+   /* Copy all the libcall-arguments out of the varargs data
+      and into a vector ARGVEC.
+ 
+@@ -3113,6 +3117,10 @@
+   is_const = no_queue;
+   fun = orgfun;
+ 
++#ifdef LIBCALL_ENCODE_SECTION_INFO
++  LIBCALL_ENCODE_SECTION_INFO (fun);
++#endif
++
+   /* If this kind of value comes back in memory,
+      decide where in memory it should come back.  */
+   if (aggregate_value_p (type_for_mode (outmode, 0)))

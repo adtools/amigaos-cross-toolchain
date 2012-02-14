@@ -1,0 +1,38 @@
+# Note: It doesn't do any good to try to define prefix or local_prefix
+# in the host overrides because configure will just change them back.
+# You either have to give an appropriate option to configure or live with
+# an Amiga specific patch to configure.  See the note in configure.  -fnf
+
+# Building under AmigaOS almost certainly requires an already working gcc.
+# To bootstrap without "-pipe" do "make PIPE=".
+
+CC = gcc $(PIPE)
+
+# Disable -pipe for now since I had problems bootstrapping gcc 2.5.5 with
+# it. (fnf)
+#PIPE = -pipe
+
+# Allow the user to override the default host optimization with gcc, or if the
+# host compiler is not gcc and doesn't understand -O<N>.
+
+X_OPTIMIZE = -O2
+
+# The standard additional host flags for the compiler.
+
+X_CFLAGS = $(X_OPTIMIZE) -mstackextend
+
+# Man pages get a wierd suffix...
+
+manext = .0
+
+# We really shouldn't specify CFLAGS from here, but there's no other way
+# to get rid of the `-g' indoctrinated by Makefile.in.  Note this becomes
+# part of both the host compilation CFLAGS and the target compilation
+# CFLAGS.
+
+CFLAGS =
+
+# Ranlib does exist, but may not be in a path where the default RANLIB_TEST
+# expects it, so just force it to true.
+
+RANLIB_TEST = true

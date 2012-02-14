@@ -1,0 +1,101 @@
+--- gcc-2.95.3/gcc/config/m68k/m68k.md	Thu Aug  5 08:22:05 1999
++++ gcc/gcc/config/m68k/m68k.md	Thu Sep 27 19:35:54 2001
+@@ -6799,7 +6799,7 @@
+ 	 (match_operand:SI 1 "general_operand" "g"))]
+   ;; Operand 1 not really used on the m68000.
+ 
+-  "! flag_pic"
++  "(! flag_pic || flag_pic >= 3)"
+   "*
+ #if defined (MOTOROLA) && !defined (USE_GAS)
+ #ifdef MOTOROLA_BSR
+@@ -6819,7 +6819,7 @@
+ 	 (match_operand:SI 1 "general_operand" "g"))]
+   ;; Operand 1 not really used on the m68000.
+ 
+-  "flag_pic"
++  "(flag_pic && flag_pic < 3)"
+   "*
+   if (GET_CODE (operands[0]) == MEM
+       && GET_CODE (XEXP (operands[0], 0)) == SYMBOL_REF)
+@@ -6862,7 +6862,7 @@
+ 	(call (match_operand:QI 1 "memory_operand" "o")
+ 	      (match_operand:SI 2 "general_operand" "g")))]
+   ;; Operand 2 not really used on the m68000.
+-  "! flag_pic"
++  "(! flag_pic || flag_pic >= 3)"
+   "*
+ #if defined (MOTOROLA) && !defined (USE_GAS)
+ #ifdef MOTOROLA_BSR
+@@ -6882,7 +6882,7 @@
+ 	(call (match_operand:QI 1 "memory_operand" "o")
+ 	      (match_operand:SI 2 "general_operand" "g")))]
+   ;; Operand 2 not really used on the m68000.
+-  "flag_pic"
++  "(flag_pic && flag_pic < 3)"
+   "*
+   if (GET_CODE (operands[1]) == MEM
+       && GET_CODE (XEXP (operands[1], 0)) == SYMBOL_REF)
+@@ -7823,7 +7823,7 @@
+ (define_insn "sinsf2"
+   [(set (match_operand:SF 0 "general_operand" "=f")
+ 	(unspec:SF [(match_operand:SF 1 "general_operand" "fm")] 1))]
+-  "TARGET_68881 && flag_fast_math"
++  "TARGET_68881 && !TARGET_68040 && !TARGET_68060 && flag_fast_math"
+   "*
+ {
+   if (FP_REG_P (operands[1]))
+@@ -7835,7 +7835,7 @@
+ (define_insn "sindf2"
+   [(set (match_operand:DF 0 "general_operand" "=f")
+ 	(unspec:DF [(match_operand:DF 1 "general_operand" "fm")] 1))]
+-  "TARGET_68881 && flag_fast_math"
++  "TARGET_68881 && !TARGET_68040 && !TARGET_68060 && flag_fast_math"
+   "*
+ {
+   if (FP_REG_P (operands[1]))
+@@ -7847,13 +7847,13 @@
+ (define_insn "sinxf2"
+   [(set (match_operand:XF 0 "general_operand" "=f")
+ 	(unspec:XF [(match_operand:XF 1 "nonimmediate_operand" "fm")] 1))]
+-  "TARGET_68881 && flag_fast_math"
++  "TARGET_68881 && !TARGET_68040 && !TARGET_68060 && flag_fast_math"
+   "fsin%.x %1,%0")
+ 
+ (define_insn "cossf2"
+   [(set (match_operand:SF 0 "general_operand" "=f")
+ 	(unspec:SF [(match_operand:SF 1 "general_operand" "fm")] 2))]
+-  "TARGET_68881 && flag_fast_math"
++  "TARGET_68881 && !TARGET_68040 && !TARGET_68060 && flag_fast_math"
+   "*
+ {
+   if (FP_REG_P (operands[1]))
+@@ -7865,7 +7865,7 @@
+ (define_insn "cosdf2"
+   [(set (match_operand:DF 0 "general_operand" "=f")
+ 	(unspec:DF [(match_operand:DF 1 "general_operand" "fm")] 2))]
+-  "TARGET_68881 && flag_fast_math"
++  "TARGET_68881 && !TARGET_68040 && !TARGET_68060 && flag_fast_math"
+   "*
+ {
+   if (FP_REG_P (operands[1]))
+@@ -7877,5 +7877,18 @@
+ (define_insn "cosxf2"
+   [(set (match_operand:XF 0 "general_operand" "=f")
+ 	(unspec:XF [(match_operand:XF 1 "nonimmediate_operand" "fm")] 2))]
+-  "TARGET_68881 && flag_fast_math"
++  "TARGET_68881 && !TARGET_68040 && !TARGET_68060 && flag_fast_math"
+   "fcos%.x %1,%0")
++
++; This is only needed for some subtargets.
++(define_expand "allocate_stack"
++  [(set (match_operand:SI 0 "register_operand" "=r")
++	(minus:SI (reg:SI 15) (match_operand:SI 1 "general_operand" "")))
++   (set (reg:SI 15) (minus:SI (reg:SI 15) (match_dup 1)))]
++  "TARGET_ALTERNATE_ALLOCATE_STACK"
++  "
++{
++#ifdef ALTERNATE_ALLOCATE_STACK
++  ALTERNATE_ALLOCATE_STACK(operands);
++#endif
++}")

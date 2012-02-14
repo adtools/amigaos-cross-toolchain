@@ -1,0 +1,17 @@
+--- gcc-2.95.3/gcc/flow.c	Thu Jan 25 15:03:08 2001
++++ gcc/gcc/flow.c	Thu Sep 27 19:36:09 2001
+@@ -3157,11 +3157,11 @@
+   if (n_basic_blocks == 0
+       || (regno < FIRST_PSEUDO_REGISTER
+ 	  && (global_regs[regno]
+-	      || fixed_regs[regno]
+-	      || FUNCTION_ARG_REGNO_P (regno))))
++	      || fixed_regs[regno])))
+     return 0;
+ 
+-  return REGNO_REG_SET_P (BASIC_BLOCK (0)->global_live_at_start, regno);
++  return (REGNO_REG_SET_P (BASIC_BLOCK (0)->global_live_at_start, regno)
++	  && (regno >= FIRST_PSEUDO_REGISTER || ! function_arg_regno_p (regno)));
+ }
+ 
+ /* 1 if register REGNO was alive at a place where `setjmp' was called

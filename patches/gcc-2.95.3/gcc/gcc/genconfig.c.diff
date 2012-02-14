@@ -1,0 +1,13 @@
+--- gcc-2.95.3/gcc/genconfig.c	Fri Apr 16 21:52:24 1999
++++ gcc/gcc/genconfig.c	Thu Sep 27 19:36:09 2001
+@@ -327,8 +327,8 @@
+   printf ("/* Generated automatically by the program `genconfig'\n\
+ from the machine description file `md'.  */\n\n");
+ 
+-  /* Allow at least 10 operands for the sake of asm constructs.  */
+-  max_recog_operands = 9;  /* We will add 1 later.  */
++  /* Allow at least 15 operands for the sake of asm constructs.  */
++  max_recog_operands = 14;  /* We will add 1 later.  */
+   max_dup_operands = 1;
+ 
+   /* Read the machine description.  */

@@ -1,0 +1,33 @@
+--- gcc-2.95.3/gcc/Makefile.in	Thu Jan 25 15:02:58 2001
++++ gcc/gcc/Makefile.in	Thu Oct  4 17:12:22 2001
+@@ -367,7 +367,7 @@
+ LIBGCC2_DEPS =
+ 
+ # libgcc1-test target (must also be overridable for a target)
+-LIBGCC1_TEST = libgcc1-test
++LIBGCC1_TEST = #libgcc1-test
+ 
+ # List of extra executables that should be compiled for this target machine
+ # that are used for compiling from source code to object code.
+@@ -403,6 +403,12 @@
+ # so don't override it here.
+ USE_COLLECT2 = collect2$(exeext)
+ 
++### begin-GG-local: dynamic libraries
++# List of extra object files that should be compiled and linked with
++# collect2.
++EXTRA_COLLECT2_OBJS =
++### end-GG-local
++
+ # List of extra C and assembler files to add to libgcc1.a.
+ # Assembler files should have names ending in `.asm'.
+ LIB1FUNCS_EXTRA = 
+@@ -1359,7 +1365,7 @@
+     hard-reg-set.h $(BASIC_BLOCK_H)
+ sbitmap.o: sbitmap.c $(CONFIG_H) system.h $(RTL_H) flags.h $(BASIC_BLOCK_H)
+ 
+-COLLECT2_OBJS = collect2.o tlink.o hash.o intl.o underscore.o version.o 
++COLLECT2_OBJS = collect2.o tlink.o hash.o intl.o underscore.o version.o $(EXTRA_COLLECT2_OBJS)
+ collect2$(exeext): $(COLLECT2_OBJS) $(LIBDEPS)
+ # Don't try modifying collect2 (aka ld) in place--it might be linking this.
+ 	-rm -f collect2$(exeext)

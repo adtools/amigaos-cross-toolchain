@@ -1,0 +1,84 @@
+--- gcc-2.95.3/gcc/gcc.c	Thu Jan 25 15:03:16 2001
++++ gcc/gcc/gcc.c	Thu Sep 27 19:36:09 2001
+@@ -1372,9 +1372,12 @@
+ #ifndef STANDARD_EXEC_PREFIX
+ #define STANDARD_EXEC_PREFIX "/usr/local/lib/gcc-lib/"
+ #endif /* !defined STANDARD_EXEC_PREFIX */
++#ifndef STANDARD_EXEC_PREFIX_1
++#define STANDARD_EXEC_PREFIX_1 "/usr/lib/gcc/"
++#endif /* !defined STANDARD_EXEC_PREFIX_1 */
+ 
+ static const char *standard_exec_prefix = STANDARD_EXEC_PREFIX;
+-static const char *standard_exec_prefix_1 = "/usr/lib/gcc/";
++static const char *standard_exec_prefix_1 = STANDARD_EXEC_PREFIX_1;
+ #ifdef MD_EXEC_PREFIX
+ static const char *md_exec_prefix = MD_EXEC_PREFIX;
+ #endif
+@@ -1382,6 +1385,12 @@
+ #ifndef STANDARD_STARTFILE_PREFIX
+ #define STANDARD_STARTFILE_PREFIX "/usr/local/lib/"
+ #endif /* !defined STANDARD_STARTFILE_PREFIX */
++#ifndef STANDARD_STARTFILE_PREFIX_1
++#define STANDARD_STARTFILE_PREFIX_1 "/lib/"
++#endif /* !defined STANDARD_STARTFILE_PREFIX_1 */
++#ifndef STANDARD_STARTFILE_PREFIX_2
++#define STANDARD_STARTFILE_PREFIX_2 "/usr/lib/"
++#endif /* !defined STANDARD_STARTFILE_PREFIX_2 */
+ 
+ #ifdef MD_STARTFILE_PREFIX
+ static const char *md_startfile_prefix = MD_STARTFILE_PREFIX;
+@@ -1390,8 +1399,8 @@
+ static const char *md_startfile_prefix_1 = MD_STARTFILE_PREFIX_1;
+ #endif
+ static const char *standard_startfile_prefix = STANDARD_STARTFILE_PREFIX;
+-static const char *standard_startfile_prefix_1 = "/lib/";
+-static const char *standard_startfile_prefix_2 = "/usr/lib/";
++static const char *standard_startfile_prefix_1 = STANDARD_STARTFILE_PREFIX_1;
++static const char *standard_startfile_prefix_2 = STANDARD_STARTFILE_PREFIX_2;
+ 
+ #ifndef TOOLDIR_BASE_PREFIX
+ #define TOOLDIR_BASE_PREFIX "/usr/local/"
+@@ -1997,7 +2006,11 @@
+ 
+   /* Determine the filename to execute (special case for absolute paths).  */
+ 
++#ifdef FILE_NAME_ABSOLUTE_P
++  if (FILE_NAME_ABSOLUTE_P (name)
++#else
+   if (IS_DIR_SEPARATOR (*name)
++#endif
+ #ifdef HAVE_DOS_BASED_FILESYSTEM
+       /* Check for disk name on MS-DOS-based systems.  */
+       || (name[0] && name[1] == ':' && IS_DIR_SEPARATOR (name[2]))
+@@ -3530,9 +3543,13 @@
+ 		  /* Relative directories always come from -B,
+ 		     and it is better not to use them for searching
+ 		     at run time.  In particular, stage1 loses  */
++#ifndef FILE_NAME_ABSOLUTE_P
+ 		  if (!IS_DIR_SEPARATOR (pl->prefix[0]))
+ 		    continue;
+-#endif
++#else
++		  if (! FILE_NAME_ABSOLUTE_P (pl->prefix))
++#endif /* FILE_NAME_ABSOLUTE_P */
++#endif /* RELATIVE_PREFIX_NOT_LINKDIR */
+ 		  /* Try subdirectory if there is one.  */
+ 		  if (multilib_dir != NULL)
+ 		    {
+@@ -4609,12 +4626,11 @@
+   /* Exclude directories that the linker is known to search.  */
+   if (linker
+       && ((cp - path == 6
+-	   && strcmp (path, concat (dir_separator_str, "lib", 
+-				    dir_separator_str, ".", NULL_PTR)) == 0)
++	   && strcmp (path, concat (STANDARD_STARTFILE_PREFIX_1, 
++				    ".", NULL_PTR)) == 0)
+ 	  || (cp - path == 10
+-	      && strcmp (path, concat (dir_separator_str, "usr", 
+-				       dir_separator_str, "lib", 
+-				       dir_separator_str, ".", NULL_PTR)) == 0)))
++	      && strcmp (path, concat (STANDARD_STARTFILE_PREFIX_2, 
++				       ".", NULL_PTR)) == 0)))
+     return 0;
+ 
+   return (stat (path, &st) >= 0 && S_ISDIR (st.st_mode));

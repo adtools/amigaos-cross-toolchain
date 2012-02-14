@@ -1,0 +1,91 @@
+--- gcc-2.95.3/gcc/configure.in	Thu Jan 25 15:03:02 2001
++++ gcc/gcc/configure.in	Wed Dec  5 23:54:53 2001
+@@ -491,7 +491,7 @@
+ 		cpu_type=convex
+ 		;;
+ changequote(,)dnl
+-	i[34567]86-*-*)
++	i[34567]86*-*-*)
+ changequote([,])dnl
+ 		cpu_type=i386
+ 		;;
+@@ -1250,6 +1250,25 @@
+  		fi
+ 		;;
+ changequote(,)dnl
++	i[34567]86be-*-amithlon*)	# Intel 80386's running AMIthlon/AmigaOS
++changequote([,])dnl			# with ELF format in big endian integer data mode
++		out_file=i386/i386.c
++		md_file=i386/i386be.md
++		xm_file=i386/xm-amithlon.h
++		tm_file=i386/amithlon.h
++		tmake_file="i386/t-amithlon i386/t-crtstuff"
++#		xmake_file=i386/x-amithlon
++#		extra_objs=amigaos.o
++		gnu_ld=yes
++#		tmake_file="t-linux i386/t-crtstuff"
++		extra_parts="crtbegin.o crtbeginS.o crtend.o crtendS.o"
++		gnu_ld=yes
++		float_format=i386
++# 		if test x$enable_threads = xyes; then
++# 			thread_file='posix'
++# 		fi
++		;;
++changequote(,)dnl
+ 	i[34567]86-*-linux-gnu*)	# Intel 80386's running GNU/Linux
+ changequote([,])dnl			# with ELF format using glibc 2
+ 					# aka GNU/Linux C library 6
+@@ -2019,6 +2038,14 @@
+ 		extra_headers=math-68881.h
+ 		float_format=m68k
+ 		;;
++	m68k-*-amigaos*)
++		xm_file=m68k/xm-amigaos.h
++		tm_file=m68k/amigaos.h
++		tmake_file=m68k/t-amigaos
++		xmake_file=m68k/x-amigaos
++		extra_objs=amigaos.o
++		gnu_ld=yes
++		;;
+ 	m68k-*-coff*)
+ 		tmake_file=m68k/t-m68kbare
+ 		tm_file="m68k/m68k-coff.h dbx.h libgloss.h"
+@@ -2763,6 +2790,16 @@
+ 		tmake_file=rs6000/t-beos
+ 		xmake_file=rs6000/x-beos
+ 		;;
++	powerpc-*-morphos*)
++		cpu_type=rs6000
++		xm_file=rs6000/xm-morphos.h
++		tm_file=rs6000/morphos.h
++		tmake_file=rs6000/t-morphos
++		xmake_file=rs6000/x-morphos
++		extra_objs=morphos.o
++		broken_install=cp
++		install_headers_dir=install-headers-cp
++		;;
+ 	powerpc-*-sysv* | powerpc-*-elf*)
+ 		tm_file=rs6000/sysv4.h
+ 		xm_file="xm-siglist.h rs6000/xm-sysv4.h"
+@@ -3338,10 +3375,10 @@
+ 	# Process --with-cpu= for PowerPC/rs6000
+ 	target_cpu_default2=
+ 	case $machine in
+-	i486-*-*)
++	i486*-*-*)
+ 		target_cpu_default2=1
+ 		;;
+-	i586-*-*)
++	i586*-*-*)
+ 		case $target_alias in
+ 			k6-*)
+ 				target_cpu_default2=4
+@@ -3351,7 +3388,7 @@
+ 				;;
+ 		esac
+ 		;;
+-	i686-*-* | i786-*-*)
++	i686*-*-* | i786*-*-*)
+ 		target_cpu_default2=3
+ 		;;
+ 	alpha*-*-*)

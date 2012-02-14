@@ -1,0 +1,49 @@
+--- gcc-2.95.3/gcc/config/rs6000/rs6000.md	Thu Jan 25 15:03:35 2001
++++ gcc/gcc/config/rs6000/rs6000.md	Thu Sep 27 19:35:54 2001
+@@ -5828,14 +5828,18 @@
+   [(set (match_operand:SI 0 "gpc_reg_operand" "=b")
+ 	(high:SI (match_operand 1 "" "")))]
+   "TARGET_ELF && ! TARGET_64BIT"
+-  "{liu|lis} %0,%1@ha")
++  "*
++  return (baserel_data_operand(operands[1]) ?
++    \"{addiu|addis} %0,13,%1@drelha\" : \"{liu|lis} %0,%1@ha\");")
+ 
+ (define_insn "elf_low"
+   [(set (match_operand:SI 0 "gpc_reg_operand" "=r")
+ 	(lo_sum:SI (match_operand:SI 1 "gpc_reg_operand" "b")
+ 		   (match_operand 2 "" "")))]
+    "TARGET_ELF && ! TARGET_64BIT"
+-   "{cal|la} %0,%2@l(%1)")
++   "*
++   return (baserel_data_operand(operands[2]) ?
++     \"{cal|la} %0,%2@drell(%1)\" : \"{cal|la} %0,%2@l(%1)\");")
+ 
+ ;; Set up a register with a value from the GOT table
+ 
+@@ -7742,10 +7746,24 @@
+ 
+   emit_move_insn (chain, stack_bot);
+ 
++  /* Under MorphOS, we may have to check/extend the stack. Do it via a 
++     call to an external function. */
++  if (TARGET_MORPHOS && target_flags & (MASK_STACKCHECK | MASK_STACKEXTEND)) 
++    {
++      rtx tmp = gen_reg_rtx (Pmode);
++      emit_library_call_value (gen_rtx_SYMBOL_REF (Pmode, 
++				target_flags & MASK_STACKEXTEND ? 
++				  \"__alloc_stk_ext\" : \"__alloc_stk_chk\"),
++				tmp, 0, Pmode, 1, operands[1], Pmode);
++      emit_insn (gen_set_sp (tmp));
++      /*emit_move_insn (operands[0], tmp);*/
++      emit_move_insn (operands[0], virtual_stack_dynamic_rtx);
++      DONE;
++    }
+   /* Under Windows NT, we need to add stack probes for large/variable
+      allocations, so do it via a call to the external function alloca
+      instead of doing it inline.  */
+-  if (DEFAULT_ABI == ABI_NT
++  else if (DEFAULT_ABI == ABI_NT
+       && (GET_CODE (operands[1]) != CONST_INT || INTVAL (operands[1]) > 4096))
+     {
+       rtx tmp = gen_reg_rtx (Pmode);

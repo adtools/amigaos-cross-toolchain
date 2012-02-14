@@ -1,0 +1,225 @@
+--- gcc-2.95.3/gcc/config/m68k/m68k.h	Thu Jan 25 15:03:34 2001
++++ gcc/gcc/config/m68k/m68k.h	Thu Sep 27 19:35:54 2001
+@@ -68,10 +68,8 @@
+ #define MASK_RTD	8
+ #define TARGET_RTD (target_flags & MASK_RTD)
+ 
+-/* Compile passing first two args in regs 0 and 1.
+-   This exists only to test compiler features that will
+-   be needed for RISC chips.  It is not usable
+-   and is not intended to be usable on this cpu.  */
++/* Compile using the first 'm68k_regparm' data, address and float
++   registers for arguments passing.  */
+ #define MASK_REGPARM	16
+ #define TARGET_REGPARM (target_flags & MASK_REGPARM)
+ 
+@@ -182,6 +180,8 @@
+     { "cpu32", MASK_68020},						\
+     { "align-int", MASK_ALIGN_INT },					\
+     { "no-align-int", -MASK_ALIGN_INT },				\
++    { "regparm", MASK_REGPARM},						\
++    { "no-regparm", - MASK_REGPARM},					\
+     SUBTARGET_SWITCHES							\
+     { "", TARGET_DEFAULT}}
+ /* TARGET_DEFAULT is defined in sun*.h and isi.h, etc.  */
+@@ -199,6 +199,7 @@
+ { { "align-loops=",	&m68k_align_loops_string },			\
+   { "align-jumps=",	&m68k_align_jumps_string },			\
+   { "align-functions=",	&m68k_align_funcs_string },			\
++  { "regparm=",		&m68k_regparm_string },				\
+   SUBTARGET_OPTIONS							\
+ }
+ 
+@@ -809,7 +810,7 @@
+ #ifndef SUPPORT_SUN_FPA
+ 
+ #define CLASS_MAX_NREGS(CLASS, MODE)	\
+- ((CLASS) == FP_REGS ? 1 \
++ ((CLASS) == FP_REGS ? GET_MODE_NUNITS (MODE) \
+   : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD))
+ 
+ /* Moves between fp regs and other regs are two insns.  */
+@@ -821,7 +822,7 @@
+ #else /* defined SUPPORT_SUN_FPA */
+ 
+ #define CLASS_MAX_NREGS(CLASS, MODE)	\
+- ((CLASS) == FP_REGS || (CLASS) == FPA_REGS || (CLASS) == LO_FPA_REGS ? 1 \
++ ((CLASS) == FP_REGS || (CLASS) == FPA_REGS || (CLASS) == LO_FPA_REGS ? GET_MODE_NUNITS (MODE) \
+   : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD))
+ 
+ /* Moves between fp regs and other regs are two insns.  */
+@@ -925,10 +926,19 @@
+ 
+ #define PCC_STATIC_STRUCT_RETURN
+ 
+-/* 1 if N is a possible register number for function argument passing.
+-   On the 68000, no registers are used in this way.  */
++/* 1 if N is a possible register number for function argument passing.  */
+ 
+-#define FUNCTION_ARG_REGNO_P(N) 0
++#define FUNCTION_ARG_REGNO_P(N)			\
++  (((N) >= 0 && (N) < M68K_MAX_REGPARM)		\
++   || ((N) >= 8 && (N) < 8 + M68K_MAX_REGPARM)	\
++   || (TARGET_68881 && (N) >= 16 && (N) < 16 + M68K_MAX_REGPARM))
++
++/* Nonzero if we need to generate special stack-allocating insns.
++   On most systems they are not needed.
++   When they are needed, also define ALTERNATE_ALLOCATE_STACK (see m68k.md)
++   to perform the necessary actions.  */
++
++#define TARGET_ALTERNATE_ALLOCATE_STACK 0
+ 
+ /* Define a data type for recording info about an argument list
+    during the scan of that argument list.  This data type should
+@@ -936,28 +946,52 @@
+    and about the args processed so far, enough to enable macros
+    such as FUNCTION_ARG to determine where the next arg should go.
+ 
+-   On the m68k, this is a single integer, which is a number of bytes
+-   of arguments scanned so far.  */
++   On the m68k, this is a structure:
++   num_of_regs: number of data, address and float registers to use for
++     arguments passing (if it's 2, than pass arguments in d0, d1, a0, a1,
++     fp0 and fp1). 0 - pass everything on stack. vararg calls are
++     always passed entirely on stack.
++   regs_already_used: bitmask of the already used registers.
++   last_arg_reg - register number of the most recently passed argument.
++     -1 if passed on stack.
++   last_arg_len - number of registers used by the most recently passed
++     argument.
++*/
++
++struct m68k_args
++{
++  int num_of_regs;
++  long regs_already_used;
++  int last_arg_reg;
++  int last_arg_len;
++};
++
++#define CUMULATIVE_ARGS struct m68k_args
++
++/* Max. number of data, address and float registers to be used for passing
++   integer, pointer and float arguments when TARGET_REGPARM.
++   It's 4, so d0-d3, a0-a3 and fp0-fp3 can be used.  */
+ 
+-#define CUMULATIVE_ARGS int
++#define M68K_MAX_REGPARM 4
++
++/* The default number of data, address and float registers to use when
++   user specified '-mregparm' switch, not '-mregparm=<value>' option.  */
++  
++#define M68K_DEFAULT_REGPARM 2
+ 
+ /* Initialize a variable CUM of type CUMULATIVE_ARGS
+    for a call to a function whose data type is FNTYPE.
+-   For a library call, FNTYPE is 0.
+-
+-   On the m68k, the offset starts at 0.  */
++   For a library call, FNTYPE is 0.  */
+ 
+ #define INIT_CUMULATIVE_ARGS(CUM,FNTYPE,LIBNAME,INDIRECT)	\
+- ((CUM) = 0)
++  (m68k_init_cumulative_args (&(CUM), (FNTYPE)))
+ 
+ /* Update the data in CUM to advance over an argument
+    of mode MODE and data type TYPE.
+    (TYPE is null for libcalls where that information may not be available.)  */
+ 
+ #define FUNCTION_ARG_ADVANCE(CUM, MODE, TYPE, NAMED)	\
+- ((CUM) += ((MODE) != BLKmode			\
+-	    ? (GET_MODE_SIZE (MODE) + 3) & ~3	\
+-	    : (int_size_in_bytes (TYPE) + 3) & ~3))
++  (m68k_function_arg_advance (&(CUM)))
+ 
+ /* Define where to put the arguments to a function.
+    Value is zero to push the argument on the stack,
+@@ -972,24 +1006,21 @@
+    NAMED is nonzero if this argument is a named parameter
+     (otherwise it is an extra parameter matching an ellipsis).  */
+ 
+-/* On the 68000 all args are pushed, except if -mregparm is specified
+-   then the first two words of arguments are passed in d0, d1.
+-   *NOTE* -mregparm does not work.
+-   It exists only to test register calling conventions.  */
++/* On the 68000 all args are pushed, except if -mregparm is specified,
++   then a number of arguments is passed in the first 'm68k_regparm' data,
++   address and float registers.
++   Note: by default, the static-chain is passed in a0. Targets that want
++   to make full use of '-mregparm' are advised to pass the static-chain
++   somewhere else.  */
+ 
+ #define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) \
+-((TARGET_REGPARM && (CUM) < 8) ? gen_rtx_REG ((MODE), (CUM) / 4) : 0)
++  ((struct rtx_def *)m68k_function_arg (&(CUM), (MODE), (TYPE)))
+ 
+ /* For an arg passed partly in registers and partly in memory,
+    this is the number of registers used.
+    For args passed entirely in registers or entirely in memory, zero.  */
+ 
+-#define FUNCTION_ARG_PARTIAL_NREGS(CUM, MODE, TYPE, NAMED) \
+-((TARGET_REGPARM && (CUM) < 8					\
+-  && 8 < ((CUM) + ((MODE) == BLKmode				\
+-		      ? int_size_in_bytes (TYPE)		\
+-		      : GET_MODE_SIZE (MODE))))  		\
+- ? 2 - (CUM) / 4 : 0)
++#define FUNCTION_ARG_PARTIAL_NREGS(CUM, MODE, TYPE, NAMED) (0)
+ 
+ /* Generate the assembly code for function entry. */
+ #define FUNCTION_PROLOGUE(FILE, SIZE) output_function_prologue(FILE, SIZE)
+@@ -1190,6 +1221,8 @@
+    of a local variable as a function of frame_pointer_needed, which
+    is hard.  */
+ 
++#define SUBTARGET_INITIAL_FP_OFFSET(OFFSET)
++
+ #define INITIAL_FRAME_POINTER_OFFSET(DEPTH)			\
+ { int regno;							\
+   int offset = -4;						\
+@@ -1199,8 +1232,9 @@
+   for (regno = 0; regno < 16; regno++)				\
+     if (regs_ever_live[regno] && ! call_used_regs[regno])	\
+       offset += 4;						\
+-  if (flag_pic && current_function_uses_pic_offset_table)	\
++  if (flag_pic && (flag_pic<=2) && current_function_uses_pic_offset_table)	\
+     offset += 4;						\
++  SUBTARGET_INITIAL_FP_OFFSET (offset);				\
+   (DEPTH) = (offset + ((get_frame_size () + 3) & -4)		\
+ 	     + (get_frame_size () == 0 ? 0 : 4));		\
+ }
+@@ -2083,6 +2117,23 @@
+ 
+ #define PRINT_OPERAND_ADDRESS(FILE, ADDR) print_operand_address (FILE, ADDR)
+ 
++
++/* Attributes support.  */
++
++/* A C expression whose value is nonzero if IDENTIFIER with arguments
++   ARGS is a valid machine specific attribute for TYPE.  The attributes
++   in ATTRIBUTES have previously been assigned to TYPE.  */
++
++#define VALID_MACHINE_TYPE_ATTRIBUTE(TYPE, ATTRIBUTES, IDENTIFIER, ARGS) \
++  (valid_m68k_type_attribute ((TYPE), (ATTRIBUTES), (IDENTIFIER), (ARGS)))
++
++/* A C expression whose value is zero if the attributes on TYPE1 and
++   TYPE2 are incompatible, one if they are compatible, and two if they
++   are nearly compatible (which causes a warning to be generated).  */
++
++#define COMP_TYPE_ATTRIBUTES(TYPE1, TYPE2) \
++  (comp_m68k_type_attributes ((TYPE1), (TYPE2)))
++
+ /* Define functions defined in aux-output.c and used in templates.  */
+ 
+ extern char *output_move_const_into_data_reg ();
+@@ -2115,9 +2166,11 @@
+ extern const char *m68k_align_loops_string;
+ extern const char *m68k_align_jumps_string;
+ extern const char *m68k_align_funcs_string;
++extern const char *m68k_regparm_string;
+ extern int m68k_align_loops;
+ extern int m68k_align_jumps;
+ extern int m68k_align_funcs;
++extern int m68k_regparm;
+ extern int m68k_last_compare_had_fp_operands;
+ 
+ /* Functions from m68k.c used in macros.  */

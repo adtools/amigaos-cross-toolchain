@@ -1,0 +1,63 @@
+# Makefile fragment for MorphOS target.
+
+# Do not build libgcc1.
+LIBGCC1 =
+CROSS_LIBGCC1 =
+#LIBGCC1_TEST =
+
+# These are really part of libgcc1, but this will cause them to be
+# built correctly, so... [taken from t-sparclite]
+LIB2FUNCS_EXTRA = fp-bit.c dp-bit.c
+
+# Extra object for cc1
+morphos.o: $(srcdir)/config/rs6000/morphos.c $(CONFIG_H)
+	$(CC) -c $(ALL_CFLAGS) $(ALL_CPPFLAGS) $(INCLUDES) $<
+
+dp-bit.c: $(srcdir)/config/fp-bit.c
+	cat $(srcdir)/config/fp-bit.c > dp-bit.c
+
+fp-bit.c: $(srcdir)/config/fp-bit.c
+	echo '#define FLOAT' > fp-bit.c
+	cat $(srcdir)/config/fp-bit.c >> fp-bit.c
+
+# Build libgcc.a with different options.
+
+MULTILIB_OPTIONS       = mbaserel32
+
+MULTILIB_DIRNAMES      = libb32
+
+MULTILIB_MATCHES       = mbaserel32=mresident32 \
+			 mbaserel32=msdata=baserel
+
+#LIBGCC = stmp-multilib
+#LIBGCC =
+#INSTALL_LIBGCC = install-multilib
+#INSTALL_LIBGCC =
+
+# Each compilation environment (Dice, GCC, SAS/C, vbcc, etc) provides its
+# own equivalent of the UNIX /usr/include tree.  For gcc, the standard headers
+# are in GG:include and system specific headers are in GG:os-include.
+# Use these paths for fixincludes.
+
+SYSTEM_HEADER_DIR = GG:include
+OTHER_FIXINCLUDES_DIRS = GG:os-include
+
+# Try to make it possible to build libgcc.a without an existing libc and
+# related include files (the default runtime of ixemul needs machine/ansi.h
+# to compile). This is useful since libc for this target isn't quite ready
+# yet. -rask
+
+TARGET_LIBGCC2_CFLAGS = -mfixedstack #-Dinhibit_libc 
+STMP_FIXPROTO =
+
+### begin-GG-local: dynamic libraries
+# Extra objects that get compiled and linked to collect2
+
+EXTRA_COLLECT2_OBJS = morphoscollect2.o
+
+# Build supplimentary MorphOS target support file for collect2
+morphoscollect2.o: morphoscollect2.c
+	$(CC) -c $(ALL_CFLAGS) $(ALL_CPPFLAGS) $(INCLUDES) \
+	-DA2IXDIR_PREFIX=\"$(prefix)/share/a2ixlibrary\" $(srcdir)/morphoscollect2.c
+### end-GG-local
+

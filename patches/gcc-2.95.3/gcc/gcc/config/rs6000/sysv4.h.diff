@@ -1,0 +1,21 @@
+--- gcc-2.95.3/gcc/config/rs6000/sysv4.h	Thu Jan 25 15:03:37 2001
++++ gcc/gcc/config/rs6000/sysv4.h	Thu Sep 27 19:35:54 2001
+@@ -24,7 +24,8 @@
+   SDATA_NONE,			/* no small data support */
+   SDATA_DATA,			/* just put data in .sbss/.sdata, don't use relocs */
+   SDATA_SYSV,			/* Use r13 to point to .sdata/.sbss */
+-  SDATA_EABI			/* Use r13 like above, r2 points to .sdata2/.sbss2 */
++  SDATA_EABI,			/* Use r13 like above, r2 points to .sdata2/.sbss2 */
++  SDATA_BREL			/* Use r13 to point to .data/.sdata/.sbss/.bss */
+ };
+ 
+ extern enum rs6000_sdata_type rs6000_sdata;
+@@ -181,6 +182,8 @@
+ 	rs6000_sdata = SDATA_SYSV;					\
+       else if (!strcmp (rs6000_sdata_name, "eabi"))			\
+ 	rs6000_sdata = SDATA_EABI;					\
++      else if (!strcmp (rs6000_sdata_name, "baserel"))			\
++	rs6000_sdata = SDATA_BREL;					\
+       else								\
+ 	error ("Bad value for -msdata=%s", rs6000_sdata_name);		\
+     }									\

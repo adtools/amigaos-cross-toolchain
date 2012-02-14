@@ -1,0 +1,77 @@
+# Makefile fragment for AmigaOS host
+
+# Uncomment the following macro to get a resident GCC. We don't do it
+# by default, since we want to support users with mc68000.
+# WARNING!  If you uncomment this, you MUST add the same flags to the
+# libiberty's Makefile (libiberty is now linked into GCC executables).
+
+#RESIDENT = -m68020 -resident32
+
+# Additional host flags that are not used when compiling with GCC_FOR_TARGET,
+# such as when compiling the libgcc* runtime archives. GCC uses stack
+# a lot, and since AmigaOS provides processes with a small, fixed size
+# stack, we have to generate code that will extend it whenever necessary.
+
+XCFLAGS = -mstackextend $(RESIDENT)
+
+# AmigaOS supports "AmigaGuide(R)" hypertext files. For GCC, these are
+# build with a custom "makeinfo".
+
+### begin-GG-local: gcc-amigaos
+EXTRA_DOC_TARGETS = guide gcc-amigaos-doc
+### end-GG-local
+
+# Arrange for guides to be build with GCC, in the build directory.
+
+ALL = all.internal doc
+
+# Actually build guides
+
+guide: cpp.guide gcc.guide
+
+cpp.guide: cpp.texi
+	$(MAKEINFO) -I$(srcdir) $(srcdir)/cpp.texi --output=$@ --amiga
+
+gcc.guide: gcc.texi extend.texi install.texi invoke.texi \
+		md.texi rtl.texi tm.texi
+	$(MAKEINFO) -I$(srcdir) $(srcdir)/gcc.texi --output=$@ --amiga
+
+# Arrange for guides to be installed with GCC.
+
+### begin-GG-local: gcc-amigaos
+INSTALL_TARGET=install-normal install-guide install-gcc-amigaos-doc
+### end-GG-local
+
+# Where the guide files go
+
+guidedir = $(prefix)/guide
+
+# Actually install guides.
+
+install-guide: doc installdirs
+	-if [ -d $(guidedir) ] ; then true ; else mkdir $(guidedir) ; chmod a+rx $(guidedir) ; fi
+	-rm -f $(guidedir)/cpp.guide $(guidedir)/gcc.guide
+	for f in cpp.guide gcc.guide; \
+	do $(INSTALL_DATA) $$f $(guidedir)/$$f; done
+	-chmod a-x $(guidedir)/cpp.guide $(guidedir)/gcc.guide
+
+### begin-GG-local: gcc-amigaos
+# Build and install gcc-amigaos.guide - documentation specific to the
+# AmigaOS port of GCC.
+
+gcc-amigaos-doc: gcc-amigaos.info gcc-amigaos.guide
+
+gcc-amigaos.info: gcc-amigaos.texi
+	$(MAKEINFO) -I$(srcdir) $(srcdir)/gcc-amigaos.texi --output=$@
+
+gcc-amigaos.guide: gcc-amigaos.texi
+	$(MAKEINFO) -I$(srcdir) $(srcdir)/gcc-amigaos.texi --output=$@ --amiga
+
+install-gcc-amigaos-doc: doc installdirs
+	-if [ -d $(guidedir) ] ; then true ; else mkdir $(guidedir) ; chmod a+rx $(guidedir) ; fi
+	-rm -f $(infodir)/gcc-amigaos.info* $(guidedir)/gcc-amigaos.guide
+	for f in gcc-amigaos.info*; \
+	do $(INSTALL_DATA) $$f $(infodir)/$$f; done
+	$(INSTALL_DATA) gcc-amigaos.guide $(guidedir)
+	-chmod a-x $(infodir)/gcc-amigaos.info* $(guidedir)/gcc-amigaos.guide
+### end-GG-local

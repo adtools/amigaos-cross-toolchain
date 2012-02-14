@@ -1,0 +1,12 @@
+# Host makefile fragment for Commodore Amiga running AmigaOS.
+
+# We don't actually use libmmalloc.a, since there is no sbrk(),
+# but this allows us to compile it (and then ignore it).
+MMALLOC=
+MMALLOC_DISABLE = -DNO_MMALLOC
+
+# There is no standard system compiler.  Assume using GNU C.
+CC = gcc
+
+# Compile for automatic stack extension.
+HDEFINES = -mstackextend

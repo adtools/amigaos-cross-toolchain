@@ -1,0 +1,13 @@
+# Host makefile fragment for Commodore Amiga running AmigaOS.
+
+# There is no standard system compiler.  Assume using GNU C.
+CC = gcc
+CFLAGS = -g -O2 -mstackextend
+
+# We have both types of links under AmigaOS with GNU
+# utils, however the links need to be made in canonical
+# AmigaOS format (foo:bar/bell/file) rather than UNIX
+# format (/foo/bar/bell/file).  When this is fixed, then
+# these can go away.
+SYMLINK = cp
+HARDLINK = cp

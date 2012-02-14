@@ -38,15 +38,14 @@ function unpack_sources {
   rm -rf "${BINUTILS}"
   tar -xzf "${ARCHIVES}/${BINUTILS_SRC}"
   pushd "${BINUTILS}"
-  zcat "${PATCHES}/${BINUTILS_PATCH}" | patch -p1
+  patch -p1 < "${PATCHES}/${BINUTILS}/patch"
   popd
 
   rm -rf "${GCC}"
   tar -xzf "${ARCHIVES}/${GCC_CORE_SRC}"
   tar -xzf "${ARCHIVES}/${GCC_CPP_SRC}"
   pushd "${GCC}"
-  zcat "${PATCHES}/${GCC_CORE_PATCH}" | patch -p1
-  zcat "${PATCHES}/${GCC_CPP_PATCH}" | patch -p1
+  patch -p1 < "${PATCHES}/${GCC}/patch"
   popd
 
   rm -rf "${FD2INLINE}"

@@ -1,0 +1,59 @@
+--- binutils-2.9.1/bfd/pei-i386.c	Fri May  1 08:48:14 1998
++++ binutils-2.9.1/bfd/pei-i386.c	Sun Aug 23 00:00:00 1998
+@@ -30,6 +30,56 @@ Foundation, Inc., 59 Temple Place - Suit
+ #define COFF_LONG_SECTION_NAMES
+ 
+ #include "coff-i386.c"
++#include <ctype.h>
+ 
++/* Routine to get the comdat symbol or associated section
++     for a section, used by the linker to determine if sections are
++     duplicates. needs the asection passed to it */
+ 
++void pei_get_comdat_info PARAMS ((asection *));
+ 
++void pei_get_comdat_info(sec)
++asection *sec;
++{
++const char *nosym = "none";
++bfd_size_type symesz;
++bfd_byte *esym;
++bfd_byte *esym_end;
++
++comdat_info *comdat;
++
++comdat = (comdat_info *) bfd_alloc (sec->owner, sizeof(comdat_info));
++
++memcpy (comdat->name_buf, nosym, 5);
++comdat->asoc_sec = (int)NULL;
++symesz = bfd_coff_symesz (sec->owner);
++esym = (bfd_byte *) obj_coff_external_syms (sec->owner);
++esym_end = esym + obj_raw_syment_count (sec->owner) * symesz;
++
++
++/* walk the native table looking for the section symbol */
++  while (esym < esym_end)
++    {
++      struct internal_syment sym;
++      bfd_coff_swap_sym_in (sec->owner, (PTR) esym, (PTR) &sym);
++	/* FIXME add ISSYM() ISWEAK()? to function symbols ISFCN( sym.n_type )) would make things MUCH easier*/
++	/* every comdat has either another comdat that it is addociated with
++	   or a comdat symbol of it's own. if a symbol it isn't associated */
++      if ((sym.n_scnum == sec->index + 1) && !isalpha(sym.n_name[0]) && !sym.n_numaux )
++         {
++	  comdat->comdat_sym = _bfd_coff_internal_syment_name(sec->owner, &sym, comdat->name_buf);
++		break;
++	 }
++      if (!isalpha(sym.n_name[0]) && (sym.n_scnum == sec->index + 1) && sym.n_numaux)
++         {
++          union internal_auxent aux;
++          bfd_coff_swap_aux_in(sec->owner, (PTR) (esym + symesz)
++		,sym.n_type, sym.n_sclass, 0, sym.n_numaux, (PTR) &aux);
++          comdat->asoc_sec = aux.x_scn.x_associated;
++	  if (comdat->asoc_sec)
++            break;
++         }
++      esym += (sym.n_numaux + 1) * symesz;
++    }
++sec->pe_comdat_info = comdat;
++}

@@ -1,0 +1,30 @@
+--- binutils-2.9.1/ld/configure.in	Fri May  1 08:48:48 1998
++++ binutils-2.9.1/ld/configure.in	Sun Aug 23 00:00:00 1998
+@@ -45,6 +45,17 @@ AC_PROG_YACC
+ AC_PROG_LEX
+ AC_DECL_YYTEXT
+ 
++# begin-GG-local
++AC_MSG_CHECKING(whether compiling a cross-linker)
++if test "${host}" = "${target}"; then
++  cross_linker=no
++else
++  cross_linker=yes
++  AC_DEFINE(CROSS_LINKER)
++fi
++AC_MSG_RESULT($cross_linker)
++# end-GG-local
++
+ AM_MAINTAINER_MODE
+ 
+ . ${srcdir}/configure.host
+@@ -108,6 +119,9 @@ done
+ 
+ AC_SUBST(EMUL)
+ AC_SUBST(TDIRS)
++AC_SUBST(LDNAME)
++AC_SUBST(EXTRA_PROGS)
++AC_SUBST(EXTRA_INSTALL)
+ 
+ dnl FIXME: We will build a 64 bit BFD for a 64 bit host or a 64 bit
+ dnl target, and in those cases we should also build the 64 bit

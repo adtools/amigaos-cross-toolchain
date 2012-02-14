@@ -1,0 +1,38 @@
+--- binutils-2.9.1/gas/config/tc-ppc.c	Fri May  1 08:44:45 1998
++++ binutils-2.9.1/gas/config/tc-ppc.c	Sun Aug 23 00:00:00 1998
+@@ -1278,7 +1278,7 @@ ppc_elf_cons (nbytes)
+ 	      register char *p = frag_more ((int) nbytes);
+ 	      int offset = nbytes - size;
+ 
+-	      fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size, &exp, 0, reloc);
++	      fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size, &exp, 0, reloc, 0);
+ 	    }
+ 	}
+       else
+@@ -1656,7 +1656,7 @@ md_assemble (str)
+ 	  /* If there are fewer operands in the line then are called
+ 	     for by the instruction, we want to skip the optional
+ 	     operand.  */
+-	  if (opcount < strlen (opcode->operands))
++	  if (opcount < strlen ((const char *) opcode->operands))
+ 	    skip_optional = 1;
+ 
+ 	  break;
+@@ -2000,7 +2000,7 @@ md_assemble (str)
+ 
+ 	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset, size,
+ 			      &fixups[i].exp, reloc_howto->pc_relative,
+-			      fixups[i].reloc);
++			      fixups[i].reloc, 0);
+ 
+ 	  /* Turn off complaints that the addend is too large for things like
+ 	     foo+100000@ha.  */
+@@ -2022,7 +2022,7 @@ md_assemble (str)
+ 		     &fixups[i].exp,
+ 		     (operand->flags & PPC_OPERAND_RELATIVE) != 0,
+ 		     ((bfd_reloc_code_real_type)
+-		       (fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
++		       (fixups[i].opindex + (int) BFD_RELOC_UNUSED)),0);
+     }
+ }
+ 

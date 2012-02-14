@@ -1,0 +1,11 @@
+--- binutils-2.9.1/gprof/Makefile.am	Fri May  1 08:49:41 1998
++++ binutils-2.9.1/gprof/Makefile.am	Sun Aug 23 00:00:00 1998
+@@ -25,7 +25,7 @@ EXTRA_DIST = flat_bl.c bsd_callg_bl.c fs
+ 
+ BUILT_SOURCES = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
+ 
+-diststuff: $(BUILT_SOURCES) info
++diststuff: $(BUILT_SOURCES) info guide
+ 
+ .m.c:
+ 	awk -f $(srcdir)/gen-c-prog.awk > ./$*.c \

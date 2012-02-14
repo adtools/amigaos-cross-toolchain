@@ -1,0 +1,16 @@
+--- binutils-2.9.1/ld/ld.texinfo	Fri May  1 08:48:48 1998
++++ binutils-2.9.1/ld/ld.texinfo	Sun Aug 23 00:00:00 1998
+@@ -1834,11 +1834,11 @@ other places they can appear for aesthet
+ @table @code
+ @item Assignment
+ Semicolons must appear at the end of assignment expressions.
+-@xref{Assignment}
++@xref{Assignment}.
+ 
+ @item PHDRS
+ Semicolons must appear at the end of a @code{PHDRS} statement.
+-@xref{PHDRS}
++@xref{PHDRS}.
+ @end table
+ 
+ @node MEMORY

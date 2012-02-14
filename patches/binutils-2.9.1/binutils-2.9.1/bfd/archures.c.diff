@@ -1,0 +1,10 @@
+--- binutils-2.9.1/bfd/archures.c	Fri May  1 08:48:01 1998
++++ binutils-2.9.1/bfd/archures.c	Sun Aug 23 00:00:00 1998
+@@ -869,3 +869,7 @@ bfd_printable_arch_mach (arch, machine)
+       return ap->printable_name;
+     return "UNKNOWN!";
+ }
++
++#ifndef HAVE_i386pei_vec
++void pei_get_comdat_info(struct sec *pei_comdat_section){}
++#endif

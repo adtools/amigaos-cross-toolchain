@@ -1,0 +1,14 @@
+--- binutils-2.9.1/gas/config/tc-ppc.h	Fri May  1 08:44:45 1998
++++ binutils-2.9.1/gas/config/tc-ppc.h	Sun Aug 23 00:00:00 1998
+@@ -60,6 +60,11 @@ extern int target_big_endian;
+ #endif
+ #endif
+ 
++/* This is used by the Amiga to produce sun3 style a.out objects */
++#if defined(OBJ_AOUT) && defined(TE_SUN3) && 0
++#define TARGET_FORMAT "a.out-amiga"
++#endif
++
+ /* PowerMac has a BFD slightly different from AIX's.  */
+ #ifdef TE_POWERMAC
+ #ifdef TARGET_FORMAT

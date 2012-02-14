@@ -1,0 +1,9 @@
+--- binutils-2.9.1/ld/acconfig.h	Fri May  1 08:48:47 1998
++++ binutils-2.9.1/ld/acconfig.h	Sun Aug 23 00:00:00 1998
+@@ -20,3 +20,6 @@
+ 
+ /* Do we need to use the b modifier when opening binary files?  */
+ #undef USE_BINARY_FOPEN
++
++/* Are we building a cross linker */
++#undef CROSS_LINKER

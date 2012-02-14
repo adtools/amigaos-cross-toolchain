@@ -1,0 +1,26 @@
+--- binutils-2.9.1/bfd/configure.in	Fri May  1 08:48:05 1998
++++ binutils-2.9.1/bfd/configure.in	Sun Aug 23 00:00:00 1998
+@@ -12,6 +12,7 @@ AM_INIT_AUTOMAKE(bfd, 2.9.1)
+ dnl These must be called before AM_PROG_LIBTOOL, because it may want
+ dnl to call AC_CHECK_PROG.
+ AC_CHECK_TOOL(AR, ar)
++AC_ARFLAGS
+ AC_CHECK_TOOL(RANLIB, ranlib, :)
+ 
+ dnl Default to a non shared library.  This may be overridden by the
+@@ -385,6 +386,7 @@ do
+     # with the two vector lists in targets.c.
+     a29kcoff_big_vec)		tb="$tb coff-a29k.lo cofflink.lo" ;;
+     a_out_adobe_vec)		tb="$tb aout-adobe.lo aout32.lo" ;;
++    amiga_vec)			tb="$tb amigaos.lo amigaoslink.lo" ;;
+     armcoff_little_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
+     armcoff_big_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
+     armpe_little_vec)		tb="$tb pe-arm.lo coff-arm.lo cofflink.lo " ;;
+@@ -392,6 +394,7 @@ do
+     armpei_little_vec)		tb="$tb pei-arm.lo cofflink.lo " ;;
+     armpei_big_vec)		tb="$tb pei-arm.lo cofflink.lo " ;;
+     aout0_big_vec)		tb="$tb aout0.lo aout32.lo" ;;
++    aout_amiga_vec)		tb="$tb aout-amiga.lo aout32.lo stab-syms.lo";;
+     aout_arm_big_vec)		tb="$tb aout-arm.lo aout32.lo" ;;
+     aout_arm_little_vec)	tb="$tb aout-arm.lo aout32.lo" ;;
+     aout_mips_big_vec)		tb="$tb mipsbsd.lo aout32.lo" ;;

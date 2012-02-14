@@ -1,0 +1,86 @@
+--- binutils-2.9.1/bfd/cofflink.c	Fri May  1 08:48:05 1998
++++ binutils-2.9.1/bfd/cofflink.c	Sun Aug 23 00:00:00 1998
+@@ -34,6 +34,8 @@ static boolean coff_link_check_archive_e
+ static boolean coff_link_check_ar_symbols
+   PARAMS ((bfd *, struct bfd_link_info *, boolean *));
+ static boolean coff_link_add_symbols PARAMS ((bfd *, struct bfd_link_info *));
++static asection *coff_get_first_section_of_archive
++ PARAMS ((struct bfd_link_info *, bfd *, CONST char *));
+ static char *dores_com PARAMS ((char *, bfd *, int));
+ static char *get_name PARAMS ((char *, char **));
+ static int process_embedded_commands
+@@ -2654,8 +2656,33 @@ _bfd_coff_generic_relocate_section (outp
+ 		     + sec->output_offset);
+ 	      }
+ 
++      else if (coff_data(input_bfd)->pe
++	       && h->class == C_SECTION
++	       && h->root.type == bfd_link_hash_undefined)
++        {
++           /* Reference to an idata sub-section label, 
++              currently undefined */
++	      asection *sec;
++           if (!strncmp(sym->n_name, "i4", (size_t)2 ))
++                  sprintf(sym->n_name, ".idata$4");
++           else 
++             { 
++               if (!strncmp(sym->n_name, "i5", (size_t)2 ))
++                  sprintf(sym->n_name, ".idata$5"); 
++             }
++           sec = coff_get_first_section_of_archive(info,
++	         h->root.u.undef.abfd,
++	         sym->n_name);
++           if (sec == NULL)
++                 goto undef_sym;
++           val = (sec->output_section->vma
++	   + sec->output_offset
++	   - sec->vma);
++        }
++
+ 	  else if (! info->relocateable)
+ 	    {
++undef_sym:
+ 	      if (! ((*info->callbacks->undefined_symbol)
+ 		     (info, h->root.root.string, input_bfd, input_section,
+ 		      rel->r_vaddr - input_section->vma)))
+@@ -2732,4 +2759,39 @@ _bfd_coff_generic_relocate_section (outp
+     }
+   return true;
+ }
+-
++static asection *
++coff_get_first_section_of_archive(info, abfd, name)
++     struct bfd_link_info *info;
++     bfd *abfd;
++     CONST char *name;
++{
++bfd *sub;
++asection *sect;
++asection *rtn = NULL;
++bfd_vma offset;
++
++/* move abfd to containing archive */
++if (abfd->my_archive == NULL)
++   return NULL;
++
++abfd = abfd->my_archive;
++
++for (sub = info->input_bfds; sub != NULL; sub = sub->link_next) 
++  {
++   /* make sure that the bfd comes from the same archive */
++   if (sub->my_archive == NULL || strcmp(abfd->filename, sub->my_archive->filename) )
++     continue;
++
++   for (sect = sub->sections; sect != NULL; sect = sect->next) 
++     {
++     if (strcmp (sect->name, name))
++       continue;
++     if (rtn == NULL || offset > sect->output_offset)
++       {
++       offset = sect->output_offset;
++       rtn = sect;
++       }
++     }
++  }
++ return rtn;
++}

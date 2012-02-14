@@ -1,0 +1,12 @@
+--- binutils-2.9.1/binutils/objcopy.c	Fri May  1 08:49:34 1998
++++ binutils-2.9.1/binutils/objcopy.c	Sun Aug 23 00:00:00 1998
+@@ -1242,7 +1242,8 @@ copy_section (ibfd, isection, obfdarg)
+   if (size == 0 || osection == 0)
+     return;
+ 
+-  if (strip_symbols == strip_all)
++  /* Never, ever, strip reloc data on the Amiga! */
++  if (strip_symbols == strip_all && bfd_get_flavour(obfd) != bfd_target_amiga_flavour)
+     bfd_set_reloc (obfd, osection, (arelent **) NULL, 0);
+   else
+     {

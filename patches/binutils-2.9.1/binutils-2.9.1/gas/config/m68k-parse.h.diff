@@ -1,0 +1,12 @@
+--- binutils-2.9.1/gas/config/m68k-parse.h	Fri May  1 08:44:34 1998
++++ binutils-2.9.1/gas/config/m68k-parse.h	Sun Aug 23 00:00:00 1998
+@@ -225,6 +225,9 @@ struct m68k_exp
+ 
+   /* The expression itself.  */
+   expressionS exp;
++  
++  /* base-relative? */
++  short baserel;
+ };
+ 
+ /* The operand modes.  */

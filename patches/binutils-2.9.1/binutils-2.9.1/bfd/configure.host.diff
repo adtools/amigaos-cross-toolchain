@@ -1,0 +1,10 @@
+--- binutils-2.9.1/bfd/configure.host	Fri May  1 08:48:05 1998
++++ binutils-2.9.1/bfd/configure.host	Sun Aug 23 00:00:00 1998
+@@ -44,6 +44,7 @@ mips*-*-sysv*)		HDEFINES="-G 4" ;;
+ mips*-*-riscos*)	HDEFINES="-G 4" ;;
+ 
+ m68*-hp-hpux*)		HDEFINES=-DHOST_HP300HPUX ;;
++m68*-*-amigaos*)	HDEFINES=-mstackextend ;;
+ 
+ *-*-solaris*)		HOST_64BIT_TYPE="long long"
+ 			HOST_U_64BIT_TYPE="unsigned long long"

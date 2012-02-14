@@ -1,0 +1,54 @@
+--- binutils-2.9.1/bfd/coffgen.c	Fri May  1 08:48:05 1998
++++ binutils-2.9.1/bfd/coffgen.c	Sun Aug 23 00:00:00 1998
+@@ -41,6 +41,7 @@ Foundation, Inc., 59 Temple Place - Suit
+ #include "libbfd.h"
+ #include "coff/internal.h"
+ #include "libcoff.h"
++#include <ctype.h>
+ 
+ static void coff_fix_symbol_name
+   PARAMS ((bfd *, asymbol *, combined_entry_type *, bfd_size_type *,
+@@ -654,6 +655,7 @@ coff_renumber_symbols (bfd_ptr, first_un
+     if (!newsyms)
+       return false;
+     bfd_ptr->outsymbols = newsyms;
++#ifndef HAVE_i386pei_vec
+     for (i = 0; i < symbol_count; i++)
+       if ((symbol_ptr_ptr[i]->flags & BSF_NOT_AT_END) != 0
+ 	  || (!bfd_is_und_section (symbol_ptr_ptr[i]->section)
+@@ -670,6 +672,35 @@ coff_renumber_symbols (bfd_ptr, first_un
+ 		  == BSF_GLOBAL)))
+ 	*newsyms++ = symbol_ptr_ptr[i];
+ 
++#else
++	 /* link.exe depends on the symbols being sorted in
++		their natural order in each section. this is 
++		as close as I could come without using backend data
++		otherwise it finds local labels and thinks they are comdats */
++    for (i = 0; i < symbol_count; i++)
++      if ( (symbol_ptr_ptr[i]->flags & BSF_NOT_AT_END) != 0 
++	   || ( !bfd_is_und_section (symbol_ptr_ptr[i]->section) 
++              && !bfd_is_com_section (symbol_ptr_ptr[i]->section)
++              && !isalpha(symbol_ptr_ptr[i]->name[0])
++              && ((symbol_ptr_ptr[i]->flags & (BSF_GLOBAL | BSF_FUNCTION)) != BSF_GLOBAL )
++              )
++         )
++	*newsyms++ = symbol_ptr_ptr[i];
++
++    for (i = 0; i < symbol_count; i++)
++      if ( (symbol_ptr_ptr[i]->flags & BSF_NOT_AT_END) == 0 
++           && !bfd_is_und_section (symbol_ptr_ptr[i]->section)
++           && !isalpha(symbol_ptr_ptr[i]->name[0])
++           && (bfd_is_com_section (symbol_ptr_ptr[i]->section) 
++              || ((symbol_ptr_ptr[i]->flags & (BSF_GLOBAL | BSF_FUNCTION)) == BSF_GLOBAL)
++              ) 
++         )
++	*newsyms++ = symbol_ptr_ptr[i];
++	/* for Scope etc.. */
++    for (i = 0;i < symbol_count;i++)
++	if (isalpha(symbol_ptr_ptr[i]->name[0]))
++	  *newsyms++ = symbol_ptr_ptr[i];
++#endif
+     *first_undef = newsyms - bfd_ptr->outsymbols;
+ 
+     for (i = 0; i < symbol_count; i++)

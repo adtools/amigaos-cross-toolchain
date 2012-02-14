@@ -1,0 +1,582 @@
+--- binutils-2.9.1/ld/Makefile.in	Fri May  1 08:48:47 1998
++++ binutils-2.9.1/ld/Makefile.in	Sun Aug 23 00:00:00 1998
+@@ -1,4 +1,4 @@
+-# Makefile.in generated automatically by automake 1.2e from Makefile.am
++# Makefile.in generated automatically by automake 1.3 from Makefile.am
+ 
+ # Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+ # This Makefile.in is free software; the Free Software Foundation
+@@ -11,7 +11,7 @@
+ # PARTICULAR PURPOSE.
+ 
+ 
+-SHELL = @SHELL@
++SHELL = /bin/sh
+ 
+ srcdir = @srcdir@
+ top_srcdir = @top_srcdir@
+@@ -28,10 +28,16 @@ sharedstatedir = @sharedstatedir@
+ localstatedir = @localstatedir@
+ libdir = @libdir@
+ infodir = @infodir@
++guidedir = @guidedir@
++htmldir = @htmldir@
++dvidir = @dvidir@
++psdir = @psdir@
+ mandir = @mandir@
+ includedir = @includedir@
+ oldincludedir = /usr/include
+ 
++DISTDIR =
++
+ pkgdatadir = $(datadir)/@PACKAGE@
+ pkglibdir = $(libdir)/@PACKAGE@
+ pkgincludedir = $(includedir)/@PACKAGE@
+@@ -62,19 +68,17 @@ host_triplet = @host@
+ target_alias = @target_alias@
+ target_triplet = @target@
+ CC = @CC@
++CC_FOR_BUILD = @CC_FOR_BUILD@
+ EXEEXT = @EXEEXT@
++EXEEXT_FOR_BUILD = @EXEEXT_FOR_BUILD@
++EXTRA_INSTALL = @EXTRA_INSTALL@
++EXTRA_PROGS = @EXTRA_PROGS@
+ HDEFINES = @HDEFINES@
+-LD = @LD@
++LDNAME = @LDNAME@
+ LIBTOOL = @LIBTOOL@
+-LN_S = @LN_S@
+-MAINT = @MAINT@
+-MAKEINFO = @MAKEINFO@
+ NATIVE_LIB_DIRS = @NATIVE_LIB_DIRS@
+-NM = @NM@
+-PACKAGE = @PACKAGE@
+ RANLIB = @RANLIB@
+ TDIRS = @TDIRS@
+-VERSION = @VERSION@
+ 
+ AUTOMAKE_OPTIONS = cygnus dejagnu
+ 
+@@ -169,6 +173,8 @@ ALL_EMULATIONS = \
+ 	ea29k.o \
+ 	eaixppc.o \
+ 	eaixrs6.o \
++	eamiga.o \
++	eamiga_bss.o \
+ 	ealpha.o \
+ 	earcelf.o \
+ 	earmaoutb.o \
+@@ -204,6 +210,7 @@ ALL_EMULATIONS = \
+ 	ehp3hpux.o \
+ 	ehppaelf.o \
+ 	ei386aout.o \
++	ei386beos.o \
+ 	ei386bsd.o \
+ 	ei386coff.o \
+ 	ei386go32.o \
+@@ -235,6 +242,8 @@ ALL_EMULATIONS = \
+ 	enews.o \
+ 	ens32knbsd.o \
+ 	epc532macha.o \
++	eppcamiga.o \
++	eppcamiga_bss.o \
+ 	eppcmacos.o \
+ 	eppcnw.o \
+ 	eppcpe.o \
+@@ -283,7 +292,7 @@ STAGESTUFF = *.o ldscripts/* e*.c
+ 
+ # These all start with e so 'make clean' can find them.
+ 
+-GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} @host@ @target@ @target_alias@ ${EMUL} "@NATIVE_LIB_DIRS@"
++GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} @host@ @target@ @target_alias@ ${EMUL} "@NATIVE_LIB_DIRS@" "$(LIB_PATH)"
+ GEN_DEPENDS = $(srcdir)/genscripts.sh $(srcdir)/emultempl/stringify.sed
+ 
+ ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
+@@ -324,12 +333,20 @@ CFLAGS = @CFLAGS@
+ COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+ LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -o $@
++MAKEINFO = `if test -f $(top_builddir)/../texinfo/makeinfo/makeinfo; then echo $(top_builddir)/../texinfo/makeinfo/makeinfo; else echo makeinfo; fi`
+ TEXI2DVI = `if test -f $(top_srcdir)/../texinfo/util/texi2dvi; then echo $(top_srcdir)/../texinfo/util/texi2dvi; else echo texi2dvi; fi`
+ TEXINFO_TEX = $(top_srcdir)/../texinfo/texinfo.tex
+ INFO_DEPS = ld.info
+ DVIS = ld.dvi
+ TEXINFOS = ld.texinfo
+-MANS = ld.1
++GUIDES = ld.guide
++GUIDE_DEPS = ld.guide
++HTMLS = ld.html
++HTML_DEPS = ld.html
++PS_S = ld.ps
++PS_DEPS = ld.ps
++man1dir = $(mandir)/man1
++MANS = $(man_MANS)
+ 
+ NROFF = nroff
+ DIST_COMMON =  README ChangeLog Makefile.am Makefile.in NEWS TODO \
+@@ -337,21 +354,24 @@ acconfig.h acinclude.m4 aclocal.m4 confi
+ ldgram.c ldlex.c stamp-h.in
+ 
+ 
+-DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
++PACKAGE = @PACKAGE@
++VERSION = @VERSION@
+ 
++DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST) \
++		$(INFOS) $(GUIDES) $(HTMLS) $(MANS)
+ TAR = tar
+ GZIP = --best
+ SOURCES = $(ld_new_SOURCES)
+ OBJECTS = $(ld_new_OBJECTS)
+ 
+-default: all
++all: Makefile $(PROGRAMS) $(MANS) config.h
+ 
+ .SUFFIXES:
+-.SUFFIXES: .S .c .dvi .info .l .lo .o .ps .s .texi .texinfo .y
+-$(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+-	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
++.SUFFIXES: .S .c .dvi .guide .html .info .l .lo .o .ps .s .texi .texinfo .txi .y
++$(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
++	cd $(top_srcdir) && $(AUTOMAKE) --cygnus --include-deps Makefile
+ 
+-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
++Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+ 	cd $(top_builddir) \
+ 	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+ 
+@@ -445,6 +465,9 @@ ldgram.h: ldgram.c
+ 	$(LEX) $(LFLAGS) $< && mv $(LEX_OUTPUT_ROOT).c $@
+ 
+ ld.info: ld.texinfo
++ld.guide: ld.texinfo
++ld.html: ld.texinfo
++ld.ps: ld.dvi
+ ld.dvi: ld.texinfo
+ 
+ 
+@@ -452,7 +475,7 @@ DVIPS = dvips
+ 
+ .texi.info:
+ 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
+-	$(MAKEINFO) -I $(srcdir) $<
++	$(MAKEINFO) -I$(srcdir) $< --output=$@
+ 
+ .texi.dvi:
+ 	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
+@@ -460,39 +483,51 @@ DVIPS = dvips
+ 
+ .texi:
+ 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
+-	$(MAKEINFO) -I $(srcdir) $<
++	$(MAKEINFO) -I $(srcdir) $< --output=$@
+ 
+ .texinfo.info:
+ 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
+-	$(MAKEINFO) -I $(srcdir) $<
++	$(MAKEINFO) -I $(srcdir) $< --output=$@
+ 
+ .texinfo:
+ 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
+-	$(MAKEINFO) -I $(srcdir) $<
++	$(MAKEINFO) -I $(srcdir) $< --output=$@
+ 
+ .texinfo.dvi:
+ 	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
+ 	  MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
++
++.txi.info:
++	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
++	$(MAKEINFO) -I $(srcdir) $<
++
++.txi.dvi:
++	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
++	  MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
++
++.txi:
++	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
++	$(MAKEINFO) -I $(srcdir) $<
+ .dvi.ps:
+ 	$(DVIPS) $< -o $@
+ 
+ install-info-am: $(INFO_DEPS)
+ 	@$(NORMAL_INSTALL)
+-	$(mkinstalldirs) $(infodir)
++	$(mkinstalldirs) $(DESTDIR)$(infodir)
+ 	@for file in $(INFO_DEPS); do \
+ 	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+ 	  for ifile in `cd $$d && echo $$file $$file-[0-9] $$file-[0-9][0-9]`; do \
+ 	    if test -f $$d/$$ifile; then \
+-	      echo " $(INSTALL_DATA) $$d/$$ifile $(infodir)/$$ifile"; \
+-	      $(INSTALL_DATA) $$d/$$ifile $(infodir)/$$ifile; \
++	      echo " $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$ifile"; \
++	      $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$ifile; \
+ 	    else : ; fi; \
+ 	  done; \
+ 	done
+ 	@$(POST_INSTALL)
+ 	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
+ 	  for file in $(INFO_DEPS); do \
+-	    echo " install-info --info-dir=$(infodir) $(infodir)/$$file";\
+-	    install-info --info-dir=$(infodir) $(infodir)/$$file || :;\
++	    echo " install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$file";\
++	    install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$file || :;\
+ 	  done; \
+ 	else : ; fi
+ 
+@@ -503,11 +538,11 @@ uninstall-info:
+ 	else ii=; fi; \
+ 	for file in $(INFO_DEPS); do \
+ 	  test -z "$ii" \
+-	    || install-info --info-dir=$(infodir) --remove $$file; \
++	    || install-info --info-dir=$(DESTDIR)$(infodir) --remove $$file; \
+ 	done
+-	$(NORMAL_UNINSTALL)
++	@$(NORMAL_UNINSTALL)
+ 	for file in $(INFO_DEPS); do \
+-	  (cd $(infodir) && rm -f $$file $$file-[0-9] $$file-[0-9][0-9]); \
++	  (cd $(DESTDIR)$(infodir) && rm -f $$file $$file-[0-9] $$file-[0-9][0-9]); \
+ 	done
+ 
+ dist-info: $(INFO_DEPS)
+@@ -520,10 +555,140 @@ dist-info: $(INFO_DEPS)
+ 	  done; \
+ 	done
+ 
++MAKEGUIDE= $(MAKEINFO) --amiga
++
++MAKEHTML = texi2html -number -split_chapter
++
++.texi.guide:
++	$(MAKEGUIDE) -I$(srcdir) $< -o $@
++
++.texinfo.guide:
++	$(MAKEGUIDE) -I$(srcdir) $< -o $@
++
++.txi.guide:
++	$(MAKEGUIDE) -I$(srcdir) $< -o $@
++
++.texi.html:
++	$(MAKEHTML) -I$(srcdir) $< 
++
++.texinfo.html:
++	$(MAKEHTML) -I$(srcdir) $< 
++
++install-guide: $(GUIDE_DEPS)
++	$(mkinstalldirs) $(guidedir)
++	for file in $(GUIDE_DEPS); do		\
++	  for ifile in `echo $$file*`; do \
++	    $(INSTALL_DATA) $$ifile $(guidedir)/$$ifile; \
++	  done;					\
++	done
++
++uninstall-guide:
++	for file in *.guide*; do	\
++	  rm -f $(guidedir)/$$file; \
++	done
++
++install-ps: $(PS_S)
++	$(mkinstalldirs) $(psdir)
++	for file in $(PS_DEPS); do		\
++	  for ifile in `echo $$file*`; do \
++	    $(INSTALL_DATA) $$ifile $(psdir)/$$ifile; \
++	  done;					\
++	done
++
++uninstall-ps:
++	for file in *.ps*; do	\
++	  rm -f $(psdir)/$$file; \
++	done
++
++install-dvi: $(DVIS)
++	$(mkinstalldirs) $(dvidir)
++	for file in $(DVIS); do		\
++	  for ifile in `echo $$file*`; do \
++	    $(INSTALL_DATA) $$ifile $(dvidir)/$$ifile; \
++	  done;					\
++	done
++
++uninstall-dvi:
++	for file in *.dvi*; do	\
++	  rm -f $(dvidir)/$$file; \
++	done
++
++install-html: $(HTML_DEPS)
++	$(mkinstalldirs) $(htmldir)
++	@touch $(HTML_DEPS)
++	@for file in $(HTML_DEPS); do \
++	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
++	  bfile=`basename $$file .html`; \
++	  for ifile in `cd $$d && echo $$file $$bfile'_toc.html' $$bfile'_foot.html' $$bfile'_[0-9].html' $$bfile'_[0-9][0-9].html'`; do \
++	    if test -f $$d/$$ifile; then \
++	      echo " $(INSTALL_DATA) $$d/$$ifile $(htmldir)/$$ifile"; \
++	      $(INSTALL_DATA) $$d/$$ifile $(htmldir)/$$ifile; \
++	    else : ; fi; \
++	  done; \
++	done
++	@rm -f $(htmldir)/$(HTML_DEPS)
++
++uninstall-html:
++	@for file in $(HTML_DEPS); do \
++	  bfile=`basename $$file .html`; \
++	  for ifile in `cd $(htmldir) && echo $$file $$bfile'_toc.html' $$bfile'_foot.html' $$bfile'_[0-9].html' $$bfile'_[0-9][0-9].html'`; do \
++	    echo "removing: $(htmldir)/$$ifile"; \
++	    rm -f $(htmldir)/$$ifile; \
++	  done; \
++	done
++
++mostlyclean-guide:
++	rm -f ld.aux ld.cp ld.cps ld.dvi ld.fn ld.fns ld.ky ld.kys ld.ps ld.log \
++	  ld.pg ld.toc ld.tp ld.tps ld.vr ld.vrs ld.op ld.tr ld.cv \
++	  ld.cn ld.guide ld.html ld.ps
++
++clean-guide:
++
++distclean-guide:
++
++maintainer-clean-guide:
++	rm -f $(GUIDES)
++
++mostlyclean-html:
++	rm -f ld.aux ld.cp ld.cps ld.dvi ld.fn ld.fns ld.ky ld.kys ld.ps ld.log \
++	  ld.pg ld.toc ld.tp ld.tps ld.vr ld.vrs ld.op ld.tr ld.cv \
++	  ld.cn ld.guide ld.html ld.ps
++
++clean-html:
++
++distclean-html:
++
++maintainer-clean-html:
++	rm -f $(HTMLS)
++
++mostlyclean-ps:
++	rm -f ld.aux ld.cp ld.cps ld.dvi ld.fn ld.fns ld.ky ld.kys ld.ps ld.log \
++	  ld.pg ld.toc ld.tp ld.tps ld.vr ld.vrs ld.op ld.tr ld.cv \
++	  ld.cn ld.guide ld.html ld.ps
++
++clean-ps:
++
++distclean-ps:
++
++maintainer-clean-ps:
++	rm -f $(PS_S)
++
++mostlyclean-dvi:
++	rm -f ld.aux ld.cp ld.cps ld.dvi ld.fn ld.fns ld.ky ld.kys ld.ps ld.log \
++	  ld.pg ld.toc ld.tp ld.tps ld.vr ld.vrs ld.op ld.tr ld.cv \
++	  ld.cn ld.guide ld.html ld.ps
++
++clean-dvi:
++
++distclean-dvi:
++
++maintainer-clean-dvi:
++	rm -f $(DVIS)
++
+ mostlyclean-aminfo:
+ 	-rm -f ld.aux ld.cp ld.cps ld.dvi ld.fn ld.fns ld.ky ld.kys ld.ps \
+ 	  ld.log ld.pg ld.toc ld.tp ld.tps ld.vr ld.vrs ld.op ld.tr \
+-	  ld.cv ld.cn
++	  ld.cv ld.cn ld.guide ld.html ld.ps
+ 
+ clean-aminfo:
+ 
+@@ -537,21 +702,45 @@ maintainer-clean-aminfo:
+ 	  fi; \
+ 	done
+ clean-info: mostlyclean-aminfo
+-install-man: $(MANS)
+-	$(NORMAL_INSTALL)
+-	$(mkinstalldirs) $(mandir)/man1
+-	@sect=1;				\
+-	inst=`echo "ld" | sed '$(transform)'`.1; \
+-	if test -f $(srcdir)/ld.1; then file=$(srcdir)/ld.1; \
+-	else file=ld.1; fi; \
+-	echo " $(INSTALL_DATA) $$file $(mandir)/man$$sect/$$inst"; \
+-	$(INSTALL_DATA) $$file $(mandir)/man$$sect/$$inst
+ 
+-uninstall-man:
+-	$(NORMAL_UNINSTALL)
+-	-inst=`echo "ld" | sed '$(transform)'`.1; \
+-	rm -f $(mandir)/man1/$$inst
++install-man1:
++	$(mkinstalldirs) $(DESTDIR)$(man1dir)
++	@list='$(man1_MANS)'; \
++	l2='$(man_MANS)'; for i in $$l2; do \
++	  case "$$i" in \
++	    *.1*) list="$$list $$i" ;; \
++	  esac; \
++	done; \
++	for i in $$list; do \
++	  if test -f $(srcdir)/$$i; then file=$(srcdir)/$$i; \
++	  else file=$$i; fi; \
++	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
++	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
++	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
++	  echo " $(INSTALL_DATA) $$file $(DESTDIR)$(man1dir)/$$inst"; \
++	  $(INSTALL_DATA) $$file $(DESTDIR)$(man1dir)/$$inst; \
++	done
+ 
++uninstall-man1:
++	@list='$(man1_MANS)'; \
++	l2='$(man_MANS)'; for i in $$l2; do \
++	  case "$$i" in \
++	    *.1*) list="$$list $$i" ;; \
++	  esac; \
++	done; \
++	for i in $$list; do \
++	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
++	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
++	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
++	  echo " rm -f $(DESTDIR)$(man1dir)/$$inst"; \
++	  rm -f $(DESTDIR)$(man1dir)/$$inst; \
++	done
++install-man: $(MANS)
++	@$(NORMAL_INSTALL)
++	$(MAKE) install-man1
++uninstall-man:
++	@$(NORMAL_UNINSTALL)
++	$(MAKE) uninstall-man1
+ 
+ tags: TAGS
+ 
+@@ -645,6 +834,9 @@ site.exp: Makefile
+ 	-@mv site.exp site.bak
+ 	@mv $@-t site.exp
+ info: $(INFO_DEPS)
++guide: $(GUIDE_DEPS)
++html: $(HTML_DEPS)
++ps: $(PS_DEPS)
+ dvi: $(DVIS)
+ check:
+ 	$(MAKE) check-DEJAGNU
+@@ -661,12 +853,10 @@ install: install-exec install-data all
+ 
+ uninstall: uninstall-man
+ 
+-all: Makefile $(PROGRAMS) $(MANS) config.h
+-
+ install-strip:
+ 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+ installdirs:
+-	$(mkinstalldirs)  $(mandir)/man1
++	$(mkinstalldirs)  $(DESTDIR)$(mandir)/man1
+ 
+ 
+ mostlyclean-generic:
+@@ -685,39 +875,50 @@ maintainer-clean-generic:
+ 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+ mostlyclean:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
+ 		mostlyclean-compile mostlyclean-libtool \
+-		mostlyclean-aminfo mostlyclean-tags mostlyclean-generic \
+-		mostlyclean-local
++		mostlyclean-aminfo mostlyclean-guide mostlyclean-html \
++		mostlyclean-dvi mostlyclean-ps mostlyclean-tags \
++		mostlyclean-generic mostlyclean-local
+ 
+ clean:  clean-hdr clean-noinstPROGRAMS clean-compile clean-libtool \
+-		clean-aminfo clean-tags clean-generic mostlyclean
++		clean-aminfo clean-guide clean-html clean-dvi clean-ps \
++		clean-tags clean-generic mostlyclean
+ 
+ distclean:  distclean-hdr distclean-noinstPROGRAMS distclean-compile \
+-		distclean-libtool distclean-aminfo distclean-tags \
+-		distclean-generic clean distclean-local
++		distclean-libtool distclean-aminfo distclean-guide \
++		distclean-html distclean-dvi distclean-ps \
++		distclean-tags distclean-generic clean distclean-local
+ 	-rm -f config.status
+ 	-rm -f libtool
+ 
+ maintainer-clean:  maintainer-clean-hdr maintainer-clean-noinstPROGRAMS \
+ 		maintainer-clean-compile maintainer-clean-libtool \
+-		maintainer-clean-aminfo maintainer-clean-tags \
++		maintainer-clean-aminfo maintainer-clean-guide \
++		maintainer-clean-html maintainer-clean-dvi \
++		maintainer-clean-ps maintainer-clean-tags \
+ 		maintainer-clean-generic distclean
+ 	@echo "This command is intended for maintainers to use;"
+ 	@echo "it deletes files that may require special tools to rebuild."
+ 	-rm -f config.status
+ 
+-.PHONY: default mostlyclean-hdr distclean-hdr clean-hdr \
+-maintainer-clean-hdr mostlyclean-noinstPROGRAMS \
+-distclean-noinstPROGRAMS clean-noinstPROGRAMS \
+-maintainer-clean-noinstPROGRAMS mostlyclean-compile distclean-compile \
+-clean-compile maintainer-clean-compile mostlyclean-libtool \
+-distclean-libtool clean-libtool maintainer-clean-libtool \
+-install-info-am uninstall-info mostlyclean-aminfo distclean-aminfo \
+-clean-aminfo maintainer-clean-aminfo install-man uninstall-man tags \
+-mostlyclean-tags distclean-tags clean-tags maintainer-clean-tags \
+-distdir check-DEJAGNU info dvi installcheck install-info install-exec \
+-install-data install uninstall all installdirs mostlyclean-generic \
+-distclean-generic clean-generic maintainer-clean-generic clean \
+-mostlyclean distclean maintainer-clean
++.PHONY: mostlyclean-hdr distclean-hdr clean-hdr maintainer-clean-hdr \
++mostlyclean-noinstPROGRAMS distclean-noinstPROGRAMS \
++clean-noinstPROGRAMS maintainer-clean-noinstPROGRAMS \
++mostlyclean-compile distclean-compile clean-compile \
++maintainer-clean-compile mostlyclean-libtool distclean-libtool \
++clean-libtool maintainer-clean-libtool install-info-am uninstall-info \
++install-guide uninstall-guide install-ps uninstall-ps install-html \
++uninstall-html install-dvi uninstall-dvi mostlyclean-guide \
++distclean-guide clean-guide maintainer-clean-guide mostlyclean-html \
++distclean-html clean-html maintainer-clean-html mostlyclean-ps \
++distclean-ps clean-ps maintainer-clean-ps mostlyclean-dvi distclean-dvi \
++clean-dvi maintainer-clean-dvi mostlyclean-aminfo distclean-aminfo \
++clean-aminfo maintainer-clean-aminfo install-man1 uninstall-man1 \
++install-man uninstall-man tags mostlyclean-tags distclean-tags \
++clean-tags maintainer-clean-tags distdir check-DEJAGNU info guide html \
++ps dvi installcheck install-info install-exec install-data install \
++uninstall all installdirs mostlyclean-generic distclean-generic \
++clean-generic maintainer-clean-generic clean mostlyclean distclean \
++maintainer-clean
+ 
+ 
+ ldmain.o: ldmain.c config.status
+@@ -739,6 +940,18 @@ ldemul-list.h: Makefile
+ 	mv ldemul-tmp.h ldemul-list.h
+ @TDIRS@
+ 
++eamiga.c: $(srcdir)/emulparams/amiga.sh\
++   $(srcdir)/emultempl/amiga.em $(srcdir)/scripttempl/amiga.sc ${GEN_DEPENDS} 
++	${GENSCRIPTS} amiga "$(tdir_amiga)"
++eamiga_bss.c: $(srcdir)/emulparams/amiga_bss.sh\
++   $(srcdir)/emultempl/amiga.em $(srcdir)/scripttempl/amiga_bss.sc ${GEN_DEPENDS}
++	${GENSCRIPTS} amiga_bss "$(tdir_amiga_bss)"
++eppcamiga.c: $(srcdir)/emulparams/ppcamiga.sh\
++   $(srcdir)/emultempl/amiga.em $(srcdir)/scripttempl/amiga.sc ${GEN_DEPENDS} 
++	${GENSCRIPTS} ppcamiga "$(tdir_ppcamiga)"
++eppcamiga_bss.c: $(srcdir)/emulparams/ppcamiga_bss.sh\
++   $(srcdir)/emultempl/amiga.em $(srcdir)/scripttempl/amiga_bss.sc ${GEN_DEPENDS}
++	${GENSCRIPTS} ppcamiga_bss "$(tdir_ppcamiga_bss)"
+ ea29k.c: $(srcdir)/emulparams/a29k.sh \
+   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/a29k.sc ${GEN_DEPENDS}
+ 	${GENSCRIPTS} a29k "$(tdir_a29k)"
+@@ -868,6 +1081,9 @@ ehppaelf.c: $(srcdir)/emulparams/hppaelf
+ ei386aout.c: $(srcdir)/emulparams/i386aout.sh \
+   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+ 	${GENSCRIPTS} i386aout "$(tdir_i386aout)"
++ei386beos.c: $(srcdir)/emulparams/i386beos.sh \
++  $(srcdir)/emultempl/beos.em $(srcdir)/scripttempl/i386beos.sc ${GEN_DEPENDS}
++	${GENSCRIPTS} i386beos "$(tdir_i386beos)"
+ ei386bsd.c: $(srcdir)/emulparams/i386bsd.sh \
+   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+ 	${GENSCRIPTS} i386bsd "$(tdir_i386bsd)"
+@@ -1047,6 +1263,16 @@ ez8002.c: $(srcdir)/emulparams/z8002.sh 
+ $(EMULATION_OFILES): ../bfd/bfd.h sysdep.h config.h $(INCDIR)/bfdlink.h \
+   ld.h ldmain.h ldemul.h ldfile.h ldmisc.h ldexp.h ldlang.h \
+   ldctor.h ldexp.h ldlang.h ldgram.h
++
++# GG-local: For BeOS, we use a fake ld that calls GNU ld and then mwld.
++beos-ld: beos-ld.c
++	$(CC) -I. -I$(INCDIR) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -DLDNAME='"@LDNAME@"' -DTARGET_ALIAS='"@target_alias@"' -o $@ $(srcdir)/beos-ld.c
++
++install-beos-ld:
++	test -d $(tooldir) || mkdir $(tooldir)
++	test -d $(tooldir)/bin || mkdir $(tooldir)/bin
++	$(INSTALL_XFORM) beos-ld $(bindir)/ld
++	$(INSTALL_PROGRAM) beos-ld $(tooldir)/bin/ld
+ 
+ check-DEJAGNU: site.exp
+ 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \

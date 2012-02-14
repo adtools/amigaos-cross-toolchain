@@ -1,0 +1,21 @@
+--- binutils-2.9.1/binutils/objdump.c	Fri May  1 08:49:34 1998
++++ binutils-2.9.1/binutils/objdump.c	Sun Aug 23 00:00:00 1998
+@@ -328,6 +328,7 @@ dump_section_header (abfd, section, igno
+   if ((section->flags & SEC_LINK_ONCE) != 0)
+     {
+       const char *ls;
++      pei_get_comdat_info(section);
+ 
+       switch (section->flags & SEC_LINK_DUPLICATES)
+ 	{
+@@ -348,6 +349,10 @@ dump_section_header (abfd, section, igno
+ 	}
+       printf ("%s%s", comma, ls);
+       comma = ", ";
++      if (section->pe_comdat_info->asoc_sec != (int)NULL)
++        printf ("\n		    Associated with section %d", section->pe_comdat_info->asoc_sec -1);
++      else
++        printf ("\n		    Communal; sym=%s", section->pe_comdat_info->comdat_sym);
+     }
+ 
+   printf ("\n");

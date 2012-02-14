@@ -1,0 +1,71 @@
+--- binutils-2.9.1/bfd/linker.c	Fri May  1 08:48:12 1998
++++ binutils-2.9.1/bfd/linker.c	Sun Aug 23 00:00:00 1998
+@@ -74,7 +74,7 @@ SUBSECTION
+ @cindex target vector (_bfd_link_hash_table_create)
+ 	The linker routines must create a hash table, which must be
+ 	derived from <<struct bfd_link_hash_table>> described in
+-	<<bfdlink.c>>.  @xref{Hash Tables} for information on how to
++	<<bfdlink.c>>.  @xref{Hash Tables}, for information on how to
+ 	create a derived hash table.  This entry point is called using
+ 	the target vector of the linker output file.
+ 
+@@ -428,7 +428,8 @@ static boolean generic_add_output_symbol
+ static boolean default_fill_link_order
+   PARAMS ((bfd *, struct bfd_link_info *, asection *,
+ 	   struct bfd_link_order *));
+-static boolean default_indirect_link_order
++/*Amiga hack - used in amigaoslink.c so must be global */
++/*static*/ boolean default_indirect_link_order
+   PARAMS ((bfd *, struct bfd_link_info *, asection *,
+ 	   struct bfd_link_order *, boolean));
+ 
+@@ -1196,8 +1197,17 @@ generic_link_check_archive_element (abfd
+ 	  h->u.c.size = size;
+ 
+ 	  power = bfd_log2 (size);
+-	  if (power > 4)
+-	    power = 4;
++	  /* For the amiga, we don't want an alignment bigger than
++	     2**2. Doing this here is a horribly kludgy, but IMHO the
++	     max power alignment really should be target-dependant so
++	     that we wouldn't have to do this -- daniel */
++	  if (bfd_get_flavour(abfd) == bfd_target_amiga_flavour) {
++	    if (power > 2)
++	      power = 2;
++	  }
++	  else
++	    if (power > 4)
++	      power = 4;
+ 	  h->u.c.p->alignment_power = power;
+ 
+ 	  if (p->section == bfd_com_section_ptr)
+@@ -1658,8 +1668,18 @@ _bfd_generic_link_add_one_symbol (info, 
+ 	    unsigned int power;
+ 
+ 	    power = bfd_log2 (value);
+-	    if (power > 4)
+-	      power = 4;
++	    /* For the amiga, we don't want an alignment bigger than
++               2**2. Doing this here is a horribly kludgy, but IMHO
++               the max power alignment really should be
++               target-dependant so that we wouldn't have to do this --
++               daniel */
++	    if (bfd_get_flavour(abfd) == bfd_target_amiga_flavour) {
++	      if (power > 2)
++		power = 2;
++	    }
++	    else
++	      if (power > 4)
++		power = 4;
+ 	    h->u.c.p->alignment_power = power;
+ 	  }
+ 
+@@ -2626,7 +2646,7 @@ default_fill_link_order (abfd, info, sec
+ 
+ /* Default routine to handle a bfd_indirect_link_order.  */
+ 
+-static boolean
++/*static*/ boolean
+ default_indirect_link_order (output_bfd, info, output_section, link_order,
+ 			     generic_linker)
+      bfd *output_bfd;

@@ -1,0 +1,14 @@
+--- binutils-2.9.1/ld/ldmain.c	Fri May  1 08:48:49 1998
++++ binutils-2.9.1/ld/ldmain.c	Sun Aug 23 00:00:00 1998
+@@ -147,8 +147,10 @@ remove_output ()
+ {
+   if (output_filename) 
+     {
+-      if (output_bfd && output_bfd->iostream)
++      if (output_bfd && output_bfd->iostream) {
+ 	fclose((FILE *)(output_bfd->iostream));
++	output_bfd->iostream = NULL;
++      }
+       if (delete_output_file_on_failure)
+ 	unlink (output_filename);
+     }

@@ -1,0 +1,36 @@
+--- binutils-2.9.1/gas/as.c	Fri May  1 08:45:05 1998
++++ binutils-2.9.1/gas/as.c	Sun Aug 23 00:00:00 1998
+@@ -76,6 +76,9 @@ char *myname;			/* argv[0] */
+ #ifdef BFD_ASSEMBLER
+ segT reg_section, expr_section;
+ segT text_section, data_section, bss_section;
++#ifdef TE_AMIGA
++segT data_chip_section, bss_chip_section;
++#endif
+ #endif
+ 
+ /* The default obstack chunk size.  If we set this to zero, the
+@@ -924,6 +927,10 @@ perform_an_assembly_pass (argc, argv)
+   text_section = subseg_new (TEXT_SECTION_NAME, 0);
+   data_section = subseg_new (DATA_SECTION_NAME, 0);
+   bss_section = subseg_new (BSS_SECTION_NAME, 0);
++#ifdef TE_AMIGA
++  data_chip_section = subseg_new (".data_chip", 0);
++  bss_chip_section = subseg_new (".bss_chip", 0);
++#endif
+   /* @@ FIXME -- we're setting the RELOC flag so that sections are assumed
+      to have relocs, otherwise we don't find out in time. */
+   applicable = bfd_applicable_section_flags (stdoutput);
+@@ -934,6 +941,12 @@ perform_an_assembly_pass (argc, argv)
+   bfd_set_section_flags (stdoutput, data_section,
+ 			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC));
+   bfd_set_section_flags (stdoutput, bss_section, applicable & SEC_ALLOC);
++#ifdef TE_AMIGA
++  bfd_set_section_flags (stdoutput, data_chip_section,
++			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC));
++  bfd_set_section_flags (stdoutput, bss_chip_section, applicable & SEC_ALLOC);
++#endif
++
+   seg_info (bss_section)->bss = 1;
+   subseg_new (BFD_ABS_SECTION_NAME, 0);
+   subseg_new (BFD_UND_SECTION_NAME, 0);

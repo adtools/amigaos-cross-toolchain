@@ -1,0 +1,109 @@
+--- binutils-2.9.1/ld/emultempl/pe.em	Fri May  1 08:48:55 1998
++++ binutils-2.9.1/ld/emultempl/pe.em	Sun Aug 23 00:00:00 1998
+@@ -187,7 +187,9 @@ set_pe_subsystem ()
+     {
+       { "native", 1, "_NtProcessStartup" },
+       { "windows", 2, "_WinMainCRTStartup" },
++      { "wwindows", 2, "_wWinMainCRTStartup" },
+       { "console", 3, "_mainCRTStartup" },
++      { "wconsole", 3, "_wmainCRTStartup" },
+ #if 0
+       /* The Microsoft linker does not recognize this.  */
+       { "os2", 5, "" },
+@@ -222,7 +224,8 @@ set_pe_subsystem ()
+ 
+ 	  /* If the subsystem is windows, we use a different entry
+ 	     point.  We also register the entry point as an undefined
+-	     symbol.  The reason we do this is so that the user
++	     symbol. from lang_add_entry() The reason we do
++	     this is so that the user
+ 	     doesn't have to because they would have to use the -u
+ 	     switch if they were specifying an entry point other than
+ 	     _mainCRTStartup.  Specifically, if creating a windows
+@@ -237,7 +240,6 @@ set_pe_subsystem ()
+ 	     can avoid making the user do this by always adding the
+ 	     entry point name as an undefined symbol.  */
+ 	  lang_add_entry (v[i].entry, 1);
+-	  ldlang_add_undef (v[i].entry);
+ 
+ 	  return;
+ 	}
+@@ -444,15 +446,54 @@ sort_by_file_name (a, b)
+ {
+   lang_statement_union_type **ra = a;
+   lang_statement_union_type **rb = b;
+-  int i;
++  int i, a_sec, b_sec;
+ 
+   i = strcmp ((*ra)->input_section.ifile->the_bfd->my_archive->filename,
+ 	      (*rb)->input_section.ifile->the_bfd->my_archive->filename);
+   if (i != 0)
+     return i;
+ 
+-  return strcmp ((*ra)->input_section.ifile->filename,
++  i = strcmp ((*ra)->input_section.ifile->filename,
+ 		 (*rb)->input_section.ifile->filename);
++  if (i != 0)
++    return i;
++  /* the tail idata4/5 are the only ones without relocs to an
++     idata$6 section unless we are importing by ordinal, 
++     so sort them to last to terminate the IAT
++     and HNT properly. if no reloc this one is import by ordinal
++     so we have to sort by section contents */
++
++  if ( ((*ra)->input_section.section->reloc_count + (*rb)->input_section.section->reloc_count) )
++    {
++       i =  (((*ra)->input_section.section->reloc_count > 
++		 (*rb)->input_section.section->reloc_count) ? -1 : 0);
++       if ( i != 0)
++         return i;
++
++        return  (((*ra)->input_section.section->reloc_count > 
++		 (*rb)->input_section.section->reloc_count) ? 0 : 1);
++    }
++  else
++    {
++       if ( (strcmp( (*ra)->input_section.section->name, ".idata$6") == 0) )
++          return 0; /* don't sort .idata$6 or .idata$7 FIXME dlltool eliminate .idata$7 */
++
++       if (! bfd_get_section_contents ((*ra)->input_section.ifile->the_bfd, 
++         (*ra)->input_section.section, &a_sec, (file_ptr) 0, (bfd_size_type)sizeof(a_sec)))
++            einfo ("%F%B: Can't read contents of section .idata: %E\n",
++                 (*ra)->input_section.ifile->the_bfd);
++
++       if (! bfd_get_section_contents ((*rb)->input_section.ifile->the_bfd, 
++        (*rb)->input_section.section, &b_sec, (file_ptr) 0, (bfd_size_type)sizeof(b_sec) ))
++           einfo ("%F%B: Can't read contents of section .idata: %E\n",
++                (*rb)->input_section.ifile->the_bfd);
++
++      i =  ((a_sec < b_sec) ? -1 : 0);
++      if ( i != 0)
++        return i;
++      return  ((a_sec < b_sec) ? 0 : 1);
++   }
++return 0;
+ }
+ 
+ static int
+@@ -462,8 +503,20 @@ sort_by_section_name (a, b)
+ {
+   lang_statement_union_type **ra = a;
+   lang_statement_union_type **rb = b;
+-  return strcmp ((*ra)->input_section.section->name,
++  int i;
++  i = strcmp ((*ra)->input_section.section->name,
+ 		 (*rb)->input_section.section->name);
++/* this is a hack to make .stab and .stabstr last, so we don't have
++   to fix strip/objcopy for .reloc sections.
++   FIXME stripping images with a .rsrc section still needs to be fixed */
++  if ( i != 0)
++    {
++      if ((strncmp ((*ra)->input_section.section->name, ".stab", 5) == 0)
++           && (strncmp ((*rb)->input_section.section->name, ".stab", 5) != 0))
++         return 1;
++      return i;
++    }
++  return i;
+ }
+ 
+ /* Subroutine of sort_sections to a contiguous subset of a list of sections.

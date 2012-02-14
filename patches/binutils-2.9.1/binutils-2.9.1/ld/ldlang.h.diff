@@ -1,0 +1,11 @@
+--- binutils-2.9.1/ld/ldlang.h	Fri May  1 08:48:49 1998
++++ binutils-2.9.1/ld/ldlang.h	Sun Aug 23 00:00:00 1998
+@@ -256,6 +256,8 @@ typedef struct lang_input_statement_stru
+   /*    unsigned int globals_in_this_file;*/
+   const char *target;
+   boolean real;
++  /* Added for AMIGA support of section attributes */
++  int amiga_attribute;
+ } lang_input_statement_type;
+ 
+ typedef struct

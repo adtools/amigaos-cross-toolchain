@@ -1,0 +1,32 @@
+--- binutils-2.9.1/bfd/doc/bfd.texinfo	Fri May  1 08:48:02 1998
++++ binutils-2.9.1/bfd/doc/bfd.texinfo	Sun Aug 23 00:00:00 1998
+@@ -302,9 +302,10 @@ structures.
+ @chapter BFD back ends
+ @menu
+ * What to Put Where::
+-* aout ::	a.out backends
+-* coff ::	coff backends
+-* elf  ::	elf backends
++* aout  ::	a.out backends
++* coff  ::	coff backends
++* elf   ::	elf backends
++* amiga ::      amigaos backend
+ @ignore
+ * oasys ::	oasys backends
+ * ieee ::	ieee backend
+@@ -320,10 +321,14 @@ All of BFD lives in one directory.
+ @node coff, elf, aout, BFD back ends
+ @include  coffcode.texi
+ 
+-@node elf,  , coff, BFD back ends
++@node elf, amiga  , coff, BFD back ends
+ @include  elf.texi
+ @c Leave this out until the file has some actual contents...
+ @c @include  elfcode.texi
++
++@node amiga,  , elf, BFD back ends
++@include amiga.texi
++@include amigalink.texi
+ 
+ @node Index,  , BFD back ends , Top
+ @unnumbered Index

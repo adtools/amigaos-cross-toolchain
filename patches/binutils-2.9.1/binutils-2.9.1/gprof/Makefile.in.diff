@@ -1,0 +1,493 @@
+--- binutils-2.9.1/gprof/Makefile.in	Fri May  1 08:49:41 1998
++++ binutils-2.9.1/gprof/Makefile.in	Sun Aug 23 00:00:00 1998
+@@ -1,4 +1,4 @@
+-# Makefile.in generated automatically by automake 1.2e from Makefile.am
++# Makefile.in generated automatically by automake 1.3 from Makefile.am
+ 
+ # Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+ # This Makefile.in is free software; the Free Software Foundation
+@@ -11,7 +11,7 @@
+ # PARTICULAR PURPOSE.
+ 
+ 
+-SHELL = @SHELL@
++SHELL = /bin/sh
+ 
+ srcdir = @srcdir@
+ top_srcdir = @top_srcdir@
+@@ -28,10 +28,16 @@ sharedstatedir = @sharedstatedir@
+ localstatedir = @localstatedir@
+ libdir = @libdir@
+ infodir = @infodir@
++guidedir = @guidedir@
++htmldir = @htmldir@
++dvidir = @dvidir@
++psdir = @psdir@
+ mandir = @mandir@
+ includedir = @includedir@
+ oldincludedir = /usr/include
+ 
++DISTDIR =
++
+ pkgdatadir = $(datadir)/@PACKAGE@
+ pkglibdir = $(libdir)/@PACKAGE@
+ pkgincludedir = $(includedir)/@PACKAGE@
+@@ -126,7 +132,14 @@ TEXINFO_TEX = $(top_srcdir)/../texinfo/t
+ INFO_DEPS = gprof.info
+ DVIS = gprof.dvi
+ TEXINFOS = gprof.texi
+-MANS = gprof.1
++GUIDES = gprof.guide
++GUIDE_DEPS = gprof.guide
++HTMLS = gprof.html
++HTML_DEPS = gprof.html
++PS_S = gprof.ps
++PS_DEPS = gprof.ps
++man1dir = $(mandir)/man1
++MANS = $(man_MANS)
+ 
+ NROFF = nroff
+ HEADERS =  $(noinst_HEADERS)
+@@ -135,21 +148,21 @@ DIST_COMMON =  ChangeLog Makefile.am Mak
+ aclocal.m4 configure configure.in gconfig.in stamp-h.in
+ 
+ 
+-DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+-
++DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST) \
++		$(INFOS) $(GUIDES) $(HTMLS) $(MANS)
+ TAR = tar
+ GZIP = --best
+ SOURCES = $(gprof_SOURCES)
+ OBJECTS = $(gprof_OBJECTS)
+ 
+-default: all
++all: Makefile $(PROGRAMS) $(MANS) $(HEADERS) gconfig.h
+ 
+ .SUFFIXES:
+-.SUFFIXES: .S .c .dvi .info .lo .m .o .ps .s .texi .texinfo
+-$(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+-	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
++.SUFFIXES: .S .c .dvi .guide .html .info .lo .m .o .ps .s .texi .texinfo .txi
++$(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
++	cd $(top_srcdir) && $(AUTOMAKE) --cygnus --include-deps Makefile
+ 
+-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
++Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+ 	cd $(top_builddir) \
+ 	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+ 
+@@ -193,18 +206,18 @@ maintainer-clean-binPROGRAMS:
+ 
+ install-binPROGRAMS: $(bin_PROGRAMS)
+ 	@$(NORMAL_INSTALL)
+-	$(mkinstalldirs) $(bindir)
++	$(mkinstalldirs) $(DESTDIR)$(bindir)
+ 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+ 	  if test -f $$p; then \
+-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed '$(transform)'`"; \
+-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed '$(transform)'`; \
++	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`"; \
++	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`; \
+ 	  else :; fi; \
+ 	done
+ 
+ uninstall-binPROGRAMS:
+-	$(NORMAL_UNINSTALL)
++	@$(NORMAL_UNINSTALL)
+ 	list='$(bin_PROGRAMS)'; for p in $$list; do \
+-	  rm -f $(bindir)/`echo $$p|sed '$(transform)'`; \
++	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`; \
+ 	done
+ 
+ .c.o:
+@@ -250,6 +263,9 @@ gprof$(EXEEXT): $(gprof_OBJECTS) $(gprof
+ 	$(LINK) $(gprof_LDFLAGS) $(gprof_OBJECTS) $(gprof_LDADD) $(LIBS)
+ 
+ gprof.info: gprof.texi
++gprof.guide: gprof.texi
++gprof.html: gprof.texi
++gprof.ps: gprof.dvi
+ gprof.dvi: gprof.texi
+ 
+ 
+@@ -257,7 +273,7 @@ DVIPS = dvips
+ 
+ .texi.info:
+ 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
+-	$(MAKEINFO) -I $(srcdir) $<
++	$(MAKEINFO) -I$(srcdir) $< --output=$@
+ 
+ .texi.dvi:
+ 	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
+@@ -265,39 +281,51 @@ DVIPS = dvips
+ 
+ .texi:
+ 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
+-	$(MAKEINFO) -I $(srcdir) $<
++	$(MAKEINFO) -I $(srcdir) $< --output=$@
+ 
+ .texinfo.info:
+ 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
+-	$(MAKEINFO) -I $(srcdir) $<
++	$(MAKEINFO) -I $(srcdir) $< --output=$@
+ 
+ .texinfo:
+ 	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
+-	$(MAKEINFO) -I $(srcdir) $<
++	$(MAKEINFO) -I $(srcdir) $< --output=$@
+ 
+ .texinfo.dvi:
+ 	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
+ 	  MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
++
++.txi.info:
++	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
++	$(MAKEINFO) -I $(srcdir) $<
++
++.txi.dvi:
++	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
++	  MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
++
++.txi:
++	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
++	$(MAKEINFO) -I $(srcdir) $<
+ .dvi.ps:
+ 	$(DVIPS) $< -o $@
+ 
+ install-info-am: $(INFO_DEPS)
+ 	@$(NORMAL_INSTALL)
+-	$(mkinstalldirs) $(infodir)
++	$(mkinstalldirs) $(DESTDIR)$(infodir)
+ 	@for file in $(INFO_DEPS); do \
+ 	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
+ 	  for ifile in `cd $$d && echo $$file $$file-[0-9] $$file-[0-9][0-9]`; do \
+ 	    if test -f $$d/$$ifile; then \
+-	      echo " $(INSTALL_DATA) $$d/$$ifile $(infodir)/$$ifile"; \
+-	      $(INSTALL_DATA) $$d/$$ifile $(infodir)/$$ifile; \
++	      echo " $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$ifile"; \
++	      $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$ifile; \
+ 	    else : ; fi; \
+ 	  done; \
+ 	done
+ 	@$(POST_INSTALL)
+ 	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
+ 	  for file in $(INFO_DEPS); do \
+-	    echo " install-info --info-dir=$(infodir) $(infodir)/$$file";\
+-	    install-info --info-dir=$(infodir) $(infodir)/$$file || :;\
++	    echo " install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$file";\
++	    install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$file || :;\
+ 	  done; \
+ 	else : ; fi
+ 
+@@ -308,11 +336,11 @@ uninstall-info:
+ 	else ii=; fi; \
+ 	for file in $(INFO_DEPS); do \
+ 	  test -z "$ii" \
+-	    || install-info --info-dir=$(infodir) --remove $$file; \
++	    || install-info --info-dir=$(DESTDIR)$(infodir) --remove $$file; \
+ 	done
+-	$(NORMAL_UNINSTALL)
++	@$(NORMAL_UNINSTALL)
+ 	for file in $(INFO_DEPS); do \
+-	  (cd $(infodir) && rm -f $$file $$file-[0-9] $$file-[0-9][0-9]); \
++	  (cd $(DESTDIR)$(infodir) && rm -f $$file $$file-[0-9] $$file-[0-9][0-9]); \
+ 	done
+ 
+ dist-info: $(INFO_DEPS)
+@@ -325,11 +353,145 @@ dist-info: $(INFO_DEPS)
+ 	  done; \
+ 	done
+ 
++MAKEGUIDE= $(MAKEINFO) --amiga
++
++MAKEHTML = texi2html -number -split_chapter
++
++.texi.guide:
++	$(MAKEGUIDE) -I$(srcdir) $< -o $@
++
++.texinfo.guide:
++	$(MAKEGUIDE) -I$(srcdir) $< -o $@
++
++.txi.guide:
++	$(MAKEGUIDE) -I$(srcdir) $< -o $@
++
++.texi.html:
++	$(MAKEHTML) -I$(srcdir) $< 
++
++.texinfo.html:
++	$(MAKEHTML) -I$(srcdir) $< 
++
++install-guide: $(GUIDE_DEPS)
++	$(mkinstalldirs) $(guidedir)
++	for file in $(GUIDE_DEPS); do		\
++	  for ifile in `echo $$file*`; do \
++	    $(INSTALL_DATA) $$ifile $(guidedir)/$$ifile; \
++	  done;					\
++	done
++
++uninstall-guide:
++	for file in *.guide*; do	\
++	  rm -f $(guidedir)/$$file; \
++	done
++
++install-ps: $(PS_S)
++	$(mkinstalldirs) $(psdir)
++	for file in $(PS_DEPS); do		\
++	  for ifile in `echo $$file*`; do \
++	    $(INSTALL_DATA) $$ifile $(psdir)/$$ifile; \
++	  done;					\
++	done
++
++uninstall-ps:
++	for file in *.ps*; do	\
++	  rm -f $(psdir)/$$file; \
++	done
++
++install-dvi: $(DVIS)
++	$(mkinstalldirs) $(dvidir)
++	for file in $(DVIS); do		\
++	  for ifile in `echo $$file*`; do \
++	    $(INSTALL_DATA) $$ifile $(dvidir)/$$ifile; \
++	  done;					\
++	done
++
++uninstall-dvi:
++	for file in *.dvi*; do	\
++	  rm -f $(dvidir)/$$file; \
++	done
++
++install-html: $(HTML_DEPS)
++	$(mkinstalldirs) $(htmldir)
++	@touch $(HTML_DEPS)
++	@for file in $(HTML_DEPS); do \
++	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
++	  bfile=`basename $$file .html`; \
++	  for ifile in `cd $$d && echo $$file $$bfile'_toc.html' $$bfile'_foot.html' $$bfile'_[0-9].html' $$bfile'_[0-9][0-9].html'`; do \
++	    if test -f $$d/$$ifile; then \
++	      echo " $(INSTALL_DATA) $$d/$$ifile $(htmldir)/$$ifile"; \
++	      $(INSTALL_DATA) $$d/$$ifile $(htmldir)/$$ifile; \
++	    else : ; fi; \
++	  done; \
++	done
++	@rm -f $(htmldir)/$(HTML_DEPS)
++
++uninstall-html:
++	@for file in $(HTML_DEPS); do \
++	  bfile=`basename $$file .html`; \
++	  for ifile in `cd $(htmldir) && echo $$file $$bfile'_toc.html' $$bfile'_foot.html' $$bfile'_[0-9].html' $$bfile'_[0-9][0-9].html'`; do \
++	    echo "removing: $(htmldir)/$$ifile"; \
++	    rm -f $(htmldir)/$$ifile; \
++	  done; \
++	done
++
++mostlyclean-guide:
++	rm -f gprof.aux gprof.cp gprof.cps gprof.dvi gprof.fn gprof.fns \
++	  gprof.ky gprof.kys gprof.ps gprof.log gprof.pg gprof.toc \
++	  gprof.tp gprof.tps gprof.vr gprof.vrs gprof.op gprof.tr \
++	  gprof.cv gprof.cn gprof.guide gprof.html gprof.ps
++
++clean-guide:
++
++distclean-guide:
++
++maintainer-clean-guide:
++	rm -f $(GUIDES)
++
++mostlyclean-html:
++	rm -f gprof.aux gprof.cp gprof.cps gprof.dvi gprof.fn gprof.fns \
++	  gprof.ky gprof.kys gprof.ps gprof.log gprof.pg gprof.toc \
++	  gprof.tp gprof.tps gprof.vr gprof.vrs gprof.op gprof.tr \
++	  gprof.cv gprof.cn gprof.guide gprof.html gprof.ps
++
++clean-html:
++
++distclean-html:
++
++maintainer-clean-html:
++	rm -f $(HTMLS)
++
++mostlyclean-ps:
++	rm -f gprof.aux gprof.cp gprof.cps gprof.dvi gprof.fn gprof.fns \
++	  gprof.ky gprof.kys gprof.ps gprof.log gprof.pg gprof.toc \
++	  gprof.tp gprof.tps gprof.vr gprof.vrs gprof.op gprof.tr \
++	  gprof.cv gprof.cn gprof.guide gprof.html gprof.ps
++
++clean-ps:
++
++distclean-ps:
++
++maintainer-clean-ps:
++	rm -f $(PS_S)
++
++mostlyclean-dvi:
++	rm -f gprof.aux gprof.cp gprof.cps gprof.dvi gprof.fn gprof.fns \
++	  gprof.ky gprof.kys gprof.ps gprof.log gprof.pg gprof.toc \
++	  gprof.tp gprof.tps gprof.vr gprof.vrs gprof.op gprof.tr \
++	  gprof.cv gprof.cn gprof.guide gprof.html gprof.ps
++
++clean-dvi:
++
++distclean-dvi:
++
++maintainer-clean-dvi:
++	rm -f $(DVIS)
++
+ mostlyclean-aminfo:
+ 	-rm -f gprof.aux gprof.cp gprof.cps gprof.dvi gprof.fn gprof.fns \
+ 	  gprof.ky gprof.kys gprof.ps gprof.log gprof.pg gprof.toc \
+ 	  gprof.tp gprof.tps gprof.vr gprof.vrs gprof.op gprof.tr \
+-	  gprof.cv gprof.cn
++	  gprof.cv gprof.cn gprof.guide gprof.html gprof.ps
+ 
+ clean-aminfo:
+ 
+@@ -343,21 +505,45 @@ maintainer-clean-aminfo:
+ 	  fi; \
+ 	done
+ clean-info: mostlyclean-aminfo
+-install-man: $(MANS)
+-	$(NORMAL_INSTALL)
+-	$(mkinstalldirs) $(mandir)/man1
+-	@sect=1;				\
+-	inst=`echo "gprof" | sed '$(transform)'`.1; \
+-	if test -f $(srcdir)/gprof.1; then file=$(srcdir)/gprof.1; \
+-	else file=gprof.1; fi; \
+-	echo " $(INSTALL_DATA) $$file $(mandir)/man$$sect/$$inst"; \
+-	$(INSTALL_DATA) $$file $(mandir)/man$$sect/$$inst
+ 
+-uninstall-man:
+-	$(NORMAL_UNINSTALL)
+-	-inst=`echo "gprof" | sed '$(transform)'`.1; \
+-	rm -f $(mandir)/man1/$$inst
++install-man1:
++	$(mkinstalldirs) $(DESTDIR)$(man1dir)
++	@list='$(man1_MANS)'; \
++	l2='$(man_MANS)'; for i in $$l2; do \
++	  case "$$i" in \
++	    *.1*) list="$$list $$i" ;; \
++	  esac; \
++	done; \
++	for i in $$list; do \
++	  if test -f $(srcdir)/$$i; then file=$(srcdir)/$$i; \
++	  else file=$$i; fi; \
++	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
++	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
++	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
++	  echo " $(INSTALL_DATA) $$file $(DESTDIR)$(man1dir)/$$inst"; \
++	  $(INSTALL_DATA) $$file $(DESTDIR)$(man1dir)/$$inst; \
++	done
+ 
++uninstall-man1:
++	@list='$(man1_MANS)'; \
++	l2='$(man_MANS)'; for i in $$l2; do \
++	  case "$$i" in \
++	    *.1*) list="$$list $$i" ;; \
++	  esac; \
++	done; \
++	for i in $$list; do \
++	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
++	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
++	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
++	  echo " rm -f $(DESTDIR)$(man1dir)/$$inst"; \
++	  rm -f $(DESTDIR)$(man1dir)/$$inst; \
++	done
++install-man: $(MANS)
++	@$(NORMAL_INSTALL)
++	$(MAKE) install-man1
++uninstall-man:
++	@$(NORMAL_UNINSTALL)
++	$(MAKE) uninstall-man1
+ 
+ tags: TAGS
+ 
+@@ -428,6 +614,9 @@ distdir: $(DISTFILES)
+ 	done
+ 	$(MAKE) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-info
+ info: $(INFO_DEPS)
++guide: $(GUIDE_DEPS)
++html: $(HTML_DEPS)
++ps: $(PS_DEPS)
+ dvi: $(DVIS)
+ check:
+ 	$(MAKE)
+@@ -444,12 +633,10 @@ install: install-exec install-data all
+ 
+ uninstall: uninstall-binPROGRAMS uninstall-man
+ 
+-all: Makefile $(PROGRAMS) $(MANS) $(HEADERS) gconfig.h
+-
+ install-strip:
+ 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+ installdirs:
+-	$(mkinstalldirs)  $(bindir) $(mandir)/man1
++	$(mkinstalldirs)  $(DATADIR)$(bindir) $(DESTDIR)$(mandir)/man1
+ 
+ 
+ mostlyclean-generic:
+@@ -468,40 +655,52 @@ maintainer-clean-generic:
+ 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+ mostlyclean:  mostlyclean-hdr mostlyclean-binPROGRAMS \
+ 		mostlyclean-compile mostlyclean-libtool \
+-		mostlyclean-aminfo mostlyclean-tags mostlyclean-generic
++		mostlyclean-aminfo mostlyclean-guide mostlyclean-html \
++		mostlyclean-dvi mostlyclean-ps mostlyclean-tags \
++		mostlyclean-generic
+ 
+ clean:  clean-hdr clean-binPROGRAMS clean-compile clean-libtool \
+-		clean-aminfo clean-tags clean-generic mostlyclean
++		clean-aminfo clean-guide clean-html clean-dvi clean-ps \
++		clean-tags clean-generic mostlyclean
+ 
+ distclean:  distclean-hdr distclean-binPROGRAMS distclean-compile \
+-		distclean-libtool distclean-aminfo distclean-tags \
+-		distclean-generic clean
++		distclean-libtool distclean-aminfo distclean-guide \
++		distclean-html distclean-dvi distclean-ps \
++		distclean-tags distclean-generic clean
+ 	-rm -f config.status
+ 	-rm -f libtool
+ 
+ maintainer-clean:  maintainer-clean-hdr maintainer-clean-binPROGRAMS \
+ 		maintainer-clean-compile maintainer-clean-libtool \
+-		maintainer-clean-aminfo maintainer-clean-tags \
++		maintainer-clean-aminfo maintainer-clean-guide \
++		maintainer-clean-html maintainer-clean-dvi \
++		maintainer-clean-ps maintainer-clean-tags \
+ 		maintainer-clean-generic distclean
+ 	@echo "This command is intended for maintainers to use;"
+ 	@echo "it deletes files that may require special tools to rebuild."
+ 	-rm -f config.status
+ 
+-.PHONY: default mostlyclean-hdr distclean-hdr clean-hdr \
+-maintainer-clean-hdr mostlyclean-binPROGRAMS distclean-binPROGRAMS \
+-clean-binPROGRAMS maintainer-clean-binPROGRAMS uninstall-binPROGRAMS \
+-install-binPROGRAMS mostlyclean-compile distclean-compile clean-compile \
++.PHONY: mostlyclean-hdr distclean-hdr clean-hdr maintainer-clean-hdr \
++mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
++maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
++mostlyclean-compile distclean-compile clean-compile \
+ maintainer-clean-compile mostlyclean-libtool distclean-libtool \
+ clean-libtool maintainer-clean-libtool install-info-am uninstall-info \
+-mostlyclean-aminfo distclean-aminfo clean-aminfo \
+-maintainer-clean-aminfo install-man uninstall-man tags mostlyclean-tags \
+-distclean-tags clean-tags maintainer-clean-tags distdir info dvi \
++install-guide uninstall-guide install-ps uninstall-ps install-html \
++uninstall-html install-dvi uninstall-dvi mostlyclean-guide \
++distclean-guide clean-guide maintainer-clean-guide mostlyclean-html \
++distclean-html clean-html maintainer-clean-html mostlyclean-ps \
++distclean-ps clean-ps maintainer-clean-ps mostlyclean-dvi distclean-dvi \
++clean-dvi maintainer-clean-dvi mostlyclean-aminfo distclean-aminfo \
++clean-aminfo maintainer-clean-aminfo install-man1 uninstall-man1 \
++install-man uninstall-man tags mostlyclean-tags distclean-tags \
++clean-tags maintainer-clean-tags distdir info guide html ps dvi \
+ installcheck install-info install-exec install-data install uninstall \
+ all installdirs mostlyclean-generic distclean-generic clean-generic \
+ maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+ 
+ 
+-diststuff: $(BUILT_SOURCES) info
++diststuff: $(BUILT_SOURCES) info guide
+ 
+ .m.c:
+ 	awk -f $(srcdir)/gen-c-prog.awk > ./$*.c \

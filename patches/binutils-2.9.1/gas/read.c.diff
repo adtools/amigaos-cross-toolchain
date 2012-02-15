@@ -72,21 +72,3 @@
  #endif /* TC_CONS_FIX_NEW */
  #endif /* BFD_ASSEMBLER */
      }
-@@ -4111,7 +4129,7 @@ sizeof_uleb128 (value)
-   return size;
- }
- 
--inline int
-+int
- sizeof_leb128 (value, sign)
-      valueT value;
-      int sign;
-@@ -4175,7 +4193,7 @@ output_uleb128 (p, value)
-   return p - orig;
- }
- 
--inline int
-+int
- output_leb128 (p, value, sign)
-      char *p;
-      valueT value;

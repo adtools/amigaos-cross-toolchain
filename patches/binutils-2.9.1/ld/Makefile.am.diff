@@ -1,6 +1,6 @@
---- binutils-2.9.1/ld/Makefile.am	Fri May  1 08:48:47 1998
-+++ binutils-2.9.1/ld/Makefile.am	Sun Aug 23 00:00:00 1998
-@@ -93,6 +93,8 @@ ALL_EMULATIONS = \
+--- binutils-2.9.1/ld/Makefile.am.orig	1998-05-01 08:48:47.000000000 -0700
++++ binutils-2.9.1/ld/Makefile.am	2012-02-14 20:07:02.321812291 -0800
+@@ -93,6 +93,8 @@
  	ea29k.o \
  	eaixppc.o \
  	eaixrs6.o \
@@ -9,7 +9,7 @@
  	ealpha.o \
  	earcelf.o \
  	earmaoutb.o \
-@@ -159,6 +162,8 @@ ALL_EMULATIONS = \
+@@ -159,6 +161,8 @@
  	enews.o \
  	ens32knbsd.o \
  	epc532macha.o \
@@ -18,11 +18,7 @@
  	eppcmacos.o \
  	eppcnw.o \
  	eppcpe.o \
-@@ -225,10 +230,22 @@ ldemul-list.h: Makefile
- 
- # These all start with e so 'make clean' can find them.
- 
- GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} @host@ @target@ @target_alias@ ${EMUL} "@NATIVE_LIB_DIRS@"
+@@ -229,6 +233,18 @@
  GEN_DEPENDS = $(srcdir)/genscripts.sh $(srcdir)/emultempl/stringify.sed
  @TDIRS@
  

@@ -1,6 +1,6 @@
---- binutils-2.9.1/ld/ldlang.h	Fri May  1 08:48:49 1998
-+++ binutils-2.9.1/ld/ldlang.h	Sun Aug 23 00:00:00 1998
-@@ -256,6 +256,8 @@ typedef struct lang_input_statement_stru
+--- binutils-2.9.1/ld/ldlang.h	1998-05-01 08:48:49.000000000 -0700
++++ binutils-2.9.1/ld/ldlang.h	2011-05-08 20:28:36.636307945 -0700
+@@ -256,6 +256,8 @@
    /*    unsigned int globals_in_this_file;*/
    const char *target;
    boolean real;

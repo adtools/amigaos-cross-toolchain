@@ -82,18 +82,14 @@ the original routines from @file{linker.c} and @file{reloc.c}.
 #define DEBUG_AMIGA 10000
 
 #if DEBUG_AMIGA
-#include <varargs.h>
-static void error_print(va_alist)
-va_dcl
+#include <stdarg.h>
+static void error_print(const char *fmt, ...)
 {
-va_list args;
-char *fmt;
+  va_list args;
 
-va_start(args);
-fmt=va_arg(args,char *);
-
-(void)vfprintf(stderr,fmt,args);
-va_end(args);
+  va_start(args, fmt);
+  (void)vfprintf(stderr,fmt,args);
+  va_end(args);
 }
 
 #define DPRINT(L,x) if (L>=DEBUG_AMIGA) error_print x

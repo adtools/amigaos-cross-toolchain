@@ -1,41 +1,6 @@
---- binutils-2.9.1/bfd/bfd-in2.h	Fri May  1 08:48:01 1998
-+++ binutils-2.9.1/bfd/bfd-in2.h	Sun Aug 23 00:00:00 1998
-@@ -694,6 +694,11 @@ extern boolean bfd_coff_get_syment
- extern boolean bfd_coff_get_auxent
-   PARAMS ((bfd *, struct symbol_cache_entry *, int, union internal_auxent *));
- 
-+/* Externally visible PEI routines */
-+
-+extern void pei_get_comdat_info 
-+  PARAMS ((struct sec *));
-+
- /* And more from the source.  */
- void 
- bfd_init PARAMS ((void));
-@@ -797,6 +802,13 @@ bfd_create PARAMS ((CONST char *filename
- #define bfd_h_get_signed_64(abfd, ptr) \
-                 BFD_SEND(abfd, bfd_h_getx_signed_64, (ptr))
- 
-+typedef struct _comdat_info
-+{
-+  int asoc_sec;
-+  char name_buf[9];
-+  const char * comdat_sym;
-+} comdat_info;
-+
- typedef struct sec
- {
-          /* The name of the section; the name isn't a copy, the pointer is
-@@ -1078,6 +1090,8 @@ typedef struct sec
-    struct symbol_cache_entry *symbol;
-    struct symbol_cache_entry **symbol_ptr_ptr;
- 
-+   comdat_info *pe_comdat_info;
-+
-    struct bfd_link_order *link_order_head;
-    struct bfd_link_order *link_order_tail;
- } asection ;
-@@ -2290,6 +2304,8 @@ struct _bfd 
+--- binutils-2.9.1/bfd/bfd-in2.h	1998-05-01 08:48:01.000000000 -0700
++++ binutils-2.9.1/bfd/bfd-in2.h	2011-05-08 20:28:36.626324556 -0700
+@@ -2290,6 +2290,8 @@
        struct cisco_core_struct *cisco_core_data;
        struct versados_data_struct *versados_data;
        struct netbsd_core_struct *netbsd_core_data;
@@ -44,7 +9,7 @@
        PTR any;
        } tdata;
    
-@@ -2505,6 +2521,7 @@ core_file_matches_executable_p
+@@ -2505,6 +2507,7 @@
  #endif
  enum bfd_flavour {
    bfd_target_unknown_flavour,

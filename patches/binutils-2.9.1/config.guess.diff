@@ -10,13 +10,3 @@
      arc64:OpenBSD:*:*)
  	echo mips64el-unknown-openbsd${UNAME_RELEASE}
  	exit 0 ;;
-@@ -795,6 +798,9 @@ EOF
- 	exit 0 ;;
-     BeMac:BeOS:*:*)	# BeOS running on Mac or Mac clone, PPC only.
- 	echo powerpc-apple-beos
-+	exit 0 ;;
-+    BePC:BeOS:*:*)	# BeOS running on Intel PC compatible.
-+	echo i586-pc-beos
- 	exit 0 ;;
- esac
- 

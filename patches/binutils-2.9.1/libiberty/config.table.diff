@@ -1,11 +1,10 @@
---- binutils-2.9.1/libiberty/config.table	Fri May  1 08:47:49 1998
-+++ binutils-2.9.1/libiberty/config.table	Sun Aug 23 00:00:00 1998
-@@ -23,6 +23,8 @@ case "${host}" in
+--- binutils-2.9.1/libiberty/config.table	1998-05-01 08:47:49.000000000 -0700
++++ binutils-2.9.1/libiberty/config.table	2011-05-08 20:28:36.636307945 -0700
+@@ -23,6 +23,7 @@
    *-*-sysv*)		frag=mh-sysv ;;
    *-*-go32)		frag=mh-go32 ;;
    i[345]86-*-windows*)	frag=mh-windows ;;
 +  *-*-amigaos*)		frag=mh-amigaos ;;
-+  *-*-beos*)		frag=mh-beos ;;
  
    *-*-vxworks5* | *-*-vxworks)
      # VxWorks 5 needs special action, because the usual

@@ -1,15 +1,6 @@
---- binutils-2.9.1/bfd/config.bfd	Fri May  1 08:48:05 1998
-+++ binutils-2.9.1/bfd/config.bfd	Sun Aug 23 00:00:00 1998
-@@ -236,7 +236,7 @@ case "${targ}" in
-     targ_defvec=bfd_elf32_i386_vec
-     targ_selvecs="i386msdos_vec i386aout_vec"
-     ;;
--  i[3456]86-*-mingw32* | i[3456]86-*-cygwin32* | i[3456]86-*-winnt | i[3456]86-*-pe)
-+  i[3456]86-*-mingw32* | i[3456]86-*-cygwin32* | i[3456]86-*-winnt | i[3456]86-*-pe | i[3456]86-*-beos* )
-     targ_defvec=i386pe_vec
-     targ_selvecs="i386pe_vec i386pei_vec"
-     ;;
-@@ -284,6 +284,10 @@ case "${targ}" in
+--- binutils-2.9.1/bfd/config.bfd	1998-05-01 08:48:05.000000000 -0700
++++ binutils-2.9.1/bfd/config.bfd	2011-05-08 20:28:36.626324556 -0700
+@@ -284,6 +284,10 @@
    m68*-motorola-sysv*)
      targ_defvec=m68ksysvcoff_vec
      ;;
@@ -20,15 +11,6 @@
    m68*-hp-bsd*)
      targ_defvec=hp300bsd_vec
      targ_underscore=yes
-@@ -341,7 +345,7 @@ case "${targ}" in
-     targ_selvecs="m68kcoff_vec versados_vec tekhex_vec"
-     targ_underscore=yes
-     ;;
--  m68*-cbm-*)
-+  m68*-cbm-amix)
-     targ_defvec=bfd_elf32_m68k_vec
-     targ_selvecs=m68kcoff_vec
-     ;;
 @@ -463,6 +467,14 @@ case "${targ}" in
  
    powerpc-*-aix* | powerpc-*-beos*)

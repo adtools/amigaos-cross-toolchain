@@ -1,13 +1,5 @@
 --- binutils-2.9.1/ld/configure.tgt	Fri May  1 08:48:48 1998
 +++ binutils-2.9.1/ld/configure.tgt	Sun Aug 23 00:00:00 1998
-@@ -97,6 +97,7 @@ i[3456]86-*-winnt*)	targ_emul=i386pe ;;
- i[3456]86-*-pe)		targ_emul=i386pe ;;
- i[3456]86-*-cygwin32*)	targ_emul=i386pe ;;
- i[3456]86-*-mingw32*)	targ_emul=i386pe ;;
-+i[3456]86-*-beos*)	targ_emul=i386beos ;;
- m8*-*-*)		targ_emul=m88kbcs ;;
- a29k-*-udi)		targ_emul=sa29200 ;;
- a29k-*-ebmon)		targ_emul=ebmon29k ;;
 @@ -119,6 +120,7 @@ sh-*-*|sh-*-rtems*)	targ_emul=sh; targ_e
  m68k-sony-*)		targ_emul=news ;;
  m68k-hp-bsd*)		targ_emul=hp300bsd ;;
@@ -25,28 +17,3 @@
  powerpc-*-elf* | powerpc-*-eabi* | powerpc-*-linux-gnu* | powerpc-*-sysv* \
    | powerpc-*-netbsd*)
  	targ_emul=elf32ppc ;;
-@@ -208,3 +212,24 @@ w65-*-*)		targ_emul=w65 ;;
-   exit 1
- 
- esac
-+
-+# Begin GG local change
-+#
-+# Note that you might think we could override program_transform_name in order to
-+# force the installed GNU ld binary to be ld-coff for BeOS.  This actually does
-+# work, until you configure and build the linker as part of a larger source
-+# tree and INSTALL_XFORM is passed down from above and wipes out your change.
-+# So we need an out-of-band method of renaming the installed binary that is
-+# not affected by any other name transformation rules.
-+
-+case "${targ}" in
-+powerpc-*-beos*)	LDNAME=ld-coff
-+			EXTRA_PROGS=beos-ld
-+			EXTRA_INSTALL=install-beos-ld
-+			;;
-+*)			LDNAME=ld
-+			EXTRA_PROGS=
-+			EXTRA_INSTALL=
-+			;;
-+esac
-+# End GG local change

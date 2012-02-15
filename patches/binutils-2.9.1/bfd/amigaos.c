@@ -176,17 +176,13 @@ static boolean write_name PARAMS ((bfd*, const char*, long));
 extern int amiga_pOS_flg;
 
 #if DEBUG_AMIGA
-#include <varargs.h>
+#include <stdarg.h>
 static void
-error_print(va_alist)
-va_dcl
+error_print(const char *fmt, ...)
 {
   va_list args;
-  char *fmt;
 
-  va_start (args);
-  fmt = va_arg (args, char *);
-
+  va_start (args, fmt);
   vfprintf (stderr, fmt, args);
   va_end (args);
 }

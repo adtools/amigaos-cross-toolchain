@@ -32,15 +32,6 @@
  	config/te-aux.h \
  	config/te-delta.h \
  	config/te-delt88.h \
-@@ -352,7 +356,7 @@ stamp-mk.com: vmsconf.sh Makefile
- EXTRA_DIST = make-gas.com
- 
- DISTSTUFF = make-gas.com m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c
--diststuff: $(DISTSTUFF) info
-+diststuff: $(DISTSTUFF) info guide
- 
- DISTCLEANFILES = targ-cpu.h obj-format.h targ-env.h itbl-cpu.h cgen-opc.h
- 
 @@ -448,6 +452,8 @@ ecoff.o : ecoff.c ecoff.h $(INCDIR)/coff
  # We need all these explicit rules for the multi stuff.  Because of
  # these rules, we don't need one for OBJ_FORMAT_O.

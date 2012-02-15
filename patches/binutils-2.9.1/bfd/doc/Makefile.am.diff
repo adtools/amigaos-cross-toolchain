@@ -5,11 +5,11 @@
  AUTOMAKE_OPTIONS = cygnus
  
 -DOCFILES = aoutx.texi  archive.texi archures.texi \
-+DOCFILES = amiga.texi amigalink.texi aoutx.texi  archive.texi archures.texi \
++DOCFILES = amiga.texi amigalink.texi aoutx.texi archive.texi archures.texi \
  	bfdt.texi  cache.texi coffcode.texi \
  	core.texi elf.texi elfcode.texi  format.texi  libbfd.texi  \
  	opncls.texi  reloc.texi  section.texi  \
-@@ -24,6 +24,7 @@ SRCDOC = $(srcdir)/../aoutx.h  $(srcdir)
+@@ -24,6 +24,7 @@
  	$(srcdir)/../cache.c $(srcdir)/../coffcode.h \
  	$(srcdir)/../corefile.c $(srcdir)/../elf.c \
  	$(srcdir)/../elfcode.h  $(srcdir)/../format.c \
@@ -17,24 +17,7 @@
  	$(srcdir)/../libbfd.c $(srcdir)/../opncls.c \
  	$(srcdir)/../reloc.c  $(srcdir)/../section.c \
  	$(srcdir)/../syms.c  $(srcdir)/../targets.c \
-@@ -48,14 +49,14 @@ info_TEXINFOS = bfd.texinfo
- MKDOC = chew$(EXEEXT_FOR_BUILD)
- 
- $(MKDOC): chew.o
--	$(CC_FOR_BUILD) -o $(MKDOC) chew.o $(LOADLIBES) $(LDFLAGS)
-+	$(CC_FOR_BUILD) $(H_CFLAGS) $(CFLAGS) -o $(MKDOC) chew.o $(LOADLIBES) $(LDFLAGS)
- 
- chew.o: chew.c
- 	$(CC_FOR_BUILD) -c -I.. -I$(srcdir)/.. -I$(srcdir)/../../include $(H_CFLAGS) $(CFLAGS) $(srcdir)/chew.c
- 
- protos: libbfd.h libcoff.h bfd.h
- 
--bfd.info bfd.dvi: $(DOCFILES) bfdsumm.texi bfd.texinfo
-+bfd.info bfd.dvi bfd.guide: $(DOCFILES) bfdsumm.texi bfd.texinfo
- 
- # We can't replace these rules with an implicit rule, because
- # makes without VPATH support couldn't find the .h files in `..'.
-@@ -182,6 +183,18 @@ s-linker: $(MKDOC) $(srcdir)/../linker.c
+@@ -182,6 +183,18 @@
  	$(srcdir)/../../move-if-change linker.tmp linker.texi
  	touch s-linker
  linker.texi: s-linker

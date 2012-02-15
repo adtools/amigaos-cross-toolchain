@@ -1,6 +1,6 @@
 --- binutils-2.9.1/bfd/linker.c	Fri May  1 08:48:12 1998
 +++ binutils-2.9.1/bfd/linker.c	Sun Aug 23 00:00:00 1998
-@@ -74,7 +74,7 @@ SUBSECTION
+@@ -74,7 +74,7 @@
  @cindex target vector (_bfd_link_hash_table_create)
  	The linker routines must create a hash table, which must be
  	derived from <<struct bfd_link_hash_table>> described in
@@ -19,7 +19,7 @@
    PARAMS ((bfd *, struct bfd_link_info *, asection *,
  	   struct bfd_link_order *, boolean));
  
-@@ -1196,8 +1197,17 @@ generic_link_check_archive_element (abfd
+@@ -1196,8 +1197,17 @@
  	  h->u.c.size = size;
  
  	  power = bfd_log2 (size);
@@ -39,7 +39,7 @@
  	  h->u.c.p->alignment_power = power;
  
  	  if (p->section == bfd_com_section_ptr)
-@@ -1658,8 +1668,18 @@ _bfd_generic_link_add_one_symbol (info, 
+@@ -1658,8 +1668,18 @@
  	    unsigned int power;
  
  	    power = bfd_log2 (value);
@@ -60,7 +60,7 @@
  	    h->u.c.p->alignment_power = power;
  	  }
  
-@@ -2626,7 +2646,7 @@ default_fill_link_order (abfd, info, sec
+@@ -2626,7 +2646,7 @@
  
  /* Default routine to handle a bfd_indirect_link_order.  */
  

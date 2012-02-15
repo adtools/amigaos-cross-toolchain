@@ -34,13 +34,3 @@
  		;;
  	*-dg)
  		os=-dgux
-@@ -1180,9 +1180,6 @@ case $basic_machine in
- 				;;
- 			-aix*)
- 				vendor=ibm
--				;;
--			-beos*)						# CYGNUS LOCAL
--				vendor=be
- 				;;
- 			-hpux*)
- 				vendor=hp

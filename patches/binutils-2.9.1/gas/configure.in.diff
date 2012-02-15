@@ -1,13 +1,5 @@
 --- binutils-2.9.1/gas/configure.in	Fri May  1 08:45:07 1998
 +++ binutils-2.9.1/gas/configure.in	Sun Aug 23 00:00:00 1998
-@@ -177,6 +177,7 @@ changequote([,])dnl
- 			    fmt=aout em=mach bfd_gas=yes ;;
-       i386-*-msdos*)        fmt=aout ;;
-       i386-*-moss*)	    fmt=elf ;;
-+      i386-*-beos*)         fmt=coff em=pe bfd_gas=yes ;;
-       i386-*-pe)            fmt=coff em=pe ;;
-       i386-*-cygwin32*)     fmt=coff em=pe bfd_gas=yes ;;
-       i386-*-mingw32*)      fmt=coff em=pe bfd_gas=yes ;;
 @@ -192,6 +193,8 @@ changequote([,])dnl
  
        m32r-*-*)		    fmt=elf bfd_gas=yes ;;

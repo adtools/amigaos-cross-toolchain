@@ -1,6 +1,6 @@
---- binutils-2.9.1/bfd/aoutx.h	Fri May  1 08:48:01 1998
-+++ binutils-2.9.1/bfd/aoutx.h	Sun Aug 23 00:00:00 1998
-@@ -135,7 +135,8 @@ DESCRIPTION
+--- binutils-2.9.1/bfd/aoutx.h	1998-05-01 08:48:01.000000000 -0700
++++ binutils-2.9.1/bfd/aoutx.h	2011-05-08 20:28:36.616333674 -0700
+@@ -135,7 +135,8 @@
  static boolean aout_get_external_symbols PARAMS ((bfd *));
  static boolean translate_from_native_sym_flags
    PARAMS ((bfd *, aout_symbol_type *));
@@ -10,7 +10,7 @@
    PARAMS ((bfd *, asymbol *, struct external_nlist *));
  static void adjust_o_magic PARAMS ((bfd *, struct internal_exec *));
  static void adjust_z_magic PARAMS ((bfd *, struct internal_exec *));
-@@ -1576,7 +1577,7 @@ translate_from_native_sym_flags (abfd, c
+@@ -1576,7 +1577,7 @@
  
  /* Set the fields of SYM_POINTER according to CACHE_PTR.  */
  
@@ -19,7 +19,7 @@
  translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
       bfd *abfd;
       asymbol *cache_ptr;
-@@ -1977,10 +1978,29 @@ NAME(aout,swap_std_reloc_out) (abfd, g, 
+@@ -1977,10 +1978,29 @@
  
    r_length = g->howto->size ;	/* Size as a power of two */
    r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC? */
@@ -49,7 +49,7 @@
  
  #if 0
    /* For a standard reloc, the addend is in the object file.  */
-@@ -2273,8 +2293,12 @@ NAME(aout,swap_std_reloc_in) (abfd, byte
+@@ -2273,8 +2293,12 @@
    /* Base relative relocs are always against the symbol table,
       regardless of the setting of r_extern.  r_extern just reflects
       whether the symbol the reloc is against is local or global.  */

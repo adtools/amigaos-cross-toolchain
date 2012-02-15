@@ -96,15 +96,6 @@
  }
  
  /* Append a string onto another string, bumping the pointer along.  */
-@@ -1134,7 +1138,7 @@ write_contents (abfd, sec, xxx)
- 	      if (fill_size == 1)
- 		{
- 		  n_per_buf = sizeof (buf);
--		  memset (buf, *fill_literal, n_per_buf);
-+		  memset (buf, *fill_literal & 0xFF, n_per_buf);	/* fnf - work around BeOS memset bug */
- 		}
- 	      else
- 		{
 @@ -1530,17 +1534,17 @@ write_object_file ()
  #ifdef TC_CONS_FIX_NEW
  	  TC_CONS_FIX_NEW (lie->frag,
@@ -153,14 +144,6 @@
  
        if (add_symbolP != NULL
  	  && add_symbolP->sy_mri_common)
-@@ -2556,7 +2564,6 @@ fixup_segment (fixP, this_segment_type)
- 		}
- 	    }
- 	}
--
-       if (add_symbolP)
- 	{
- 	  if (add_symbol_segment == this_segment_type && pcrel && !plt
 @@ -2668,6 +2675,11 @@ fixup_segment (fixP, this_segment_type)
  	      ++seg_reloc_count;
  	    }

@@ -1,14 +1,6 @@
---- binutils-2.9.1/bfd/configure.in	Fri May  1 08:48:05 1998
-+++ binutils-2.9.1/bfd/configure.in	Sun Aug 23 00:00:00 1998
-@@ -12,6 +12,7 @@ AM_INIT_AUTOMAKE(bfd, 2.9.1)
- dnl These must be called before AM_PROG_LIBTOOL, because it may want
- dnl to call AC_CHECK_PROG.
- AC_CHECK_TOOL(AR, ar)
-+AC_ARFLAGS
- AC_CHECK_TOOL(RANLIB, ranlib, :)
- 
- dnl Default to a non shared library.  This may be overridden by the
-@@ -385,6 +386,7 @@ do
+--- binutils-2.9.1/bfd/configure.in	1998-05-01 08:48:05.000000000 -0700
++++ binutils-2.9.1/bfd/configure.in	2011-05-08 20:28:36.626324556 -0700
+@@ -385,6 +385,7 @@
      # with the two vector lists in targets.c.
      a29kcoff_big_vec)		tb="$tb coff-a29k.lo cofflink.lo" ;;
      a_out_adobe_vec)		tb="$tb aout-adobe.lo aout32.lo" ;;
@@ -16,7 +8,7 @@
      armcoff_little_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
      armcoff_big_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
      armpe_little_vec)		tb="$tb pe-arm.lo coff-arm.lo cofflink.lo " ;;
-@@ -392,6 +394,7 @@ do
+@@ -392,6 +393,7 @@
      armpei_little_vec)		tb="$tb pei-arm.lo cofflink.lo " ;;
      armpei_big_vec)		tb="$tb pei-arm.lo cofflink.lo " ;;
      aout0_big_vec)		tb="$tb aout0.lo aout32.lo" ;;

@@ -1,6 +1,6 @@
---- binutils-2.9.1/ld/ldfile.c	Fri May  1 08:48:48 1998
-+++ binutils-2.9.1/ld/ldfile.c	Sun Aug 23 00:00:00 1998
-@@ -39,6 +39,9 @@ Software Foundation, 59 Temple Place - S
+--- binutils-2.9.1/ld/ldfile.c	1998-05-01 08:48:48.000000000 -0700
++++ binutils-2.9.1/ld/ldfile.c	2011-05-08 20:28:36.636307945 -0700
+@@ -39,6 +39,9 @@
  
  #include <ctype.h>
  
@@ -10,7 +10,7 @@
  const char *ldfile_input_filename;
  boolean ldfile_assumed_script = false;
  const char *ldfile_output_machine_name = "";
-@@ -79,6 +82,32 @@ static boolean ldfile_open_file_search
+@@ -79,6 +82,32 @@
  	   const char *lib, const char *suffix));
  static FILE *try_open PARAMS ((const char *name, const char *exten));
  
@@ -43,7 +43,7 @@
  void
  ldfile_add_library_path (name, cmdline)
       const char *name;
-@@ -128,6 +157,7 @@ ldfile_open_file_search (arch, entry, li
+@@ -128,6 +157,7 @@
       const char *suffix;
  {
    search_dirs_type *search;
@@ -51,7 +51,7 @@
  
    /* If this is not an archive, try to open it in the current
       directory first.  */
-@@ -142,6 +172,7 @@ ldfile_open_file_search (arch, entry, li
+@@ -142,6 +172,7 @@
         search = search->next) 
      {
        char *string;
@@ -59,7 +59,7 @@
  
        if (entry->dynamic && ! link_info.relocateable)
  	{
-@@ -171,15 +202,40 @@ ldfile_open_file_search (arch, entry, li
+@@ -171,15 +202,40 @@
        else
  	sprintf (string, "%s%s%s", search->name, slash, entry->filename);
  
@@ -106,19 +106,3 @@
    return false;
  }
  
-@@ -206,6 +262,15 @@ ldfile_open_file (entry)
- 	   arch != (search_arch_type *) NULL;
- 	   arch = arch->next)
- 	{
-+#if (defined (__BEOS__) && defined (__INTEL__))
-+          if (ldfile_open_file_search (arch->name, entry, "lib", ".so.LIB"))
-+            return;
-+#endif
-+#if defined (__CYGWIN32__)
-+	  if (strcmp (default_target, "pei-i386") == 0
-+	      && (ldfile_open_file_search (arch->name, entry, "", ".lib")))
-+            return;
-+#endif
- 	  if (ldfile_open_file_search (arch->name, entry, "lib", ".a"))
- 	    return;
- #ifdef VMS

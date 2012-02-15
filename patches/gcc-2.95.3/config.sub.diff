@@ -333,7 +333,7 @@
  		basic_machine=m68010-adobe
  		os=-scout
  		;;
-@@ -277,21 +348,25 @@
+@@ -277,21 +348,21 @@
  		os=-sysv
  		;;
  	amiga | amiga-*)
@@ -350,10 +350,6 @@
 +		basic_machine=m68k-unknown
  		os=-sysv4
  		;;
-+	amithlon)
-+		basic_machine=i386be-unknown
-+		os=-amithlon
-+		;;
  	apollo68)
  		basic_machine=m68k-apollo
  		os=-sysv
@@ -854,7 +850,7 @@
  	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
 -	      | -amigaos* | -amigados* | -msdos* | -newsos* | -unicos* | -aof* \
 -	      | -aos* \
-+	      | -amigaos* | -amigados* | -morphos* | -amithlon \
++	      | -amigaos* | -amigados* | -morphos* \
 +	      | -msdos* | -newsos* | -unicos* | -aof* | -aos* \
  	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* \
  	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \

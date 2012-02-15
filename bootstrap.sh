@@ -38,14 +38,18 @@ function unpack_sources {
   rm -rf "${BINUTILS}"
   tar -xzf "${ARCHIVES}/${BINUTILS_SRC}"
   pushd "${BINUTILS}"
-  patch -p1 < "${PATCHES}/${BINUTILS}/patch"
+  find "${PATCHES}/${BINUTILS}" -type f -iname '*.diff' | xargs cat | patch -p1
+  find "${PATCHES}/${BINUTILS}" -type f \! -name '*.diff' -printf "%p %P\n" | \
+    xargs -n 2 cp -v
   popd
 
   rm -rf "${GCC}"
   tar -xzf "${ARCHIVES}/${GCC_CORE_SRC}"
   tar -xzf "${ARCHIVES}/${GCC_CPP_SRC}"
   pushd "${GCC}"
-  patch -p1 < "${PATCHES}/${GCC}/patch"
+  find "${PATCHES}/${GCC}" -type f -iname '*.diff' | xargs cat | patch -p1
+  find "${PATCHES}/${GCC}" -type f \! -name '*.diff' -printf "%p %P\n" | \
+    xargs -n 2 cp -v
   popd
 
   rm -rf "${FD2INLINE}"

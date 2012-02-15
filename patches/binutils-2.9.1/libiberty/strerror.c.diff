@@ -1,0 +1,22 @@
+--- binutils-2.9.1/libiberty/strerror.c	1998-05-01 08:47:54.000000000 -0700
++++ binutils-2.9.1/libiberty/strerror.c	2011-05-08 20:59:25.383808009 -0700
+@@ -455,15 +455,17 @@
+    same name, it differs from other implementations in that it is dynamically
+    initialized rather than statically initialized. */
+ 
++#undef NEED_sys_errlist
++
+ #ifdef NEED_sys_errlist
+ 
+ static int sys_nerr;
+-static const char **sys_errlist;
++static const char *sys_errlist[];
+ 
+ #else
+ 
+ extern int sys_nerr;
+-extern char *sys_errlist[];
++//extern char *sys_errlist[];
+ 
+ #endif
+ 

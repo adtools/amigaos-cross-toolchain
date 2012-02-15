@@ -1,11 +1,20 @@
---- gcc-2.95.3/gcc/ginclude/stdarg.h	Sat May  8 03:52:35 1999
-+++ gcc/gcc/ginclude/stdarg.h	Fri Dec  7 23:06:10 2001
-@@ -102,7 +102,7 @@
- /* We cast to void * and then to TYPE * because this avoids
-    a warning about increasing the alignment requirement.  */
- 
--#if (defined (__arm__) && ! defined (__ARMEB__)) || defined (__i386__) || defined (__i860__) || defined (__ns32000__) || defined (__vax__)
-+#if (defined (__arm__) && ! defined (__ARMEB__)) || (defined (__i386__) && ! defined(__BIG_ENDIAN__) ) || defined (__i860__) || defined (__ns32000__) || defined (__vax__)
- /* This is for little-endian machines; small args are padded upward.  */
- #define va_arg(AP, TYPE)						\
-  (AP = (__gnuc_va_list) ((char *) (AP) + __va_rounded_size (TYPE)),	\
+--- gcc-2.95.3/gcc/ginclude/stdarg.h	1999-05-07 18:52:35.000000000 -0700
++++ gcc-2.95.3/gcc/ginclude/stdarg.h	2011-05-08 04:56:30.305285974 -0700
+@@ -178,7 +178,7 @@
+    But on BSD NET2 we must not test or define or undef it.
+    (Note that the comments in NET 2's ansi.h
+    are incorrect for _VA_LIST_--see stdio.h!)  */
+-#if !defined (_VA_LIST_) || defined (__BSD_NET2__) || defined (____386BSD____) || defined (__bsdi__) || defined (__sequent__) || defined (__FreeBSD__) || defined(WINNT)
++#if !defined (_VA_LIST_) || defined (__BSD_NET2__) || defined (____386BSD____) || defined (__bsdi__) || defined (__sequent__) || defined (__FreeBSD__) || defined(WINNT) || defined(__amigaos__)
+ /* The macro _VA_LIST_DEFINED is used in Windows NT 3.5  */
+ #ifndef _VA_LIST_DEFINED
+ /* The macro _VA_LIST is used in SCO Unix 3.2.  */
+@@ -189,7 +189,7 @@
+ #endif /* not _VA_LIST_T_H */
+ #endif /* not _VA_LIST */
+ #endif /* not _VA_LIST_DEFINED */
+-#if !(defined (__BSD_NET2__) || defined (____386BSD____) || defined (__bsdi__) || defined (__sequent__) || defined (__FreeBSD__))
++#if !(defined (__BSD_NET2__) || defined (____386BSD____) || defined (__bsdi__) || defined (__sequent__) || defined (__FreeBSD__) || defined(__amigaos__))
+ #define _VA_LIST_
+ #endif
+ #ifndef _VA_LIST

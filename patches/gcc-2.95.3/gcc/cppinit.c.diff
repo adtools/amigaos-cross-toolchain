@@ -1,0 +1,10 @@
+--- gcc-2.95.3/gcc/cppinit.c	2001-01-25 06:03:03.000000000 -0800
++++ gcc-2.95.3/gcc/cppinit.c	2012-02-11 19:37:47.196109115 -0800
+@@ -140,6 +140,7 @@
+     /* This is another place that the target system's headers might be.  */
+     { TOOL_INCLUDE_DIR, "BINUTILS", 0, 1 },
+ #endif
++    { LOCAL_INCLUDE_DIR, 0, 0, 1 },
+ #else /* not CROSS_COMPILE */
+ #ifdef LOCAL_INCLUDE_DIR
+     /* This should be /usr/local/include and should come before

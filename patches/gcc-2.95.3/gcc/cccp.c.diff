@@ -1,8 +1,11 @@
---- gcc-2.95.3/gcc/cccp.c	Thu Jan 25 15:03:00 2001
-+++ gcc/gcc/cccp.c	Thu Sep 27 19:35:54 2001
-@@ -85,7 +85,7 @@
+--- gcc-2.95.3/gcc/cccp.c	2001-01-25 06:03:00.000000000 -0800
++++ gcc-2.95.3/gcc/cccp.c	2011-05-08 04:56:30.285289276 -0700
+@@ -83,9 +83,9 @@
+ #define INCLUDE_LEN_FUDGE 12	/* leave room for VMS syntax conversion */
+ #endif /* VMS */
  
- /* Windows does not natively support inodes, and neither does MSDOS.  */
+-/* Windows does not natively support inodes, and neither does MSDOS.  */
++/* Windows does not natively support inodes, and neither does MSDOS or AmigaOS.  */
  #if (defined (_WIN32) && ! defined (__CYGWIN__) && ! defined (_UWIN)) \
 -  || defined (__MSDOS__)
 +  || defined (__MSDOS__) || defined (__amigaos__)
@@ -21,27 +24,7 @@
  extern char *version_string;
  HOST_WIDEST_INT parse_escape PROTO((char **, HOST_WIDEST_INT));
  HOST_WIDEST_INT parse_c_expression PROTO((char *, int));
-@@ -403,6 +408,10 @@
-     /* This is another place that the target system's headers might be.  */
-     { TOOL_INCLUDE_DIR, "BINUTILS", 0, 0, 0 },
- #endif
-+    /* Some systems have an extra dir of include files.  */
-+#ifdef SYSTEM_INCLUDE_DIR
-+    { SYSTEM_INCLUDE_DIR, 0, 0, 0, 0 },
-+#endif
- #else /* not CROSS_COMPILE */
- #ifdef LOCAL_INCLUDE_DIR
-     /* This should be /usr/local/include and should come before
-@@ -1124,7 +1133,7 @@
-   printf ("Usage: %s [switches] input output\n", progname);
-   printf ("Switches:\n");
-   printf ("  -include <file>           Include the contents of <file> before other files\n");
--  printf ("  -imacros <file>           Accept definition of marcos in <file>\n");
-+  printf ("  -imacros <file>           Accept definition of macros in <file>\n");
-   printf ("  -iprefix <path>           Specify <path> as a prefix for next two options\n");
-   printf ("  -iwithprefix <dir>        Add <dir> to the end of the system include paths\n");
-   printf ("  -iwithprefixbefore <dir>  Add <dir> to the end of the main include paths\n");
-@@ -1918,7 +1927,12 @@
+@@ -1918,7 +1923,12 @@
  	notice ("#include <...> search starts here:\n");
        if (!p->fname[0])
  	fprintf (stderr, " .\n");
@@ -55,7 +38,7 @@
  	fprintf (stderr, " %s\n", p->fname);
        else
  	/* Omit trailing '/'.  */
-@@ -4785,6 +4799,9 @@
+@@ -4785,6 +4795,9 @@
  #ifdef DIR_SEPARATOR
    if ((p = rindex (s, DIR_SEPARATOR))) s = p + 1;
  #endif
@@ -65,7 +48,7 @@
    return s;
  }
  
-@@ -4794,6 +4811,7 @@
+@@ -4794,6 +4807,7 @@
  absolute_filename (filename)
       char *filename;
  {
@@ -73,7 +56,7 @@
  #if defined (__MSDOS__) \
    || (defined (_WIN32) && !defined (__CYGWIN__) && !defined (_UWIN))
    if (ISALPHA (filename[0]) && filename[1] == ':') filename += 2;
-@@ -4810,6 +4828,9 @@
+@@ -4810,6 +4824,9 @@
    if (filename[0] == DIR_SEPARATOR) return 1;
  #endif
    return 0;
@@ -83,20 +66,7 @@
  }
  
  /* Returns whether or not a given character is a directory separator.
-@@ -4888,10 +4909,12 @@
-                   return to - filename;
-                 }
-             }
-+#if !defined (__amigaos__) /* Don't convert ':' on Amiga! */
- #if defined(DIR_SEPARATOR_2)
-           /* Simplify to one directory separator.  */
-           to[-1] = DIR_SEPARATOR;
- #endif
-+#endif
-         }
- 
-     /* Skip /s after a /.  */
-@@ -5072,7 +5095,7 @@
+@@ -5072,7 +5089,7 @@
        || ! inc->control_macro
        || (inc->control_macro[0] && ! lookup (inc->control_macro, -1, -1))) {
  
@@ -105,7 +75,7 @@
  
      if (fd < 0)
        {
-@@ -10406,7 +10429,11 @@
+@@ -10406,7 +10423,12 @@
      len = simplify_filename (dir->fname);
  
      /* Convert directory name to a prefix.  */
@@ -114,7 +84,18 @@
 +#ifdef VOL_SEPARATOR
 +	&& dir->fname[len - 1] != VOL_SEPARATOR
 +#endif
-+	) {
++	)
++    {
        if (len == 1 && dir->fname[len - 1] == '.')
  	len = 0;
        else
+--- gcc-2.95.3/gcc/cccp.c	2001-01-25 06:03:00.000000000 -0800
++++ gcc-2.95.3/gcc/cccp.c	2012-02-11 19:38:44.823987911 -0800
+@@ -403,6 +408,7 @@
+     /* This is another place that the target system's headers might be.  */
+     { TOOL_INCLUDE_DIR, "BINUTILS", 0, 0, 0 },
+ #endif
++    { LOCAL_INCLUDE_DIR, 0, 0, 1, 0 },
+ #else /* not CROSS_COMPILE */
+ #ifdef LOCAL_INCLUDE_DIR
+     /* This should be /usr/local/include and should come before

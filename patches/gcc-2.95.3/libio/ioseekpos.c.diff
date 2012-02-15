@@ -1,5 +1,5 @@
---- gcc-2.95.3/libio/ioseekpos.c	Tue Sep 16 18:00:23 1997
-+++ gcc/libio/ioseekpos.c	Sun Jun 30 16:09:44 2002
+--- gcc-2.95.3/libio/ioseekpos.c	Tue Sep 16 16:00:23 1997
++++ gcc-2.95.3/libio/ioseekpos.c	Thu Apr  5 10:46:18 2001
 @@ -25,10 +25,13 @@
  
  #include <libioP.h>

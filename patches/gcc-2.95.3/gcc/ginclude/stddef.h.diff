@@ -1,0 +1,11 @@
+--- gcc-2.95.3/gcc/ginclude/stddef.h	1998-12-16 13:19:25.000000000 -0800
++++ gcc-2.95.3/gcc/ginclude/stddef.h	2011-05-08 04:56:30.305285974 -0700
+@@ -24,7 +24,7 @@
+ 
+ /* On 4.3bsd-net2, make sure ansi.h is included, so we have
+    one less case to deal with in the following.  */
+-#if defined (__BSD_NET2__) || defined (____386BSD____) || defined (__FreeBSD__) || defined(__NetBSD__)
++#if defined (__BSD_NET2__) || defined (____386BSD____) || defined (__FreeBSD__) || defined(__NetBSD__) || defined (__ixemul__) || defined (__libnix__)
+ #include <machine/ansi.h>
+ #endif
+ 

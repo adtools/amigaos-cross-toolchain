@@ -1,5 +1,5 @@
---- gcc-2.95.3/gcc/function.c	Thu Jan 25 15:03:15 2001
-+++ gcc/gcc/function.c	Thu Sep 27 19:36:09 2001
+--- gcc-2.95.3/gcc/function.c	2001-01-25 06:03:15.000000000 -0800
++++ gcc-2.95.3/gcc/function.c	2011-05-08 04:56:30.295286222 -0700
 @@ -7027,3 +7027,29 @@
      }
  #endif /* HAVE_prologue or HAVE_epilogue */

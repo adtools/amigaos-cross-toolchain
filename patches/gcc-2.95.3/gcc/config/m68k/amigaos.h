@@ -138,7 +138,7 @@ Boston, MA 02111-1307, USA.  */
     "%{p:-lc_p}%{pg:-lc_p}}"						\
   "%{noixemul:-lnixmain -lnix -lamiga "					\
     "%{mstackcheck:-lstack} "						\
-    "%{mstackextend:-lstack}} -lamigastubs"
+    "%{mstackextend:-lstack}}"
 
 /* If debugging, tell the linker to output amiga-hunk symbols *and* a BSD
    compatible debug hunk.

@@ -1,5 +1,5 @@
---- gcc-2.95.3/gcc/config/m68k/m68k.c	Mon Aug  2 06:51:08 1999
-+++ gcc/gcc/config/m68k/m68k.c	Thu Sep 27 19:35:54 2001
+--- gcc-2.95.3/gcc/config/m68k/m68k.c	1999-08-01 21:51:08.000000000 -0700
++++ gcc-2.95.3/gcc/config/m68k/m68k.c	2011-05-08 04:56:30.285289276 -0700
 @@ -63,6 +63,8 @@
  const char *m68k_align_jumps_string;
  /* Specify power of two alignment used for functions. */

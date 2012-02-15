@@ -1,27 +1,21 @@
---- gcc-2.95.3/gcc/cppfiles.c	Mon May 10 17:24:33 1999
-+++ gcc/gcc/cppfiles.c	Thu Sep 27 19:35:54 2001
-@@ -56,13 +56,18 @@
+--- gcc-2.95.3/gcc/cppfiles.c	1999-05-10 08:24:33.000000000 -0700
++++ gcc-2.95.3/gcc/cppfiles.c	2011-05-08 04:56:30.295286222 -0700
+@@ -52,12 +52,12 @@
+ static void hack_vms_include_specification PROTO ((char *));
+ #endif
+ 
+-/* Windows does not natively support inodes, and neither does MSDOS.
++/* Windows does not natively support inodes, and neither does MSDOS or AmigaOS.
     VMS has non-numeric inodes. */
  #ifdef VMS
  #define INO_T_EQ(a, b) (!bcmp((char *) &(a), (char *) &(b), sizeof (a)))
--#elif (defined _WIN32 && !defined CYGWIN && ! defined (_UWIN)) \
+ #elif (defined _WIN32 && !defined CYGWIN && ! defined (_UWIN)) \
 -       || defined __MSDOS__
-+#elif (defined (_WIN32) && !defined (CYGWIN) && ! defined (_UWIN)) \
-+       || defined (__MSDOS__) || defined (__amigaos__)
++       || defined __MSDOS__ || defined __amigaos__
  #define INO_T_EQ(a, b) 0
  #else
  #define INO_T_EQ(a, b) ((a) == (b))
- #endif
- 
-+#ifndef OPEN_CASE_SENSITIVE
-+/* Default is standard open() */
-+#define OPEN_CASE_SENSITIVE open
-+#endif
-+
- /* Merge the four include chains together in the order quote, bracket,
-    system, after.  Remove duplicate dirs (as determined by
-    INO_T_EQ()).  The system_include and after_include chains are never
-@@ -318,7 +323,12 @@
+@@ -318,7 +318,12 @@
    
    ih = include_hash (pfile, fname, 1);
    jh = redundant_include_p (pfile, ih,
@@ -35,16 +29,7 @@
  
    if (jh != 0)
      {
-@@ -328,7 +338,7 @@
-       if (jh == (struct include_hash *)-1)
- 	return -2;
-       else
--	return open (jh->name, O_RDONLY, 0666);
-+	return OPEN_CASE_SENSITIVE (jh->name, O_RDONLY, 0666);
-     }
- 
-   if (ih->foundhere)
-@@ -354,11 +364,15 @@
+@@ -354,7 +359,11 @@
    ih->control_macro = NULL;
    
    /* If the pathname is absolute, just open it. */ 
@@ -56,34 +41,25 @@
      {
        ih->foundhere = ABSOLUTE_PATH;
        ih->name = ih->nshort;
--      return open (ih->name, O_RDONLY, 0666);
-+      return OPEN_CASE_SENSITIVE (ih->name, O_RDONLY, 0666);
-     }
- 
-   /* Search directory path, trying to open the file. */
-@@ -369,13 +383,20 @@
+@@ -369,8 +378,15 @@
    for (l = search_start; l; l = l->next)
      {
        bcopy (l->name, name, l->nlen);
+-      name[l->nlen] = '/';
+-      strcpy (&name[l->nlen+1], fname);
 +#ifdef VOL_SEPARATOR
 +      if (name[l->nlen - 1] == VOL_SEPARATOR)
 +	strcpy (&name[l->nlen], fname);
 +      else
 +#endif
 +	{
-       name[l->nlen] = '/';
-       strcpy (&name[l->nlen+1], fname);
++	  name[l->nlen] = '/';
++	  strcpy (&name[l->nlen+1], fname);
 +	}
        simplify_pathname (name);
        if (CPP_OPTIONS (pfile)->remap)
  	name = remap_filename (pfile, name, l);
- 
--      f = open (name, O_RDONLY|O_NONBLOCK|O_NOCTTY, 0666);
-+      f = OPEN_CASE_SENSITIVE (name, O_RDONLY|O_NONBLOCK|O_NOCTTY, 0666);
- #ifdef EACCES
-       if (f == -1 && errno == EACCES)
- 	{
-@@ -723,6 +744,18 @@
+@@ -723,6 +739,18 @@
    
    dir = xstrdup (fname);
    last_slash = rindex (dir, '/');

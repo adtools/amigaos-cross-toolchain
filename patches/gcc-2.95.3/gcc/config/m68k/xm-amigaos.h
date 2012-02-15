@@ -63,7 +63,11 @@ Boston, MA 02111-1307, USA.  */
 
 #define DIR_SEPARATOR '/'
 #define VOL_SEPARATOR ':'
-#define DIR_SEPARATOR_2 VOL_SEPARATOR
+
+/* Do *not* use this define, otherwise Amiga-devicenames ('DEV:') won't 
+   work:  */
+// #define DIR_SEPARATOR_2 VOL_SEPARATOR
+
 
 /* Determine whether a '\0'-terminated file name is absolute or not.
 

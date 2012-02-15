@@ -1,5 +1,5 @@
---- gcc-2.95.3/gcc/config/m68k/m68k.h	Thu Jan 25 15:03:34 2001
-+++ gcc/gcc/config/m68k/m68k.h	Thu Sep 27 19:35:54 2001
+--- gcc-2.95.3/gcc/config/m68k/m68k.h	2001-01-25 06:03:34.000000000 -0800
++++ gcc-2.95.3/gcc/config/m68k/m68k.h	2011-05-08 04:56:30.285289276 -0700
 @@ -68,10 +68,8 @@
  #define MASK_RTD	8
  #define TARGET_RTD (target_flags & MASK_RTD)
@@ -39,16 +39,17 @@
    : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD))
  
  /* Moves between fp regs and other regs are two insns.  */
-@@ -821,7 +822,7 @@
+@@ -821,7 +822,8 @@
  #else /* defined SUPPORT_SUN_FPA */
  
  #define CLASS_MAX_NREGS(CLASS, MODE)	\
 - ((CLASS) == FP_REGS || (CLASS) == FPA_REGS || (CLASS) == LO_FPA_REGS ? 1 \
-+ ((CLASS) == FP_REGS || (CLASS) == FPA_REGS || (CLASS) == LO_FPA_REGS ? GET_MODE_NUNITS (MODE) \
++ ((CLASS) == FP_REGS || (CLASS) == FPA_REGS || (CLASS) == LO_FPA_REGS ?	\
++   GET_MODE_NUNITS (MODE)						\
    : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD))
  
  /* Moves between fp regs and other regs are two insns.  */
-@@ -925,10 +926,19 @@
+@@ -925,10 +927,19 @@
  
  #define PCC_STATIC_STRUCT_RETURN
  
@@ -71,7 +72,7 @@
  
  /* Define a data type for recording info about an argument list
     during the scan of that argument list.  This data type should
-@@ -936,28 +946,52 @@
+@@ -936,28 +947,52 @@
     and about the args processed so far, enough to enable macros
     such as FUNCTION_ARG to determine where the next arg should go.
  
@@ -88,7 +89,8 @@
 +   last_arg_len - number of registers used by the most recently passed
 +     argument.
 +*/
-+
+ 
+-#define CUMULATIVE_ARGS int
 +struct m68k_args
 +{
 +  int num_of_regs;
@@ -102,13 +104,12 @@
 +/* Max. number of data, address and float registers to be used for passing
 +   integer, pointer and float arguments when TARGET_REGPARM.
 +   It's 4, so d0-d3, a0-a3 and fp0-fp3 can be used.  */
- 
--#define CUMULATIVE_ARGS int
++
 +#define M68K_MAX_REGPARM 4
 +
 +/* The default number of data, address and float registers to use when
 +   user specified '-mregparm' switch, not '-mregparm=<value>' option.  */
-+  
++
 +#define M68K_DEFAULT_REGPARM 2
  
  /* Initialize a variable CUM of type CUMULATIVE_ARGS
@@ -134,7 +135,7 @@
  
  /* Define where to put the arguments to a function.
     Value is zero to push the argument on the stack,
-@@ -972,24 +1006,21 @@
+@@ -972,24 +1007,21 @@
     NAMED is nonzero if this argument is a named parameter
      (otherwise it is an extra parameter matching an ellipsis).  */
  
@@ -167,7 +168,7 @@
  
  /* Generate the assembly code for function entry. */
  #define FUNCTION_PROLOGUE(FILE, SIZE) output_function_prologue(FILE, SIZE)
-@@ -1190,6 +1221,8 @@
+@@ -1190,6 +1222,8 @@
     of a local variable as a function of frame_pointer_needed, which
     is hard.  */
  
@@ -176,18 +177,18 @@
  #define INITIAL_FRAME_POINTER_OFFSET(DEPTH)			\
  { int regno;							\
    int offset = -4;						\
-@@ -1199,8 +1232,9 @@
+@@ -1199,8 +1233,9 @@
    for (regno = 0; regno < 16; regno++)				\
      if (regs_ever_live[regno] && ! call_used_regs[regno])	\
        offset += 4;						\
 -  if (flag_pic && current_function_uses_pic_offset_table)	\
-+  if (flag_pic && (flag_pic<=2) && current_function_uses_pic_offset_table)	\
++  if (flag_pic && flag_pic <= 2 && current_function_uses_pic_offset_table)	\
      offset += 4;						\
 +  SUBTARGET_INITIAL_FP_OFFSET (offset);				\
    (DEPTH) = (offset + ((get_frame_size () + 3) & -4)		\
  	     + (get_frame_size () == 0 ? 0 : 4));		\
  }
-@@ -2083,6 +2117,23 @@
+@@ -2083,6 +2118,23 @@
  
  #define PRINT_OPERAND_ADDRESS(FILE, ADDR) print_operand_address (FILE, ADDR)
  
@@ -211,7 +212,7 @@
  /* Define functions defined in aux-output.c and used in templates.  */
  
  extern char *output_move_const_into_data_reg ();
-@@ -2115,9 +2166,11 @@
+@@ -2115,9 +2167,11 @@
  extern const char *m68k_align_loops_string;
  extern const char *m68k_align_jumps_string;
  extern const char *m68k_align_funcs_string;

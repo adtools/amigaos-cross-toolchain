@@ -1,23 +1,22 @@
---- gcc-2.95.3/gcc/c-decl.c	Thu Jan 25 15:02:59 2001
-+++ gcc/gcc/c-decl.c	Thu Sep 27 19:35:53 2001
-@@ -4227,8 +4227,10 @@
+--- gcc-2.95.3/gcc/c-decl.c	2001-01-25 06:02:59.000000000 -0800
++++ gcc-2.95.3/gcc/c-decl.c	2011-05-08 04:56:30.285289276 -0700
+@@ -4227,8 +4227,9 @@
     record the given order of parms in `parm_order'.  */
  
  void
 -push_parm_decl (parm)
 -     tree parm;
-+/* begin-GG-local: explicit register specification for parameters */
++/* Amiga: explicit register specification for parameters */
 +push_parm_decl (parm, asmspec)
 +     tree parm, asmspec;
-+/* end-GG-local */
  {
    tree decl;
    int old_immediate_size_expand = immediate_size_expand;
-@@ -4253,6 +4255,78 @@
+@@ -4253,6 +4254,77 @@
      }
  #endif
  
-+  /* begin-GG-local: explicit register specification for parameters */
++  /* Amiga: explicit register specification for parameters */
 +  if (asmspec)
 +#ifdef TARGET_AMIGAOS
 +    {
@@ -87,7 +86,6 @@
 +#else /* !TARGET_AMIGAOS */
 +    error("explicit register specification for parameters is not supported for this target");
 +#endif /* !TARGET_AMIGAOS */
-+  /* end-GG-local */
 +
    decl = pushdecl (decl);
  

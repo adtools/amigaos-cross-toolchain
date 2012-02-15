@@ -1,5 +1,5 @@
---- gcc-2.95.3/gcc/collect2.c	Thu Jan 25 15:03:01 2001
-+++ gcc/gcc/collect2.c	Thu Sep 27 19:35:54 2001
+--- gcc-2.95.3/gcc/collect2.c	2001-01-25 06:03:01.000000000 -0800
++++ gcc-2.95.3/gcc/collect2.c	2011-05-08 04:56:30.285289276 -0700
 @@ -157,6 +157,12 @@
  #else
  int do_collecting = 0;
@@ -98,7 +98,7 @@
  	    case 's':
 -	      if (arg[2] == '\0' && do_collecting)
 +/* begin-GG-local: dynamic libraries */
-+	     if (arg[2] == '\0' && DO_COLLECTING)
++	      if (arg[2] == '\0' && DO_COLLECTING)
 +/* end-GG-local */
  		{
  		  /* We must strip after the nm run, otherwise C++ linking

@@ -1,13 +1,12 @@
---- gcc-2.95.3/gcc/c-tree.h	Thu Feb 18 21:38:43 1999
-+++ gcc/gcc/c-tree.h	Thu Sep 27 19:35:53 2001
-@@ -331,7 +331,9 @@
+--- gcc-2.95.3/gcc/c-tree.h	1999-02-18 12:38:43.000000000 -0800
++++ gcc-2.95.3/gcc/c-tree.h	2011-05-08 04:56:30.285289276 -0700
+@@ -331,7 +331,8 @@
  extern void print_lang_type                     PROTO((FILE *, tree, int));
  extern void push_c_function_context             PROTO((void));
  extern void push_label_level                    PROTO((void));
 -extern void push_parm_decl                      PROTO((tree));
-+/* begin-GG-local: explicit register specification for parameters */
++/* Amiga: explicit register specification for parameters */
 +extern void push_parm_decl                      PROTO((tree, tree));
-+/* end-GG-local */
  extern tree pushdecl                            PROTO((tree));
  extern tree pushdecl_top_level                  PROTO((tree));
  extern void pushlevel                           PROTO((int));

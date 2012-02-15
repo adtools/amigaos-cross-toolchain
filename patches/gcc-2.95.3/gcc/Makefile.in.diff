@@ -1,15 +1,37 @@
---- gcc-2.95.3/gcc/Makefile.in	Thu Jan 25 15:02:58 2001
-+++ gcc/gcc/Makefile.in	Thu Oct  4 17:12:22 2001
+--- gcc-2.95.3/gcc/Makefile.in	2001-01-25 06:02:58.000000000 -0800
++++ gcc-2.95.3/gcc/Makefile.in	2011-05-08 19:27:11.013863068 -0700
 @@ -367,7 +367,7 @@
  LIBGCC2_DEPS =
  
  # libgcc1-test target (must also be overridable for a target)
 -LIBGCC1_TEST = libgcc1-test
-+LIBGCC1_TEST = #libgcc1-test
++LIBGCC1_TEST = 
  
  # List of extra executables that should be compiled for this target machine
  # that are used for compiling from source code to object code.
-@@ -403,6 +403,12 @@
+@@ -393,6 +393,21 @@
+ # Often this is edited directly by `configure'.
+ EXTRA_HEADERS =@extra_headers_list@
+ 
++### begin-GG-local
++# List of extra targets that should be executed by make when building
++# the `doc' target.
++EXTRA_DOC_TARGETS =
++### end-GG-local
++
++### begin-GG-local
++# List of extra targets that should be executed by make when building
++# targets `stage1' to `stage4'.
++EXTRA_STAGE1_TARGETS =
++EXTRA_STAGE2_TARGETS =
++EXTRA_STAGE3_TARGETS =
++EXTRA_STAGE4_TARGETS =
++### end-GG-local
++
+ # Set this to `collect2' to enable use of collect2.
+ USE_COLLECT2 = @will_use_collect2@
+ # If we might be using collect2, then this variable will be set to
+@@ -403,6 +418,12 @@
  # so don't override it here.
  USE_COLLECT2 = collect2$(exeext)
  
@@ -22,7 +44,19 @@
  # List of extra C and assembler files to add to libgcc1.a.
  # Assembler files should have names ending in `.asm'.
  LIB1FUNCS_EXTRA = 
-@@ -1359,7 +1365,7 @@
+@@ -516,6 +537,11 @@
+ # "t" or nothing, for building multilibbed versions of, say, crtbegin.o.
+ T =
+ 
++# Even if ALLOCA is set, don't use it if compiling with GCC, unless
++# a configuration file overrides this default.
++USE_ALLOCA= ` case "${CC}" in "${OLDCC}") echo "${ALLOCA}" ;; esac `
++USE_HOST_ALLOCA= ` case "${HOST_CC}"@"${HOST_ALLOCA}" in "${OLDCC}"@?*) echo ${HOST_PREFIX}${HOST_ALLOCA} ;; esac `
++
+ # End of variables for you to override.
+ 
+ # Definition of `all' is here so that new rules inserted by sed
+@@ -1359,7 +1385,7 @@
      hard-reg-set.h $(BASIC_BLOCK_H)
  sbitmap.o: sbitmap.c $(CONFIG_H) system.h $(RTL_H) flags.h $(BASIC_BLOCK_H)
  
@@ -31,3 +65,48 @@
  collect2$(exeext): $(COLLECT2_OBJS) $(LIBDEPS)
  # Don't try modifying collect2 (aka ld) in place--it might be linking this.
  	-rm -f collect2$(exeext)
+@@ -2265,7 +2291,7 @@
+ #
+ # Remake the info files.
+ 
+-doc: info
++doc: info $(EXTRA_DOC_TARGETS)
+ info: cpp.info gcc.info lang.info
+ 
+ cpp.info: $(srcdir)/cpp.texi
+@@ -3049,7 +3075,7 @@
+ 	  cp stage1/$${f} . ; \
+ 	else true; \
+ 	fi; done
+-stage1: force stage1-start lang.stage1
++stage1: force stage1-start lang.stage1 $(EXTRA_STAGE1_TARGETS)
+ 
+ stage2-start:
+ 	-if [ -d stage2 ] ; then true ; else mkdir stage2 ; fi
+@@ -3073,7 +3099,7 @@
+ 	  cp stage2/$${f} . ; \
+ 	else true; \
+ 	fi; done
+-stage2: force stage2-start lang.stage2
++stage2: force stage2-start lang.stage2 $(EXTRA_STAGE2_TARGETS)
+ 
+ stage3-start:
+ 	-if [ -d stage3 ] ; then true ; else mkdir stage3 ; fi
+@@ -3097,7 +3123,7 @@
+ 	  cp stage3/$${f} . ; \
+ 	else true; \
+ 	fi; done
+-stage3: force stage3-start lang.stage3
++stage3: force stage3-start lang.stage3 $(EXTRA_STAGE3_TARGETS)
+ 
+ stage4-start:
+ 	-if [ -d stage4 ] ; then true ; else mkdir stage4 ; fi
+@@ -3121,7 +3147,7 @@
+ 	  cp stage4/$${f} . ; \
+ 	else true; \
+ 	fi; done
+-stage4: force stage4-start lang.stage4
++stage4: force stage4-start lang.stage4 $(EXTRA_STAGE4_TARGETS)
+ 
+ # Copy just the executable files from a particular stage into a subdirectory,
+ # and delete the object files.  Use this if you're just verifying a version

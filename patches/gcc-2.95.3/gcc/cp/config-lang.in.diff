@@ -1,0 +1,11 @@
+--- gcc-2.95.3/gcc/cp/config-lang.in	Wed Jan  6 20:57:30 1999
++++ gcc-2.95.3/gcc/cp/config-lang.in	Thu Apr  5 20:49:37 2001
+@@ -39,3 +39,8 @@ headers='$(CXX_EXTRA_HEADERS)'
+ lib2funcs=cplib2.txt
+ 
+ outputs=cp/Makefile
++
++# GG local hack.  Need this so that exception handling stuff gets
++# built, otherwise cannot bootstrap ADA.  Since we compile with gcc
++# on every platform we care about, this is no problem.
++boot_language=yes

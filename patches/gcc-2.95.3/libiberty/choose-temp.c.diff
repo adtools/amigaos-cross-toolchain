@@ -1,10 +1,10 @@
---- gcc-2.95.3/libiberty/choose-temp.c	Sun Apr 25 02:23:06 1999
-+++ gcc/libiberty/choose-temp.c	Thu Sep 27 19:36:10 2001
+--- gcc-2.95.3/libiberty/choose-temp.c	1999-04-24 17:23:06.000000000 -0700
++++ gcc-2.95.3/libiberty/choose-temp.c	2011-05-08 04:56:30.305285974 -0700
 @@ -51,6 +51,9 @@
  #if defined (__MSDOS__) || (defined (_WIN32) && ! defined (__CYGWIN__) && ! defined (_UWIN))
  #define DIR_SEPARATOR '\\'
  #endif
-+#if defined(__amigaos__)
++#ifdef __amigaos__
 +#define VOL_SEPARATOR ':'
 +#endif
  #endif
@@ -19,7 +19,7 @@
 +#ifdef VOL_SEPARATOR
 +      && temp_filename[len-1] != VOL_SEPARATOR
 +#endif
-+	  )
++      )
      temp_filename[len++] = DIR_SEPARATOR;
    strcpy (temp_filename + len, TEMP_FILE);
  
@@ -32,7 +32,7 @@
 +#ifdef VOL_SEPARATOR
 +      && temp_filename[base_len-1] != VOL_SEPARATOR
 +#endif
-+	  )
++      )
      temp_filename[base_len++] = DIR_SEPARATOR;
    strcpy (temp_filename + base_len, TEMP_FILE);
  

@@ -1,0 +1,10 @@
+--- gcc-2.95.3/gcc/fixinc/mkfixinc.sh	1999-05-14 19:21:35.000000000 -0700
++++ gcc-2.95.3/gcc/fixinc/mkfixinc.sh	2011-05-08 04:56:30.295286222 -0700
+@@ -87,6 +87,7 @@
+ 	i[34567]86-*-pe | i[34567]86-*-cygwin* | \
+ 	i[34567]86-*-mingw32* | \
+ 	mips-sgi-irix5cross64 | \
++	m68k-*-amigaos* | \
+ 	powerpc-*-eabiaix* | \
+ 	powerpc-*-eabisim* | \
+ 	powerpc-*-eabi*    | \

@@ -1,5 +1,14 @@
---- gcc-2.95.3/gcc/config/m68k/m68k.md	Thu Aug  5 08:22:05 1999
-+++ gcc/gcc/config/m68k/m68k.md	Thu Sep 27 19:35:54 2001
+--- gcc-2.95.3/gcc/config/m68k/m68k.md	1999-08-04 23:22:05.000000000 -0700
++++ gcc-2.95.3/gcc/config/m68k/m68k.md	2011-05-08 04:56:30.295286222 -0700
+@@ -3821,7 +3821,7 @@
+ 	  case -1 :
+ 	    /* FIXME : a scratch register would be welcome here if operand[0]
+ 	       is not a register */
+-	    output_asm_insn (\"move%.l %#-1,%R0\", operands);
++	    output_asm_insn (\"move%.l %#-1,%0\", operands);
+ 	    break;
+ 	  default :
+ 	    {
 @@ -6799,7 +6799,7 @@
  	 (match_operand:SI 1 "general_operand" "g"))]
    ;; Operand 1 not really used on the m68000.
@@ -36,55 +45,9 @@
    "*
    if (GET_CODE (operands[1]) == MEM
        && GET_CODE (XEXP (operands[1], 0)) == SYMBOL_REF)
-@@ -7823,7 +7823,7 @@
- (define_insn "sinsf2"
-   [(set (match_operand:SF 0 "general_operand" "=f")
- 	(unspec:SF [(match_operand:SF 1 "general_operand" "fm")] 1))]
--  "TARGET_68881 && flag_fast_math"
-+  "TARGET_68881 && !TARGET_68040 && !TARGET_68060 && flag_fast_math"
-   "*
- {
-   if (FP_REG_P (operands[1]))
-@@ -7835,7 +7835,7 @@
- (define_insn "sindf2"
-   [(set (match_operand:DF 0 "general_operand" "=f")
- 	(unspec:DF [(match_operand:DF 1 "general_operand" "fm")] 1))]
--  "TARGET_68881 && flag_fast_math"
-+  "TARGET_68881 && !TARGET_68040 && !TARGET_68060 && flag_fast_math"
-   "*
- {
-   if (FP_REG_P (operands[1]))
-@@ -7847,13 +7847,13 @@
- (define_insn "sinxf2"
-   [(set (match_operand:XF 0 "general_operand" "=f")
- 	(unspec:XF [(match_operand:XF 1 "nonimmediate_operand" "fm")] 1))]
--  "TARGET_68881 && flag_fast_math"
-+  "TARGET_68881 && !TARGET_68040 && !TARGET_68060 && flag_fast_math"
-   "fsin%.x %1,%0")
- 
- (define_insn "cossf2"
-   [(set (match_operand:SF 0 "general_operand" "=f")
- 	(unspec:SF [(match_operand:SF 1 "general_operand" "fm")] 2))]
--  "TARGET_68881 && flag_fast_math"
-+  "TARGET_68881 && !TARGET_68040 && !TARGET_68060 && flag_fast_math"
-   "*
- {
-   if (FP_REG_P (operands[1]))
-@@ -7865,7 +7865,7 @@
- (define_insn "cosdf2"
-   [(set (match_operand:DF 0 "general_operand" "=f")
- 	(unspec:DF [(match_operand:DF 1 "general_operand" "fm")] 2))]
--  "TARGET_68881 && flag_fast_math"
-+  "TARGET_68881 && !TARGET_68040 && !TARGET_68060 && flag_fast_math"
-   "*
- {
-   if (FP_REG_P (operands[1]))
-@@ -7877,5 +7877,18 @@
- (define_insn "cosxf2"
-   [(set (match_operand:XF 0 "general_operand" "=f")
+@@ -7879,3 +7879,16 @@
  	(unspec:XF [(match_operand:XF 1 "nonimmediate_operand" "fm")] 2))]
--  "TARGET_68881 && flag_fast_math"
-+  "TARGET_68881 && !TARGET_68040 && !TARGET_68060 && flag_fast_math"
+   "TARGET_68881 && flag_fast_math"
    "fcos%.x %1,%0")
 +
 +; This is only needed for some subtargets.

@@ -1,0 +1,1143 @@
+\input texinfo.tex  @c -*-texinfo-*-
+@c %**start of header
+@setfilename gcc-amigaos.info
+@settitle AmigaOS-only features of GCC
+@set lastupdate Oct 25th, 1997
+@c %**end of header
+
+@ifinfo
+This document describes implemenation specific features of the GNU CC
+compiler port for the AmigaOS.
+
+Copyright @copyright{} 1996, 1997 Kamil Iskra
+
+Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+@end ifinfo
+
+@titlepage
+@sp 10
+@center @titlefont{GCC Amiga}
+@subtitle Description of the AmigaOS-only features of GCC
+@subtitle @value{lastupdate}
+@author Kamil Iskra
+@page
+@end titlepage
+
+@ifinfo
+@node Top, Introduction, (dir), (dir)
+This document describes the AmigaOS-only features of the @samp{GNU CC}
+compiler.
+
+Last updated @value{lastupdate}.
+@end ifinfo
+
+@menu
+* Introduction::  Purpose of this document.
+
+* Invocation::    Command line options.
+* Attributes::    Variable and function attributes.
+* Defines::       Preprocessor symbols.
+* Miscellaneous:: Uncategorizable.
+
+* Index::         Concept index.
+@end menu
+
+@node Introduction, Invocation, Top, Top
+@chapter Introduction
+@cindex Introduction
+@cindex Purpose of this document
+
+This document is supposed to be an addendum to the baseline @samp{GCC}
+documentation.
+
+It focuses on the features that are visible by users and are important
+to them. It is not supposed to document the internals of the AmigaOS
+port of @samp{GCC}.
+
+It describes features implemented in the @samp{Geek Gadgets GCC} port.
+As of this writing, this is version 2.7.2.1, @samp{Geek Gadgets}
+snapshot @samp{970728}. For more information about @samp{Geek
+Gadgets}, please refer to:
+
+@format
+http://www.ninemoons.com/ADE/ADE.html
+ftp://ftp.ninemoons.com/pub/geekgadgets/README
+@end format
+
+This document also describes some features that are not yet part of
+the @samp{Geek Gadgets GCC} port, but which should be there soon. Such
+features are marked with @emph{[EXPERIMENTAL]}. If you have @samp{GCC}
+from a snapshot later than specified above, it's possible that these
+features are available in it. Some of these features might also be
+available in BETA @samp{GCC} releases available on Kamil Iskra's WWW
+page:
+
+@format
+http://student.uci.agh.edu.pl/~iskra/ade.html
+@end format
+
+This document focuses on @samp{GCC}. It does not describe the
+AmigaOS-only features of other @samp{GNU} packages, such as
+@samp{binutils}, unless they are very closely connected to @samp{GCC}.
+
+This means, that, unless stated otherwise, when we talk about the
+``compiler'', we mean the @file{gcc}, @file{cpp} and @file{cc1}
+executables, i.e., the executables that convert @samp{C} source code
+to assembly source code. The assembler and linker are generally beyond
+the scope of this document.
+
+The primary source of information used to create this document was the
+@samp{GCC} source code. Some parts of this document are based on:
+
+@itemize @bullet
+@item
+The @samp{LibNIX} manual, written by Matthias Fleischer and Gunther
+Nikl:
+
+@format
+fleischr@@izfm.uni-stuttgart.de
+gnikl@@informatik.uni-rostock.de
+@end format
+
+@item
+The @samp{A2IXLibrary} manual, written by Hans Verkuil:
+
+@format
+hans@@wyst.hobby.nl
+@end format
+
+@item
+The @samp{README} file, maintained by Rask Ingemann Lambertsen:
+
+@format
+gc948374@@gbar.dtu.dk
+http://www.gbar.dtu.dk/~c948374/GNU/
+@end format
+
+@item
+The @samp{Geek Gadgets FAQ}, maintained by Lynn Winebarger:
+
+@format
+owinebar@@indiana.edu
+http://nickel.ucs.indiana.edu/~owinebar/interests/amiga/amiga.html
+@end format
+
+@item
+The @samp{FAQ for g++ and libg++}, written by Joe Buck:
+
+@format
+jbuck@@synopsys.com
+http://www.cygnus.com/misc/g++FAQ_toc.html
+@end format
+
+@item
+Discussions on various @samp{Geek Gadgets} mailing lists:
+
+@format
+gg@@ninemoons.com
+gg-gcc@@ninemoons.com
+gg-ixemul@@ninemoons.com
+@end format
+@end itemize
+
+This document was created by Kamil Iskra. Please email any questions,
+suggestions etc. to <iskra@@student.uci.agh.edu.pl> or, even better,
+to the <gg-gcc@@ninemoons.com> mailing list.
+
+The author would like to thank Kriton Kyrimis <kyrimis@@cti.gr> and
+Lars Hecking <lhecking@@nmrc.ucc.ie> for correcting an awful lot of
+language mistakes in this document.
+
+@node Invocation, Attributes, Introduction, Top
+@chapter Invocation
+@cindex Invocation
+@cindex Command line options
+
+The AmigaOS port of @samp{GCC} supports the following non-standard
+command line options:
+
+@menu
+* -noixemul::           Link with @samp{LibNIX}.
+
+* -fbaserel::           Produce @samp{a4}-relative data.
+* -resident::           Produce a @samp{pure} executable.
+* -fbaserel32::         Produce @samp{a4}-relative data with no size limits.
+* -resident32::         Produce a @samp{pure} executable with no size limits.
+* -msmall-code::        Produce @samp{PC}-relative code.
+
+* -mstackcheck::        Produce stack-checking code.
+* -mstackextend::       Produce stack-extending code.
+* -mfixedstack::        Produce plain code.
+
+* -mrestore-a4::        Reload @samp{a4} in public functions.
+* -malways-restore-a4:: Reload @samp{a4} in all functions.
+
+* -mregparm::           Pass function arguments in registers.
+
+* -frepo::              Enable @samp{C++} Template Repository.
+@end menu
+
+Accordingly, the AmigaOS port of @samp{GCC} supports several flavors
+of linker libraries. @xref{Library flavors, Relation between library
+flavors and compile-time options}.
+
+@node -noixemul, -fbaserel, Invocation, Invocation
+@section -noixemul
+@cindex -noixemul
+@cindex Link with LibNIX
+
+@cindex IXEmul
+By default, the executables created with @samp{GCC} require
+@samp{ixemul.library} to run. This has its advantages (easy porting of
+@samp{UN*X} programs, resource tracking, debugging, profiling, etc)
+and disadvantages (@samp{UN*X}-style pathnames, large shared library,
+etc).
+
+@cindex LibNIX
+If @samp{-noixemul} is specified on the @samp{GCC} command line, the
+executable created will not require @samp{ixemul.library} --- it will
+use the static linker library @samp{LibNIX} instead. This library is
+very Amiga-like and @samp{SAS/C}-like, so it is convenient for the
+AmigaOS-specific development.
+
+@quotation
+@emph{Note}: There is no great mystery about the @samp{-noixemul}
+option. It has absolutely no effect on the code generated by the
+compiler, only instructing the @samp{gcc} driver to pass different
+options to the linker and preprocessor (@pxref{Options information},
+@xref{Library flavors}).
+
+This option has no negative form.
+@end quotation
+
+For more information, please refer to the @samp{LibNIX} documentation.
+
+@node -fbaserel, -resident, -noixemul, Invocation
+@section -fbaserel
+@cindex -fbaserel
+@cindex Produce a4-relative data
+
+By default, the code generated by @samp{GCC} references data using
+32-bit, absolute addressing.
+
+@cindex a4
+@cindex 64 KB data limit
+The @samp{-fbaserel} option will make @samp{GCC} generate code that
+references data with 16 bit offsets relative to the @samp{a4} address
+register. This makes executables smaller and faster. Unfortunately,
+the size of the data section cannot exceed 64 KB, so this option
+cannot be used for large programs, like @samp{GCC} itself.
+
+@quotation
+@emph{Note}: For a base-relative executable, @samp{-fbaserel} needs to
+be specified for compiling @emph{and} linking. Base-relative programs
+require special startup code and special versions of linker libraries.
+Since not all linker libraries are available in both plain and base
+relative versions, the usefulness of this option is limited. It is
+important to note that when the base-relative library is missing, the
+linker will attempt to use the plain one. This might result in strange
+link-time or even run-time errors.
+
+@cindex -fpic
+This option is the AmigaOS equivalent of the standard @samp{GCC}
+option @samp{-fpic}, which is not supported by the AmigaOS port.
+@samp{-fpic} generates code that references data indirectly, through a
+@dfn{global offset table}. The special addressing modes available on
+the @samp{m68k} processor family allow for a much more efficient
+implementation with @samp{-fbaserel}.
+
+The negative form of @samp{-fbaserel} is @samp{-fno-baserel}, and is
+on by default.
+@end quotation
+
+For more information, please refer to the @samp{LibNIX} documentation.
+
+@node -resident, -fbaserel32, -fbaserel, Invocation
+@section -resident
+@cindex -resident
+@cindex Produce a pure executable
+
+Executables produced with the @samp{-resident} option are @dfn{pure},
+so they can be made @dfn{resident} using the AmigaShell
+@samp{resident} command. @samp{resident} executables are loaded to
+memory just once, and several concurrent instances share the code
+section.
+
+@quotation
+@emph{Note}: The compiler generates the same code for @samp{-resident}
+as for @samp{-fbaserel} (@pxref{-fbaserel}). Only the linking stage is
+different (special startup code is linked).
+
+This option has no negative form.
+@end quotation
+
+For more information, please refer to the @samp{LibNIX} documentation.
+
+@node -fbaserel32, -resident32, -resident, Invocation
+@section -fbaserel32
+@cindex -fbaserel32
+@cindex Produce a4-relative data with no size limits
+
+The difference between the @samp{-fbaserel32} and @samp{-fbaserel}
+options (@pxref{-fbaserel}) is the same as between the standard
+@samp{GCC} options @samp{-fPIC} and @samp{-fpic}.
+
+Code generated with @samp{-fbaserel32} references data with 32 bit
+offsets relative to the @samp{a4} address register. In contrast to the
+@samp{-fbaserel} (@pxref{-fbaserel}) option, there is no 64 KB size
+limit. Unfortunately, the addressing modes with 32 bit offsets are
+only available on 68020 and higher processors. Therefore, it is
+necessary to specify @samp{-m68020} or higher to use this option.
+
+@quotation
+@emph{Note}: This option used to be called @samp{-flarge-baserel}
+before @samp{Geek Gadgets} snapshot @samp{970109}. Since it was not
+functional then, this should not cause any compatibility problems.
+
+The negative form of @samp{-fbaserel32} is @samp{-fno-baserel32}, and
+is on by default.
+@end quotation
+
+@node -resident32, -msmall-code, -fbaserel32, Invocation
+@section -resident32
+@cindex -resident32
+@cindex Produce a pure executable with no size limits
+
+This option is an improved version of @samp{-resident}
+(@pxref{-resident}) --- it does not impose any limits on data section
+size. Unfortunately, just like @samp{-fbaserel32}
+(@pxref{-fbaserel32}), it is only available for 68020 or higher
+processors. Therefore, it is necessary to specify @samp{-m68020} or
+higher to use this option.
+
+@quotation
+@emph{Note}: This option was first made available in the @samp{GCC}
+2.7.2.1, @samp{Geek Gadgets} snapshot @samp{970109}.
+
+This option has no negative form.
+@end quotation
+
+@node -msmall-code, -mstackcheck, -resident32, Invocation
+@section -msmall-code
+@cindex -msmall-code
+@cindex Produce PC-relative code
+
+By default, the code generated by the compiler references functions
+using 32-bit, absolute addressing.
+
+@cindex 32 KB code limit
+Code generated by @samp{GCC} with the @samp{-msmall-code} option
+references symbols in the code section with 16 bit offsets, relative
+to the @samp{PC} (@dfn{program counter}). This makes executables
+smaller and faster. Unfortunately, the size of the code section is
+generally limited to 32 KB, so this option can only be used for
+relatively small programs.
+
+@quotation
+@emph{Note}: Actually, the compiler always generates 32-bit code
+references. If the assembler can calculate the offset between the
+referencing instruction and the referenced symbol (in other words, if
+the referenced symbol is in the same source file), it replaces the
+32-bit reference with the @samp{PC}-relative one. External references
+are left intact, unless @samp{-msmall-code} is used, in which case the
+assembler generates @samp{PC}-relative references, and the exact
+offsets are calculated by the linker.
+
+This option has no negative form.
+@end quotation
+
+For more information, please refer to the @samp{LibNIX} documentation.
+
+@node -mstackcheck, -mstackextend, -msmall-code, Invocation
+@section -mstackcheck
+@cindex -mstackcheck
+@cindex Produce stack-checking code
+
+By default, the code generated by @samp{GCC} does not check if there
+is enough stack available before performing stack-consuming
+operations. This is generally not necessary on @samp{UN*X} systems,
+where the stack is extended automagically whenever needed.
+
+Unfortunately, the AmigaOS provides tasks with a static, fixed size
+stack.
+
+However, if a program is compiled with @samp{-mstackcheck}, it will
+check if there is enough stack available before performing any
+stack-hungry operations. If there is a danger of stack overflow, the
+program will abort and the user will be notified.
+
+Needless to say, stack checking increases the executable size and the
+execution time.
+
+@quotation
+@emph{Note}: Stack checking cannot be used for functions that might be
+called from outside your task. This includes interrupt handlers,
+shared library functions, hooks etc. In such cases, you should either
+avoid using @samp{-mstackcheck} for files containing such functions,
+or use @code{__attribute__((interrupt))} (@pxref{interrupt}).
+
+It is safe to call a function that performs stack checking from one
+that does not, and vice versa.
+
+The negative form of @samp{-mstackcheck} is @samp{-mno-stackcheck},
+and is on by default.
+
+@emph{Warning}: @samp{-mno-stackcheck} used to be called
+@samp{-mnostackcheck} before @samp{Geek Gadgets} snapshot
+@samp{961012}.
+@end quotation
+
+For more information, please refer to the @samp{LibNIX} documentation.
+
+@node -mstackextend, -mfixedstack, -mstackcheck, Invocation
+@section -mstackextend
+@cindex -mstackextend
+@cindex Produce stack-extending code
+
+@samp{-mstackextend} is very similar to @samp{-mstackcheck}
+(@pxref{-mstackcheck}).
+
+The main difference is that when a program runs out of stack, it is
+not aborted, but a new stack area is allocated and the program
+continues to run.
+
+@quotation
+@emph{Note}: Stack extension can slow programs down significantly. It
+is advised that programs are written in such a way that they do not
+require too much stack. This can generally be achieved by explicitly
+allocating memory for large structures and arrays using functions like
+@samp{malloc()} or @samp{AllocMem()}, instead of creating them as
+local variables. Another method is replacing recursion with iteration.
+In addition, it might be considered to use stack extension only for
+selected, ``dangerous'' functions (@pxref{stackext}), not for all
+functions in a given program.
+
+The negative form of @samp{-mstackextend} is @samp{-mno-stackextend},
+and is on by default.
+
+@emph{Warning}: @samp{-mno-stackextend} used to be called
+@samp{-mnostackextend} before @samp{Geek Gadgets} snapshot
+@samp{961012}.
+@end quotation
+
+For more information, please refer to the @samp{LibNIX} documentation.
+
+@node -mfixedstack, -mrestore-a4, -mstackextend, Invocation
+@section -mfixedstack
+@cindex -mfixedstack
+@cindex Produce plain code
+
+This option makes @samp{GCC} generate plain code, that does neither
+stack checking nor extension. Since this is the default, there is
+generally no need to use this option.
+
+@quotation
+@emph{Note}: This option has no negative form.
+@end quotation
+
+@node -mrestore-a4, -malways-restore-a4, -mfixedstack, Invocation
+@section -mrestore-a4
+@cindex -mrestore-a4
+@cindex Reload a4 in public functions
+
+This option is used to create the @samp{IXEmul} shared libraries
+(those @file{*.ixlibrary} files).
+
+It sets @samp{a4} to the appropriate value in the prologues of all
+public functions (i.e., functions with external linkage). This is
+necessary if these functions are called from the code of application.
+
+@quotation
+@emph{Note}: This option should not be used except for the creation of
+an @samp{IXEmul} shared library.
+
+This option was first made available in the @samp{GCC} 2.7.2,
+@samp{Geek Gadgets} snapshot @samp{960902}. It used to be called
+@samp{-frestore-a4}, and was relabeled to its current name in the
+@samp{GCC} 2.7.2.1, @samp{Geek Gadgets} snapshot @samp{961012}.
+
+The negative form of @samp{-mrestore-a4} is @samp{-mno-restore-a4},
+and is on by default.
+@end quotation
+
+For more information, please refer to the @samp{A2IXLibrary}
+documentation.
+
+@node -malways-restore-a4, -mregparm, -mrestore-a4, Invocation
+@section -malways-restore-a4
+@cindex -malways-restore-a4
+@cindex Reload a4 in all functions
+
+This option is very similar to @samp{-mrestore-a4}
+(@pxref{-mrestore-a4}).
+
+The only difference is that it sets @samp{a4} in all functions,
+including private ones (i.e., functions with internal linkage,
+@samp{static}). This is safer than @samp{-mrestore-a4}
+(@pxref{-mrestore-a4}), but is also slower.
+
+@quotation
+@emph{Note}: This option should not be used except for the creation of
+an @samp{IXEmul} shared library.
+
+This option was first made available in the @samp{GCC} 2.7.2,
+@samp{Geek Gadgets} snapshot @samp{960902}. It used to be called
+@samp{-falways-restore-a4}, and was relabeled to its current name in
+the @samp{GCC} 2.7.2.1, @samp{Geek Gadgets} snapshot @samp{961012}.
+
+The negative form of @samp{-malways-restore-a4} is
+@samp{-mno-always-restore-a4}, and is on by default.
+@end quotation
+
+For more information, please refer to the @samp{A2IXLibrary}
+documentation.
+
+@node -mregparm, -frepo, -malways-restore-a4, Invocation
+@section -mregparm
+@cindex -mregparm
+@cindex Pass function arguments in registers
+
+On the @samp{m68k} architecture, @samp{GCC} passes function arguments
+on the stack by default.
+
+@samp{-mregparm} allows for passing arguments in registers. This can
+be slightly faster than the standard method of passing arguments on
+the stack.
+
+The full syntax of this option is:
+
+@format
+-mregparm[=<value>]
+@end format
+
+@samp{value} should be an integer ranging from 1 to 4. If no
+@samp{value} is provided, 2 will be used.
+
+Four types of function arguments are recognized:
+
+@table @samp
+@item Integer
+Integer numbers (this includes enumerations, small structures and
+@samp{bool} in @samp{C++}, but excludes @samp{long long}, which is too
+large). They are passed in data registers, starting from @samp{d0}.
+
+@item Pointer
+Pointers to objects or functions (this includes @samp{C++} references
+and the implicit @samp{this} argument). They are passed in address
+registers, starting from @samp{a0}.
+
+@item Float
+Floating point numbers. If the floating point code generation is
+enabled, they are passed in floating point registers, starting from
+@samp{fp0}. Otherwise, they are handled like the next type.
+
+@item Other
+All the other types of arguments, like large structures, pointers to
+class methods in @samp{C++}, etc. They are always passed on the stack.
+@end table
+
+The value given for @samp{-mregparm} indicates how many arguments of
+each of the above first three types should be passed in registers.
+
+Example: @samp{GCC} is invoked with @samp{-mregparm} (without any
+value, so 2 will be used) to compile a source containing the function:
+
+@example
+void fun(int a, char *str, char b, int c);
+@end example
+
+@samp{a} and @samp{b} will be passed in @samp{d0} and @samp{d1},
+respectively, @samp{str} will be passed in @samp{a0}, and @samp{c}
+will be passed on the stack.
+
+@quotation
+@emph{Note}: To use this option properly, it is very important that
+all sources are fully prototyped. There may be very serious problems
+if they are not, since @samp{GCC} will have to ``guess'' where to put
+arguments, potentially making a wrong decission. Example:
+
+@example
+[in file1.c]
+void f(void)
+@{
+   g(0); /* Call to a function with no prototype.  The argument
+            will be put in d0, since it is an integer.  */
+@}
+
+[in file2.c]
+void g(char *a) /* The argument is expected in a0, since it is
+                   a pointer.  */
+@{
+@}
+@end example
+
+@samp{-Wimplicit -Wstrict-prototypes} should be used to ensure that
+there are no prototypes missing.
+
+In case of @samp{stdargs} functions, such as @samp{printf}, all
+arguments are passed on the stack.
+
+As of this writing, @samp{-mregparm} is supported by neither
+@samp{IXEmul} nor @samp{LibNIX}, so its usefulness is very limited.
+
+This option was first made available in the @samp{GCC} 2.7.2.1,
+@samp{Geek Gadgets} snapshot @samp{961012}.
+
+The negative form of @samp{-mregparm} is @samp{-mno-regparm}, and is
+on by default.
+@end quotation
+
+@node -frepo, , -mregparm, Invocation
+@section -frepo
+@cindex -frepo
+@cindex Enable C++ Template Repository
+
+The AmigaOS port of @samp{GCC} includes @samp{C++} @dfn{Template
+Repository} patch, so-called @samp{repo} patch.
+
+In order to activate it, please compile @samp{C++} source files with
+@samp{-frepo}. The compiler will not generate unnecessary
+@samp{template} code, and will create @samp{.rpo} files that contain
+information about @samp{template} symbols used in each source file.
+Afterwards, during linking stage, a special tool called
+@samp{collect2} will make sure that every required instantiation of
+each @samp{template} is linked into the executable, recompiling some
+source files if necessary.
+
+@quotation
+@emph{Note}: This option was first made available in the @samp{GCC}
+2.7.2.1, @samp{Geek Gadgets} snapshot @samp{970109}.
+
+This option is not specific to the AmigaOS port of
+@samp{GCC}, nevertheless it is not fully supported in the baseline
+sources.
+
+This patch has been created in Cygnus Support, a company that is a
+major contributor to the @samp{GNU} project. It has not been
+integrated into the baseline sources due to design disagreements.
+
+The negative form of @samp{-frepo} is @samp{-fno-repo}, and is on by
+default.
+@end quotation
+
+For more information, please refer to the @samp{G++ FAQ}.
+
+@node Attributes, Defines, Invocation, Top
+@chapter Attributes
+@cindex Attributes
+@cindex Variable and function attributes
+
+The following non-standard attributes are available in the AmigaOS
+port of @samp{GCC}:
+
+@menu
+Variable attributes:
+* chip::      Put object in @samp{chip} memory.
+
+Function attributes:
+* saveds::    Reload @samp{a4}.
+* interrupt:: Do not mess with the stack.
+* stackext::  Generate stack extension.
+* regparm::   Pass arguments in registers.
+* stkparm::   Pass arguments on the stack.
+@end menu
+
+@node chip, saveds, Attributes, Attributes
+@section chip
+@cindex chip
+@cindex Put object in chip memory
+
+Amiga hardware requires some data to be located in @samp{chip} memory.
+
+Typically, if an initialized buffer is required (containing a picture
+bitmap, for example), a plain, statically initialized buffer is used,
+and the data is copied into a dynamically allocated @samp{MEMF_CHIP}
+buffer.
+
+This is not necessary with the @samp{chip} attribute. If this
+attribute is specified for an initialized, static variable, it will be
+allocated in @samp{chip} memory automagically by the AmigaOS.
+
+A small example:
+
+@example
+UWORD __attribute__((chip)) bitmap1[] = @{ ... @};
+@end example
+
+@quotation
+@emph{Note}: For compatibility with other AmigaOS @samp{C} compilers,
+a preprocessor symbol @samp{__chip} is available, which expands to
+@code{__attribute__((chip))} (@pxref{Keyword macros}).
+
+All the @samp{chip} attribute does is specifying that data should go
+to a section called @samp{.datachip}. Therefore, the standard
+@samp{GCC} feature @code{__attribute__((section(".datachip")))} can be
+used instead.
+
+This attribute was first made available in the @samp{GCC} 2.7.2.1,
+@samp{Geek Gadgets} snapshot @samp{970328}.
+
+For proper operation, this attribute requires a special version of the
+assembler, which generates standard AmigaOS object files. This version
+is not yet available in @samp{Geek Gadgets} in binary form, since
+support for this object files format is not yet complete.
+@end quotation
+
+@node saveds, interrupt, chip, Attributes
+@section saveds
+@cindex saveds
+@cindex Reload a4
+
+This attribute is ignored, unless base-relative data
+(@pxref{-fbaserel}) is compiled.
+
+To improve speed, programs compiled with the AmigaOS port of
+@samp{GCC} set the @samp{a4} register to the appropriate value only
+once, in the startup code. Code generated with the standard @samp{GCC}
+option @samp{-fpic}, in contrast, sets the @samp{a4} register in every
+function which references global data.
+
+This is only safe as long as all function calls are performed from
+within your own code. Things become ``tricky'' if callback functions,
+like the AmigaOS hooks, interrupt handlers etc. are used. If global
+data is referenced in such functions, @samp{a4} has to be set
+properly.
+
+This is exactly what the @samp{saveds} attribute does: it initializes
+@samp{a4} in the function prologue, and restores it to its original
+value in the function epilogue.
+
+@quotation
+@emph{Note}: For compatibility with other AmigaOS @samp{C} compilers,
+a preprocessor symbol @samp{__saveds} is available, which expands to
+@code{__attribute__((saveds))} (@pxref{Keyword macros}).
+
+Please do not use this attribute in pure executables
+(@pxref{-resident}, @pxref{-resident32}). This is because several
+invocations of pure executables can run concurrently, each one having
+its own data section, and there is no way to find out to which of
+these sections should @samp{a4} be set.
+
+The @samp{saveds} attribute is not necessary in function declarations
+(prototypes).
+@end quotation
+
+This attribute was first made available in the @samp{GCC} 2.7.2.1,
+@samp{Geek Gadgets} snapshot @samp{961012}.
+
+@node interrupt, stackext, saveds, Attributes
+@section interrupt
+@cindex interrupt
+@cindex Do not mess with the stack
+
+This attribute should be used for any kind of callback functions that
+can be called from outside your task. This includes interrupt
+handlers, shared library functions, etc.
+
+Most often, the @samp{interrupt} attribute is only necessary if a
+program is compiled with stack checking or extension
+(@pxref{-mstackcheck}, @pxref{-mstackextend}). It will prevent the
+compiler from generating stack checking or extension code for the
+function it was specified for.
+
+Additionally, it will set @samp{CC} (@dfn{condition codes register})
+in the function epilogue to return value, by performing @code{tstl
+d0}.
+
+@quotation
+@emph{Note}: For compatibility with other AmigaOS @samp{C} compilers,
+a preprocessor symbol @samp{__interrupt} is available, which expands
+to @code{__attribute__((interrupt))} (@pxref{Keyword macros}).
+
+The @samp{interrupt} attribute is mutually exclusive with the
+@samp{stackext} attribute (@pxref{stackext}).
+
+This attribute is not necessary in function declarations (prototypes).
+@end quotation
+
+This attribute was first made available in the @samp{GCC} 2.7.2.1,
+@samp{Geek Gadgets} snapshot @samp{961012}.
+
+@node stackext, regparm, interrupt, Attributes
+@section stackext
+@cindex stackext
+@cindex Generate stack extension
+
+This attribute makes @samp{GCC} generate stack extension code for the
+function for which it was used (@pxref{-mstackextend}). This makes it
+possible to use stack extension selectively, only for the
+``dangerous'' functions --- recursive functions, functions with large
+local variables, etc.
+
+@quotation
+@emph{Note}: For compatibility with other AmigaOS @samp{C} compilers,
+a preprocessor symbol @samp{__stackext} is available, which expands to
+@code{__attribute__((stackext))} (@pxref{Keyword macros}).
+
+The @samp{stackext} attribute is mutually exclusive with the
+@samp{interrupt} attribute (@pxref{interrupt}).
+
+This attribute is not necessary in function declarations (prototypes).
+@end quotation
+
+This attribute was first made available in the @samp{GCC} 2.7.2.1,
+@samp{Geek Gadgets} snapshot @samp{961012}.
+
+@node regparm, stkparm, stackext, Attributes
+@section regparm
+@cindex regparm
+@cindex Pass arguments in registers
+
+The @samp{regparm} attribute, together with the @samp{stkparm}
+attribute (@pxref{stkparm}), can be used to fine-tune the way
+arguments are passed. It makes @samp{GCC} pass arguments in registers
+for the function for which it was used, regardless of whether the
+global @samp{-mregparm} option was used or not (@pxref{-mregparm}).
+
+An optional integer argument ranging from 1 to 4 indicates how many
+arguments of each type should be passed in registers
+(@pxref{-mregparm}). The syntax is the following:
+
+@example
+void __attribute__((regparm(3))) fun(int a, char *str, char b, int c);
+@end example
+
+This will make @samp{GCC} pass @samp{a}, @samp{b} and @samp{c} in
+@samp{d0}, @samp{d1} and @samp{d2}, respectively, and @samp{str} in
+@samp{a0}.
+
+If the argument is not provided, the value given for @samp{-mregparm}
+will be used (or 2 if that option was not specified,
+@pxref{-mregparm}).
+
+@quotation
+@emph{Note}: There is generally no need to use this attribute unless
+files compiled with different calling conventions are linked together.
+
+For compatibility with other AmigaOS @samp{C} compilers, a
+preprocessor symbol @samp{__regargs} is available, which expands to
+@code{__attribute__((regparm))} (@pxref{Keyword macros}).
+
+The @samp{regparm} attribute is mutually exclusive with the
+@samp{stkparm} attribute (@pxref{stkparm}).
+
+This attribute is necessary both in function declarations (prototypes)
+and definitions (function code).
+@end quotation
+
+This attribute was first made available in the @samp{GCC} 2.7.2.1,
+@samp{Geek Gadgets} snapshot @samp{961012}.
+
+@node stkparm, , regparm, Attributes
+@section stkparm
+@cindex stkparm
+@cindex Pass arguments on the stack
+
+The @samp{stkparm} attribute, together with the @samp{regparm}
+attribute (@pxref{regparm}), can be used to fine-tune the way
+arguments are passed. It makes @samp{GCC} pass arguments on stack for
+the function for which it was used, regardless of whether the global
+@samp{-mregparm} option was used or not (@pxref{-mregparm}).
+
+@quotation
+@emph{Note}: There is generally no need to use this attribute unless
+files compiled with different calling conventions are linked together.
+
+For compatibility with other AmigaOS @samp{C} compilers, a
+preprocessor symbol @samp{__stdargs} is available, which expands to
+@code{__attribute__((stkparm))} (@pxref{Keyword macros}).
+
+The @samp{stkparm} attribute is mutually exclusive with the
+@samp{regparm} attribute (@pxref{regparm}).
+
+This attribute is necessary both in function declarations (prototypes)
+and definitions (function code).
+@end quotation
+
+This attribute was first made available in the @samp{GCC} 2.7.2.1,
+@samp{Geek Gadgets} snapshot @samp{961012}.
+
+@node Defines, Miscellaneous, Attributes, Top
+@chapter Defines
+@cindex Defines
+@cindex Preprocessor symbols
+
+The AmigaOS-specific preprocessor symbols available in @samp{GCC} can
+be divided into three groups:
+
+@menu
+* Identifying machine:: What machine is this?
+* Options information:: Which options have been specified?
+* Keyword macros::      Compatibility with other compilers.
+@end menu
+
+@node Identifying machine, Options information, Defines, Defines
+@section Symbols identifying machine
+@cindex Symbols identifying machine
+@cindex What machine is this
+
+The following machine-identifying preprocessor symbols are available:
+
+@table @samp
+@item mc68000
+This macro identifies the machine as having a CPU from the Motorola
+68000 family.
+
+@item amiga
+@item amigaos
+@item amigados
+These macros identify the machine as being an Amiga, running the
+AmigaOS.
+
+@item AMIGA
+@item MCH_AMIGA
+These macros are provided for compatibility with other AmigaOS
+@samp{C} compilers.
+@end table
+
+@quotation
+@emph{Note}: These symbols are available in three groups: plain (as
+specified above), with two leading underscores, and with two leading
+and two tailing underscores. The plain ones are not available when
+compiling with the @samp{-ansi} option.
+
+The @samp{amigados} symbol is obsolete and will be removed in future.
+Please use @samp{amigaos}, which was first made available in the
+@samp{GCC} 2.7.2.1, @samp{Geek Gadgets} snapshot @samp{961012}.
+@end quotation
+
+@node Options information, Keyword macros, Identifying machine, Defines
+@section Symbols identifying specified options
+@cindex Symbols identifying specified options
+@cindex Symbols identifying CPU
+@cindex Symbols identifying ixemul
+@cindex Which CPU model options have been specified
+
+@samp{GCC} has several options to choose the CPU model that the code
+should be generated for. The following preprocessor symbols identify
+which options have been specified on the command line:
+
+@table @samp
+@item mc68020
+Either one of @samp{-m68020}, @samp{-mc68020} or @samp{-mc68020-40}
+has been specified.
+
+@item mc68030
+@samp{-m68030} has been specified.
+
+@item mc68040
+@samp{-m68040} has been specified.
+
+@item mc68060
+@samp{-m68060} @emph{[EXPERIMENTAL]} has been specified.
+
+@item __HAVE_68881__
+@samp{-m68881} has been specified.
+@end table
+
+@quotation
+@emph{Note}: The symbols beginning with @samp{mc} are available in
+three groups: plain (as specified above), with two leading
+underscores, and with two leading and two tailing underscores. The
+plain ones are not available when compiling with the @samp{-ansi}
+option. The ``underscored'' ones were first made available in the
+@samp{GCC} 2.7.2.1, @samp{Geek Gadgets} snapshot @samp{970109}.
+
+@samp{mc68000} is defined regardless of which @samp{-m680x0} options
+have been used.
+@end quotation
+
+In addition to the above, a preprocessor symbol @samp{ixemul}
+(together with the ``underscored'' versions) is available when not
+compiling with @samp{-noixemul} (@pxref{-noixemul}) and identifies the
+runtime environment as @samp{IXEmul}. This symbol was first made
+available in the @samp{GCC} 2.7.2.1, @samp{Geek Gadgets} snapshot
+@samp{970328}.
+
+@node Keyword macros, , Options information, Defines
+@section ``Keyword'' macros
+@cindex Keyword macros
+@cindex Compatibility with other compilers
+
+Most AmigaOS-specific @samp{C} compilers have special ``custom
+keywords'', which make the AmigaOS-specific development easier.
+Unfortunately, the idea of ``custom keywords'' is not available in
+@samp{GCC}. However, @samp{attributes} are available, and they provide
+virtually identical functionality. For compatibility with other
+AmigaOS @samp{C} compilers, preprocessor symbols are provided, which
+expand to the appropriate @samp{attributes} (@pxref{Attributes}).
+
+@table @samp
+@item __chip
+@xref{chip}.
+
+@item __saveds
+@xref{saveds}.
+
+@item __interrupt
+@xref{interrupt}.
+
+@item __stackext
+@xref{stackext}.
+
+@item __regargs
+@xref{regparm}.
+
+@item __stdargs
+@xref{stkparm}.
+
+@item __aligned
+This expands to the standard @samp{GCC}
+@samp{__attribute__((aligned(4)))}.
+@end table
+
+@quotation
+@emph{Note}: With @samp{SAS/C}, these keywords may be specified either
+before or after the type, so the following declaration is correct:
+
+@example
+__saveds void func(void);
+@end example
+
+Unfortunately, the syntax rules of @samp{GCC} 2.7.2.1 do not allow to
+specify the attributes before the type, so the above example must be
+changed to:
+
+@example
+void __saveds func(void);
+@end example
+
+This will be fixed in @samp{GCC} 2.8.0.
+@end quotation
+
+@node Miscellaneous, Index, Defines, Top
+@chapter Miscellaneous
+@cindex Miscellaneous
+@cindex Uncategorizable
+
+The following ``hard to categorize'' features are available in the
+AmigaOS port of @samp{GCC}:
+
+@menu
+* Explicit register specification:: Specify registers for arguments.
+* Case sensitive CPP::              <String.h> is not the same as <string.h>
+* GCCPRIORITY::                     Set the priority of the compiler.
+* Library flavors::                 Linker libraries.
+@end menu
+
+@node Explicit register specification, Case sensitive CPP, Miscellaneous, Miscellaneous
+@section Explicit register specification
+@cindex Explicit register specification
+@cindex Specify registers for arguments
+
+In certain situations, like writing callback hooks, ``patchers'',
+standard shared libraries, etc., functions have to receive arguments
+in particular registers.
+
+@samp{-mregparm} (@pxref{-mregparm}) is not appropriate in this case,
+since it does not give the programmer enough control on @emph{which}
+registers will be used.
+
+To overcome this problem in the AmigaOS port of @samp{GCC}, explicit
+register specification has been extended to be available for function
+arguments, as well:
+
+@example
+void myhook(struct Hook* hook __asm("a0"), APTR object __asm("a2"),
+            APTR message __asm("a1"))
+@{
+	...
+@}
+@end example
+
+@quotation
+@emph{Note}: This feature is currently not available in @samp{G++}.
+
+Only the @samp{ANSI}-style declarations (prototypes) are supported.
+
+Registers have to be specified both in function declarations
+(prototypes) and definitions (function code).
+@end quotation
+
+This feature was first made available in the @samp{GCC} 2.7.2.1,
+@samp{Geek Gadgets} snapshot @samp{961012}.
+
+@node Case sensitive CPP, GCCPRIORITY, Explicit register specification, Miscellaneous
+@section Case sensitive CPP
+@cindex Case sensitive CPP
+@cindex <String.h> is not the same as <string.h>
+
+The preprocessor available in the AmigaOS port of @samp{GCC} is case
+sensitive. This means, that the header names provided in the
+@code{#include} directives have to be correct, including upper and
+lower case letters. This affects only the way the preprocessor works.
+Currently available native AmigaOS file systems are case insensitive.
+
+@quotation
+@emph{Note}: This might seem like a horrible hack and a crazy attempt
+to implement a ``ridiculous'' UNIX feature on Amiga. However, this
+feature has been introduced to terminate the endless @samp{G++}
+problems with a standard @samp{ANSI C} header @file{string.h}: under
+the AmigaOS, a @samp{C++} header @file{String.h} would be included,
+instead.
+@end quotation
+
+@node GCCPRIORITY, Library flavors, Case sensitive CPP, Miscellaneous
+@section GCCPRIORITY
+@cindex GCCPRIORITY
+@cindex Set the priority of the compiler
+
+@samp{GCC} supports one AmigaOS-specific environment variable:
+@samp{GCCPRIORITY}.
+
+This variable specifies the @samp{exec} priority of the compiler. If
+this variable is not set, the default Shell priority will be used.
+
+@quotation
+@emph{Note}: By default, the AmigaOS assigns the priority @samp{0} to
+user tasks. It is thus generally unwise to set @samp{GCCPRIORITY}
+higher than @samp{0}.
+@end quotation
+
+@node Library flavors, , GCCPRIORITY, Miscellaneous
+@section Library flavors
+@cindex Library flavors
+@cindex Linker libraries
+
+The AmigaOS port of @samp{GCC} may use different linker libraries
+depending upon the options used while invoking the compiler. These
+libraries reside in subdirectories of the standard locations, such as
+@file{GG:lib/} or, with @samp{GCC} 2.7.2.1,
+@file{GG:lib/gcc-lib/m68k-amigaos/2.7.2.1/}.
+
+If you invoke @code{gcc} with @samp{-v}, you'll see the precise flavor
+of libraries used as a @samp{-fl} option in the @code{ld} invocation.
+Here is a list of the available flavors (and hence the subdirectories
+names):
+
+@itemize @bullet
+@item 
+@file{libb} corresponds to the @ref{-fbaserel} option.
+@item
+@file{libb32} corresponds to the @ref{-fbaserel32} option.
+@item
+@file{libm020} corresponds to the @samp{-m68020} (or higher) options.
+@item
+@file{libm881} corresponds to the @samp{-m68881} option.
+@item
+@file{libnix} corresponds to the @ref{-noixemul} option.
+@end itemize
+
+More than one flavor can be specified simultaneously. For example,
+when both @ref{-fbaserel} and @samp{-m68020} are specified, the
+libraries will be searched in @file{libb/libm020} subdirectory (as
+well as in @file{libb} subdirectory and in the standard location).
+
+@node Index, , Miscellaneous, Top
+@chapter Index
+@printindex cp
+
+@contents
+@bye

@@ -7,7 +7,7 @@
 -#elif (defined _WIN32 && !defined CYGWIN && ! defined (_UWIN)) \
 -       || defined __MSDOS__
 +#elif (defined (_WIN32) && !defined (CYGWIN) && ! defined (_UWIN)) \
-+       || defined (__MSDOS__) || defined (__amigaos__) || defined (__morphos__)
++       || defined (__MSDOS__) || defined (__amigaos__)
  #define INO_T_EQ(a, b) 0
  #else
  #define INO_T_EQ(a, b) ((a) == (b))

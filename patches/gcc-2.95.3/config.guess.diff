@@ -177,7 +177,7 @@
      alpha:OSF1:*:*)
  	if test $UNAME_RELEASE = "V4.0"; then
  		UNAME_RELEASE=`/usr/sbin/sizer -v | awk '{print $3}'`
-@@ -59,68 +180,82 @@
+@@ -59,68 +180,79 @@
  	# A Tn.n version is a released field test version.
  	# A Xn.n version is an unreleased experimental baselevel.
  	# 1.2 uses "1.2" for uname -r.
@@ -283,9 +283,6 @@
      *:[Aa]miga[Oo][Ss]:*:*)
  	echo ${UNAME_MACHINE}-unknown-amigaos
  	exit 0 ;;
-+    *:MorphOS:*:*)
-+	echo ${UNAME_MACHINE}-unknown-morphos
-+	exit 0 ;;
      arc64:OpenBSD:*:*)
  	echo mips64el-unknown-openbsd${UNAME_RELEASE}
  	exit 0 ;;

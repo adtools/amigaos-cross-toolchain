@@ -15,20 +15,3 @@
  	m68k-*-coff*)
  		tmake_file=m68k/t-m68kbare
  		tm_file="m68k/m68k-coff.h dbx.h libgloss.h"
-@@ -5079,6 +6930,16 @@
- 		tmake_file=rs6000/t-beos
- 		xmake_file=rs6000/x-beos
- 		;;
-+	powerpc-*-morphos*)
-+		cpu_type=rs6000
-+		xm_file=rs6000/xm-morphos.h
-+		tm_file=rs6000/morphos.h
-+		tmake_file=rs6000/t-morphos
-+		xmake_file=rs6000/x-morphos
-+		extra_objs=morphos.o
-+		broken_install=cp
-+		install_headers_dir=install-headers-cp
-+		;;
- 	powerpc-*-sysv* | powerpc-*-elf*)
- 		tm_file=rs6000/sysv4.h
- 		xm_file="xm-siglist.h rs6000/xm-sysv4.h"

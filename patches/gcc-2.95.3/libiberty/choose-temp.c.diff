@@ -4,7 +4,7 @@
  #if defined (__MSDOS__) || (defined (_WIN32) && ! defined (__CYGWIN__) && ! defined (_UWIN))
  #define DIR_SEPARATOR '\\'
  #endif
-+#if defined(__amigaos__) || defined(__morphos__)
++#if defined(__amigaos__)
 +#define VOL_SEPARATOR ':'
 +#endif
  #endif

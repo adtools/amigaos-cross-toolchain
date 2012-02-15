@@ -39,7 +39,7 @@
    compile_file (filename);
  
 -#if !defined(OS2) && !defined(VMS) && (!defined(_WIN32) || defined (__CYGWIN__)) && !defined(__INTERIX)
-+#if !defined(OS2) && !defined(VMS) && (!defined(_WIN32) || defined (__CYGWIN__)) && !defined(__INTERIX) && !defined (__amigaos__) && !defined (__morphos__)
++#if !defined(OS2) && !defined(VMS) && (!defined(_WIN32) || defined (__CYGWIN__)) && !defined(__INTERIX) && !defined (__amigaos__)
    if (flag_print_mem)
      {
        char *lim = (char *) sbrk (0);
@@ -48,7 +48,7 @@
  #endif
      }
 -#endif /* ! OS2 && ! VMS && (! _WIN32 || CYGWIN) && ! __INTERIX */
-+#endif /* ! OS2 && ! VMS && (! _WIN32 || CYGWIN) && ! __INTERIX  && ! __amigaos__ && ! __morphos__ */
++#endif /* ! OS2 && ! VMS && (! _WIN32 || CYGWIN) && ! __INTERIX  && ! __amigaos__ */
  
    if (errorcount)
      exit (FATAL_EXIT_CODE);

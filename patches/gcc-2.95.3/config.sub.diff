@@ -540,7 +540,7 @@
  	mipsel*-linux*)
  		basic_machine=mipsel-unknown
  		os=-linux-gnu
-@@ -548,24 +616,36 @@
+@@ -548,24 +616,32 @@
  	mips3*)
  		basic_machine=`echo $basic_machine | sed -e 's/mips3/mips64/'`-unknown
  		;;
@@ -555,10 +555,6 @@
  		;;
 -	msdos)						# EGCS LOCAL
 -		basic_machine=i386-unknown	
-+	morphos)
-+		basic_machine=powerpc-unknown
-+		os=-morphos
-+		;;
 +	msdos)
 +		basic_machine=i386-pc
  		os=-msdos
@@ -850,7 +846,7 @@
  	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
 -	      | -amigaos* | -amigados* | -msdos* | -newsos* | -unicos* | -aof* \
 -	      | -aos* \
-+	      | -amigaos* | -amigados* | -morphos* \
++	      | -amigaos* | -amigados* \
 +	      | -msdos* | -newsos* | -unicos* | -aof* | -aos* \
  	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* \
  	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \

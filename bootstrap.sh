@@ -117,7 +117,7 @@ function build_binutils {
     --prefix="${TARGET_DIR}" \
     --target=m68k-amigaos
   make all
-  make install
+  make install install-info
   popd
 
 	touch "${STAMP}/build-binutils"

@@ -52,9 +52,6 @@ function unpack_sources {
     xargs -n 2 cp -v
   popd
 
-  rm -rf "${FD2INLINE}"
-  tar -xzf "${ARCHIVES}/${FD2INLINE_SRC}"
-
   rm -rf "${SFDC}"
   lha -xq "${ARCHIVES}/${SFDC_SRC}"
   tar -xzf "${SFDC}.tar.gz"
@@ -65,6 +62,12 @@ function unpack_sources {
   rm -rf "${NDK}"
   lha -xq "${ARCHIVES}/${NDK_SRC}"
   rm -rf ndk_* *.info
+  pushd "${NDK}"
+  mkdir Include/include_h/inline
+  find "${PATCHES}/${NDK}" -type f -iname '*.diff' | xargs cat | patch -p1
+  find "${PATCHES}/${NDK}" -type f \! -name '*.diff' -printf "%p %P\n" | \
+    xargs -n 2 cp -v
+  popd
 
   rm -rf "${IXEMUL}"
   lha -xq "${ARCHIVES}/${IXEMUL_SRC}"
@@ -187,12 +190,6 @@ function process_headers {
 
   pushd "${TARGET_DIR}/include"
   cp -av "${SOURCES}/${NDK}/Include/include_h/"* .
-  mkdir -p clib proto inline
-  patch -d devices -p0 < ${SOURCES}/${FD2INLINE}/patches/timer.h.diff
-  cp -v "${SOURCES}/${FD2INLINE}/include-src/inline/alib.h" inline/
-  cp -v "${SOURCES}/${FD2INLINE}/include-src/inline/macros.h" inline/
-  cp -v "${SOURCES}/${FD2INLINE}/include-src/inline/stubs.h" inline/
-  cp -v "${SOURCES}/${FD2INLINE}/include-src/proto/alib.h" proto/
   for file in ${SOURCES}/${NDK}/Include/sfd/*.sfd; do
     base=$(basename ${file%_lib.sfd})
 

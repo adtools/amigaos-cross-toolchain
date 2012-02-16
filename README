@@ -27,7 +27,6 @@ Prerequisites (look at bootstrap.conf file):
  * Amiga specific sources & binaries:
    - libnix 2.1
    - AmigaOS NDK 3.9
-   - fd2inline 1.21
    - sfdc 1.4
    - libamiga-bin
 
@@ -43,8 +42,8 @@ TODO:
     - Cygwin
   * Remove dependencies:
     - gcc 3.4
-    - fd2inline
     - libamiga-bin
   * Make it installable into some prefix.
   * Provide some rudimentary testing (C / C++ sources).
   * Build ixemul.
+  * Add auxiliary tools: GccFindHit, hunk2aout.

@@ -19,9 +19,6 @@ download \
   "libnix-2.1.tar.gz"
 download "http://www.haage-partner.de/download/AmigaOS/NDK39.lha"
 download \
-  "http://ftp.back2roots.org/geekgadgets/amiga/m68k/alpha/fd2inline/fd2inline-1.21-src.tgz" \
-  "fd2inline-1.21.tar.gz"
-download \
   "http://aminet.net/dev/gcc/sfdc.lha" \
   "sfdc-1.4.lha"
 download \

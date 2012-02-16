@@ -1,0 +1,21 @@
+	README for GccFindHit V1.2, 25/05/95
+
+This tool should be used in conjunction with Enforcer.
+Its purpose is to find the source name/line corresponding to a given offset
+in the executable. Very simple to use:
+when your program named, say, 'prog', is a bad boy
+and makes Enforcer hit(s), remember the offset(s) of the hit(s) displayed
+by Enforcer and run the command 'GccFindHit prog <list of offsets in hex>'
+The offsets are separated by blanks.
+Enforcer gives also the hunk number, but it should always be zero.
+If it's not and your program is compiled by gcc, please let me know
+about it.
+GccFindHit understands the stabs from the aout format encapsulated
+in the debug hunk of the AmigaOS executable, so it will work as
+long as ld outputs its debug information this way.
+Source code is included and it is distributed under the GPL
+See the file COPYING for details about the GPL. If it's not in
+the archive, please contact the site/person/organization you got
+this program from, and tell them it is *required*
+
+	Daniel Verite -- daniel@brainstorm.eu.org

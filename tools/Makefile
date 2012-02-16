@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O2 -Wall -I../target/include
+CFLAGS = -O2 -Wall -I../target/include -I../target/m68k-amigaos/sys-include
 
 all:  GccFindHit hunk2aout
 

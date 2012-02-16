@@ -193,8 +193,6 @@ function process_headers {
   for file in ${SOURCES}/${NDK}/Include/sfd/*.sfd; do
     base=$(basename ${file%_lib.sfd})
 
-    sfdc --target=m68k-amigaos --mode=clib \
-      --output="clib/${base}_protos.h" $file
     sfdc --target=m68k-amigaos --mode=proto \
       --output="proto/${base}.h" $file
     sfdc --target=m68k-amigaos --mode=macros \

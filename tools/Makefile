@@ -5,7 +5,7 @@ BINS = GccFindHit hunk2aout
 
 all: $(BINS)
 
-GccFindHit.o: GccFindHit.c defs.h
+GccFindHit.o: GccFindHit.c defs.h a.out.h
 hunk2aout.o: hunk2aout.c a.out.h
 
 clean:

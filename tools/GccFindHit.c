@@ -49,6 +49,8 @@
 
 #include "defs.h"
 
+typedef struct nlist BSD_SYM;
+
 static int ExeFile,NbOffs;
 static int32_t *SearchOffs;
 
@@ -153,13 +155,13 @@ void GetLines (int32_t symsz, BSD_SYM *syms, int32_t string_offset)
   int i;
 
   while (nbsyms--) {
-    switch (sym->type) {
+    switch (sym->n_type) {
       case N_SO:
       case N_SOL:
-        srcname = GETLONG (sym->strx);
+        srcname = GETLONG (sym->n_un.n_strx);
         break;
       case N_SLINE:
-        offs = OFFSET_N_SLINE (GETLONG (sym->value));
+        offs = OFFSET_N_SLINE (GETLONG (sym->n_value));
         for (i = 0; i < NbOffs; i++) {
           if (SearchOffs[i] >= prev_offs && SearchOffs[i] < offs) {
             printf ("%s: line %hd, offset 0x%x\n", get_string(prev_src +
@@ -167,11 +169,11 @@ void GetLines (int32_t symsz, BSD_SYM *syms, int32_t string_offset)
           }
         }
         prev_offs = offs;
-        prev_line = GETWORD (sym->desc);
+        prev_line = GETWORD (sym->n_desc);
         prev_src = srcname;
         break;
     }
-    prev_type = sym->type;
+    prev_type = sym->n_type;
     sym++;
   }
   /* the last SLINE is a special case */
@@ -199,15 +201,15 @@ void HunkDebug (void)
       strsz = GETLONG (hdr.strsz);
       symsz = GETLONG (hdr.symsz);
       if (strsz + symsz != 0) {
-	syms = (char*)malloc (symsz);
-	if (syms) {
-	  if (read (ExeFile, syms, symsz) == symsz) {
-	    pos = lseek(ExeFile, strsz, SEEK_CUR);
+        syms = (char*)malloc (symsz);
+        if (syms) {
+          if (read (ExeFile, syms, symsz) == symsz) {
+            pos = lseek(ExeFile, strsz, SEEK_CUR);
             if (pos > 0)
-	      GetLines (symsz, (BSD_SYM*)syms, pos - strsz);
-	  }
-	  free (syms);
-	}
+              GetLines (symsz, (BSD_SYM*)syms, pos - strsz);
+          }
+          free (syms);
+        }
       }
     }
   }
@@ -239,9 +241,9 @@ void DoHunks (struct Header *h)
     case HUNK_RELOC32:
     case HUNK_RELOC16:
     case HUNK_RELOC8:
-    case HUNK_DRELOC32:
-    case HUNK_DRELOC16:
-    case HUNK_DRELOC8:
+    case HUNK_DREL32:
+    case HUNK_DREL16:
+    case HUNK_DREL8:
       SkipRelocation();
       break;
     case HUNK_RELOC32SHORT:

@@ -81,6 +81,7 @@ struct relocation_info {
  */
 
 #define N_UNDF  0x00    /* undefined */
+#define N_EXT   0x01    /* external (global) bit, OR'ed in */
 #define N_ABS   0x02    /* absolute address */
 #define N_TEXT  0x04    /* text segment */
 #define N_DATA  0x06    /* data segment */
@@ -90,9 +91,11 @@ struct relocation_info {
 #define N_COMM  0x12    /* common reference */
 #define N_FN    0x1e    /* file name (N_EXT on) */
 #define N_WARN  0x1e    /* warning message (N_EXT off) */
-#define N_EXT   0x01    /* external (global) bit, OR'ed in */
 #define N_TYPE  0x1e    /* mask for all the type bits */
-#define N_STAB  0x0e0   /* mask for debugger symbols -- stab(5) */
+#define N_SLINE 0x44    /* line number in text segment */
+#define N_SO    0x64    /* name of main source file */
+#define N_SOL   0x84    /* name of sub-source file (#include file) */
+#define N_STAB  0xe0    /* mask for debugger symbols -- stab(5) */
 
 struct nlist {
   union {

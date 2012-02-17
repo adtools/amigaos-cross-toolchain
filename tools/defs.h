@@ -15,10 +15,6 @@
 #define GETWORD(x) ntohs(x)
 #define GETLONG(x) ntohl(x)
 
-#define	N_SO	  0x64
-#define	N_SOL	  0x84
-#define	N_SLINE	0x44
-
 /* Converts an SLINE value to an offset in the text section.
    This definition is OK for ld 1.8, currently used on the Amiga AFAIK,
    but you may change that for another linker */

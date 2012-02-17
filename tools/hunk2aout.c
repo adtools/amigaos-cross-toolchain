@@ -49,15 +49,7 @@
 #include <stdint.h>
 #include <errno.h>
 
-#include "a.out.h"
-
-/* This is really <dos/doshunks.h>, which is a 2.0 header file.
- * You can get those 2.0 headers from CATS.
- * Sorry, I'm not allowed to include them here. You may as well take the
- * AmigaDOS Manual 2nd ed. (you'll miss the a4-rel hunks) or 3rd ed. and write
- * the header yourself, it's not that long and difficult
- */
-#include <dos/doshunks.h>
+#include "defs.h"
 
 /* strangely enough, this is missing from the doshunks.h file */
 #define HUNK_ATTRIBUTE(h) ((h) >> 30)
@@ -128,7 +120,7 @@ static void emit_aout_file(int fd, void *text, void *data, void *chip_data,
 static void next_hunk(uint32_t **hp)
 {
   /* skip over the length field and the there given length */
-  *hp += 1 + **hp;
+  *hp += 1 + GETLONG(**hp);
 }
 
 
@@ -306,7 +298,7 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
 
   while (units < 2)
   {
-    switch (HUNK_VALUE(*file_ptr++))
+    switch (HUNK_VALUE(GETLONG(*file_ptr++)))
     {
       case HUNK_UNIT:
         DP(("HUNK_UNIT: units = %d\n", units));
@@ -349,7 +341,7 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
         hdr.a_magic = OMAGIC;
         hunk_num = 0;
         next_hunk (& file_ptr);
-        if (! silent_mode)
+        if (silent_mode)
         {
           putchar ('.');
           fflush (stdout);
@@ -379,18 +371,18 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
          * be able to convert a loadfile into an object file?! */
 
         /* skip (never used) resident library names */
-        while (file_ptr[0]) next_hunk (& file_ptr);
+        while (GETLONG(file_ptr[0])) next_hunk (& file_ptr);
         /* skip null-word, table_size, F & L, and size-table */
-        file_ptr += 4 + (file_ptr[1] - file_ptr[2] + 1);
+        file_ptr += 4 + (GETLONG(file_ptr[1]) - GETLONG(file_ptr[2]) + 1);
         break;
 
       case HUNK_CODE:
-        DP(("HUNK_CODE, size = $%x\n", file_ptr[0] << 2));
-        is_chip = HUNK_ATTRIBUTE(file_ptr[-1]) == HUNK_ATTR_CHIP;
+        DP(("HUNK_CODE, size = $%x\n", GETLONG(file_ptr[0]) << 2));
+        is_chip = HUNK_ATTRIBUTE(GETLONG(file_ptr[-1])) == HUNK_ATTR_CHIP;
         if (is_chip)
           fprintf (stderr, "CHIP code hunks are not supported, "
               "ignoring CHIP attribute\n");
-        if (file_ptr[0])
+        if (GETLONG(file_ptr[0]))
         {
           /* only accept one code hunk with size != 0 */
           if (hdr.a_text)
@@ -398,7 +390,7 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
           else
           {
             text = (uint8_t *)&file_ptr[1];
-            hdr.a_text = file_ptr[0] << 2;
+            hdr.a_text = GETLONG(file_ptr[0]) << 2;
           }
         }
         next_hunk (& file_ptr);
@@ -407,9 +399,9 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
         break;
 
       case HUNK_DATA:
-        DP(("HUNK_DATA, size = $%x\n", file_ptr[0] << 2));
-        is_chip = HUNK_ATTRIBUTE(file_ptr[-1]) == HUNK_ATTR_CHIP;
-        if (file_ptr[0])
+        DP(("HUNK_DATA, size = $%x\n", GETLONG(file_ptr[0]) << 2));
+        is_chip = HUNK_ATTRIBUTE(GETLONG(file_ptr[-1])) == HUNK_ATTR_CHIP;
+        if (GETLONG(file_ptr[0]))
         {
           /* only accept one data hunk with size != 0 */
           if (is_chip)
@@ -419,7 +411,7 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
             else
             {
               chip_data = (uint8_t *) &file_ptr[1];
-              chip_data_size = file_ptr[0] << 2;
+              chip_data_size = GETLONG(file_ptr[0]) << 2;
             }
           }
           else
@@ -429,7 +421,7 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
             else
             {
               data = (uint8_t *)&file_ptr[1];
-              hdr.a_data = file_ptr[0] << 2;
+              hdr.a_data = GETLONG(file_ptr[0]) << 2;
             }
           }
         }
@@ -439,9 +431,9 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
         break;
 
       case HUNK_BSS:
-        DP(("HUNK_BSS, size = $%x\n", file_ptr[0] << 2));
+        DP(("HUNK_BSS, size = $%x\n", GETLONG(file_ptr[0]) << 2));
         is_chip = HUNK_ATTRIBUTE(file_ptr[-1]) == HUNK_ATTR_CHIP;
-        if (file_ptr[0])
+        if (GETLONG(file_ptr[0]))
         {
           /* only accept one bss hunk with size != 0 */
           if (is_chip)
@@ -449,14 +441,14 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
             if (chip_bss_size)
               limit_hunk ("chip bss");
             else
-              chip_bss_size = file_ptr[0] << 2;
+              chip_bss_size = GETLONG(file_ptr[0]) << 2;
           }
           else
           {
             if (hdr.a_bss)
               limit_hunk ("bss");
             else
-              hdr.a_bss = file_ptr[0] << 2;
+              hdr.a_bss = GETLONG(file_ptr[0]) << 2;
           }
         }
         file_ptr++;
@@ -474,22 +466,22 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
         {
           int size, brel;
 
-          brel = file_ptr[-1] >= HUNK_DREL32;
-          size = (brel ? HUNK_DREL8 : HUNK_RELOC8) - file_ptr[-1];
-          DP(("HUNK_RELOC/DREL ($%x), brel = %d, size = %d\n", file_ptr[-1], brel, size));
+          brel = GETLONG(file_ptr[-1]) >= HUNK_DREL32;
+          size = (brel ? HUNK_DREL8 : HUNK_RELOC8) - GETLONG(file_ptr[-1]);
+          DP(("HUNK_RELOC/DREL ($%x), brel = %d, size = %d\n", GETLONG(file_ptr[-1]), brel, size));
 
-          while (file_ptr[0])
+          while (GETLONG(file_ptr[0]))
           {
-            long to_reloc = file_ptr[1];
-            long n        = file_ptr[0];
+            long to_reloc = GETLONG(file_ptr[1]);
+            long n        = GETLONG(file_ptr[0]);
 
             while (n--)
               /* amiga relocs are automatically pcrel, when size < 2
                * according to the AmigaDOS-Manual 2nd ed. */
-              add_reloc (&reloc_tab, hunk_num-1, to_reloc, file_ptr[n+2],
+              add_reloc (&reloc_tab, hunk_num-1, to_reloc, GETLONG(file_ptr[n+2]),
                   size, size != 2, brel, -1);
 
-            file_ptr += file_ptr[0] + 2;
+            file_ptr += GETLONG(file_ptr[0]) + 2;
           }
         }
         file_ptr++;
@@ -498,35 +490,39 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
       case HUNK_SYMBOL:
       case HUNK_EXT:
         DP(("HUNK_SYMBOL/EXT\n"));
-        while (file_ptr[0])
+        while (GETLONG(file_ptr[0]))
         {
           int n, size, brel;
 
+#if 0
           DP(("  EXT_: %d, %-*.*s\n", file_ptr[0] >> 24, 
                 4*(file_ptr[0] & 0xffffff), 4*(file_ptr[0] & 0xffffff), &file_ptr[1]));
+#endif
 
-          switch (file_ptr[0] >> 24)
+          switch (GETLONG(file_ptr[0]) >> 24)
           {
             case EXT_SYMB:
             case EXT_DEF:
             case EXT_ABS:
             case EXT_RES:
-              add_symbol (&symbol_tab, hunk_num-1, file_ptr[0], 
-                  file_ptr[1+(file_ptr[0] & 0xffffff)],
+              add_symbol (&symbol_tab, hunk_num-1,
+                  GETLONG(file_ptr[0]),
+                  file_ptr[1+(GETLONG(file_ptr[0]) & 0xffffff)], 
                   (char *)&file_ptr[1]);
-              file_ptr += 2+(file_ptr[0] & 0xffffff);
+              file_ptr += 2+(GETLONG(file_ptr[0]) & 0xffffff);
               break;
 
             case EXT_COMMON:
               /* first define the common symbol, then add the relocs */
-              add_symbol (&symbol_tab, hunk_num-1, file_ptr[0], 
-                  file_ptr[1+(file_ptr[0] & 0xffffff)],
+              add_symbol (&symbol_tab, hunk_num-1,
+                  GETLONG(file_ptr[0]), 
+                  file_ptr[1+(GETLONG(file_ptr[0]) & 0xffffff)],
                   (char *)&file_ptr[1]);
-              file_ptr += 2+(file_ptr[0] & 0xffffff);
+              file_ptr += 2+(GETLONG(file_ptr[0]) & 0xffffff);
 
               /* now the references, translated into relocs */
               for (n = file_ptr[0]; n--; )
-                add_reloc (&reloc_tab, hunk_num - 1, -1, file_ptr[n],
+                add_reloc (&reloc_tab, hunk_num - 1, -1, GETLONG(file_ptr[n]),
                     2, 0, 0, symbol_tab.i - 1);
               next_hunk (&file_ptr);
               break;
@@ -537,19 +533,19 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
             case EXT_DEXT8:
             case EXT_DEXT16:
             case EXT_DEXT32:
-              size = file_ptr[0] >> 24;
+              size = GETLONG(file_ptr[0]) >> 24;
               brel = size >= EXT_DEXT32;
               size = (size == EXT_REF32 || size == EXT_DEXT32) ? 2 :
                 ((size == EXT_REF16 || size == EXT_DEXT16) ? 1 : 0);
               /* first define the symbol (as undefined ;-)), 
                * then add the relocs */
-              add_symbol (&symbol_tab, hunk_num-1, file_ptr[0], 
+              add_symbol (&symbol_tab, hunk_num-1, GETLONG(file_ptr[0]), 
                   0, (char *)&file_ptr[1]);
-              file_ptr += 1+(file_ptr[0] & 0xffffff);
+              file_ptr += 1+(GETLONG(file_ptr[0]) & 0xffffff);
 
               /* now the references, translated into relocs */
-              for (n = file_ptr[0]; n; n--)
-                add_reloc (&reloc_tab, hunk_num - 1, -1, file_ptr[n],
+              for (n = GETLONG(file_ptr[0]); n; n--)
+                add_reloc (&reloc_tab, hunk_num - 1, -1, GETLONG(file_ptr[n]),
                     size, size < 2, brel, symbol_tab.i - 1);
               next_hunk (&file_ptr);
               break;
@@ -557,7 +553,7 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
             default:
               fprintf (stderr, 
                   "Unknown symbol type %d, don't know how to handle!\n",
-                  file_ptr[0] >> 24);
+                  GETLONG(file_ptr[0]) >> 24);
               /* can't continue, don't know how much to advance the file_ptr
                * to reach the next valid hunk/block */
               exit(20);
@@ -577,7 +573,7 @@ static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
 
       default:
         fprintf (stderr, "Unknown hunk type $%x, unit offset = $%x.\n",
-            file_ptr[-1], ((file_ptr-1)-*file_pptr) * 2);
+            GETLONG(file_ptr[-1]), ((file_ptr-1)-*file_pptr) * 2);
         /* can't continue, don't know how much to advance the file_ptr
          * to reach the next valid hunk/block */
         exit(20);
@@ -893,8 +889,22 @@ static void emit_aout_file (int fd, void *text, void *data, void *chip_data,
   hdr->a_syms = symbol_tab->i * sizeof (struct nlist);
   hdr->a_trsize = text_relocs.i * sizeof (struct relocation_info);
   hdr->a_drsize = data_relocs.i * sizeof (struct relocation_info);
-  *(uint32_t *)str_table = strtab_index;
-  write (fd, (char *)hdr, sizeof (*hdr));
+  *(uint32_t *)str_table = PUTLONG(strtab_index);
+  {
+    struct exec hdr_be;;
+    
+    hdr_be.a_mid    = PUTWORD(hdr->a_mid);
+    hdr_be.a_magic  = PUTWORD(hdr->a_magic);
+    hdr_be.a_text   = PUTLONG(hdr->a_text);
+    hdr_be.a_data   = PUTLONG(hdr->a_data);
+    hdr_be.a_bss    = PUTLONG(hdr->a_bss);
+    hdr_be.a_syms   = PUTLONG(hdr->a_syms);
+    hdr_be.a_entry  = PUTLONG(hdr->a_entry);
+    hdr_be.a_trsize = PUTLONG(hdr->a_trsize);
+    hdr_be.a_drsize = PUTLONG(hdr->a_drsize);
+
+    write (fd, (char *)&hdr_be, sizeof (hdr_be));
+  }
   if (hdr->a_text) write (fd, text, hdr->a_text);
   if (hdr->a_data - chip_data_size > 0)
     write (fd, data, hdr->a_data - chip_data_size);

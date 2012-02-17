@@ -1,9 +1,14 @@
 CC = gcc
-CFLAGS = -O2 -Wall -I../target/include -I../target/m68k-amigaos/sys-include
+CFLAGS = -O2 -Wall -I../target/include
 
-all:  GccFindHit hunk2aout
+BINS = GccFindHit hunk2aout
+
+all: $(BINS)
 
 GccFindHit.o: GccFindHit.c defs.h
-hunk2aout.o: hunk2aout.c
+hunk2aout.o: hunk2aout.c a.out.h
 
-clean: GccFindHit hunk2aout
+clean:
+	rm -f $(BINS) *.o *~
+
+# vim: set noexpandtab ts=8 sw=8 :

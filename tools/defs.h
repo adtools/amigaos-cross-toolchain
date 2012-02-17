@@ -56,24 +56,24 @@ enum {
 
 /* amigaos hunk header structure */
 struct Header {
-  long	nb_hunks;
-  long	first;
-  long	last;
-  long	sizes[1];
+  int32_t	nb_hunks;
+  int32_t	first;
+  int32_t	last;
+  int32_t	sizes[1];
 };
 
 /* bsd header structure */
 struct bsd_header{
-  long	magic;
-  long	symsz;
-  long	strsz;
+  int32_t	magic;
+  int32_t	symsz;
+  int32_t	strsz;
 };
 
 typedef struct {
-  long strx;
-  unsigned char	type;
-  unsigned char other;
-  unsigned short desc;
-  long	value;
+  int32_t strx;
+  uint8_t	type;
+  uint8_t other;
+  uint16_t desc;
+  int32_t	value;
 } BSD_SYM;
 

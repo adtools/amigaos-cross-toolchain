@@ -44,17 +44,17 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdint.h>
+#include <errno.h>
 
 #include "defs.h"
 
-extern int errno;
+static int ExeFile,NbOffs;
+static int32_t *SearchOffs;
 
-int ExeFile,NbOffs;
-unsigned long *SearchOffs;
+const char version_id[] = "\000$VER: GccFindHit 1.2.1 (07.12.96)";
 
-static const char version_id[] = "\000$VER: GccFindHit 1.2.1 (07.12.96)";
-
-int Read4 (long *buf)
+int Read4 (int32_t *buf)
 {
   if (read (ExeFile,buf,4)==4) {
     *buf = GETLONG(*buf);
@@ -66,7 +66,7 @@ int Read4 (long *buf)
 
 struct Header *ReadHeader ()
 {
-  long nb,size;
+  int32_t nb,size;
   struct Header *h;
   int i;
 
@@ -77,7 +77,7 @@ struct Header *ReadHeader ()
   /* reads the number of hunks */
   if (!Read4(&nb))
     return NULL;
-  h = (struct Header*)malloc(sizeof(struct Header)+(nb-1)*sizeof(long));
+  h = (struct Header*)malloc(sizeof(struct Header)+(nb-1)*sizeof(int32_t));
   if (!h)
     return NULL;
   h->nb_hunks = nb;
@@ -91,15 +91,15 @@ struct Header *ReadHeader ()
   return h;
 } /* ReadHeader() */
 
-int long_cmp (long *e1,long *e2)
+int long_cmp (int32_t *e1,int32_t *e2)
 {
   return (*e1)<(*e2);
 }
 
 void SkipRelocation ()
 {
-  unsigned long no; /* number of offsets */
-  long h;  /* hunk number */
+  int32_t no; /* number of offsets */
+  int32_t h;  /* hunk number */
   while (Read4 (&no) && no && Read4 (&h))
     lseek (ExeFile, no<<2, SEEK_CUR);
 }
@@ -108,8 +108,8 @@ void SkipRelocation ()
    so it's useless for now */
 void SkipShortRel ()
 {
-  unsigned long no;
-  short h;
+  int32_t no;
+  int16_t h;
   while (Read4 (&no) && no && read (ExeFile, &h, sizeof h))
     lseek (ExeFile, no<<1, SEEK_CUR);
 }
@@ -117,7 +117,7 @@ void SkipShortRel ()
 /* can be slow if I/O buffering doesn't do some read-ahead */
 void SkipSymbols ()
 {
-  long nl; /* name length in long words */
+  int32_t nl; /* name length in long words */
   while (Read4 (&nl) && nl) {
     /* skips the name + the value */
     lseek (ExeFile, (nl+1)<<2, SEEK_CUR);
@@ -127,12 +127,12 @@ void SkipSymbols ()
 /* skip hunks such as HUNK_NAME that have their size in the first long */
 void SkipHunk ()
 {
-  unsigned long size;
+  int32_t size;
   if (Read4 (&size))
     lseek (ExeFile, size<<2, SEEK_CUR);
 }
 
-char *get_string(long offset)
+char *get_string(int32_t offset)
 {
   static char buf[256];
 
@@ -142,35 +142,34 @@ char *get_string(long offset)
   return buf;
 }
 
-void GetLines (long symsz, BSD_SYM *syms, long string_offset)
+void GetLines (int32_t symsz, BSD_SYM *syms, int32_t string_offset)
 {
-  long nbsyms = symsz / sizeof(BSD_SYM);
+  int32_t nbsyms = symsz / sizeof(BSD_SYM);
   BSD_SYM *sym = syms;
-  unsigned char prev_type;
-  long srcname = 0, prev_src = 0;
-  unsigned short prev_line = 0;
-  unsigned long offs , prev_offs = -1UL;
+  uint8_t prev_type;
+  int32_t srcname = 0, prev_src = 0;
+  uint16_t prev_line = 0;
+  uint32_t offs , prev_offs = -1UL;
   int i;
 
   while (nbsyms--) {
     switch (sym->type) {
-    case N_SO:
-    case N_SOL:
-      srcname = GETLONG (sym->strx);
-      break;
-    case N_SLINE:
-      offs = OFFSET_N_SLINE (GETLONG (sym->value));
-      for (i = 0; i < NbOffs; i++) {
-	if (SearchOffs[i] >= prev_offs && SearchOffs[i] < offs) {
-	  printf ("%s: line %hd, offset 0x%lx\n",
-                  get_string(prev_src + string_offset), prev_line,
-		  prev_offs);
-	}
-      }
-      prev_offs = offs;
-      prev_line = GETWORD (sym->desc);
-      prev_src = srcname;
-      break;
+      case N_SO:
+      case N_SOL:
+        srcname = GETLONG (sym->strx);
+        break;
+      case N_SLINE:
+        offs = OFFSET_N_SLINE (GETLONG (sym->value));
+        for (i = 0; i < NbOffs; i++) {
+          if (SearchOffs[i] >= prev_offs && SearchOffs[i] < offs) {
+            printf ("%s: line %hd, offset 0x%x\n", get_string(prev_src +
+                  string_offset), prev_line, prev_offs);
+          }
+        }
+        prev_offs = offs;
+        prev_line = GETWORD (sym->desc);
+        prev_src = srcname;
+        break;
     }
     prev_type = sym->type;
     sym++;
@@ -178,18 +177,18 @@ void GetLines (long symsz, BSD_SYM *syms, long string_offset)
   /* the last SLINE is a special case */
   for (i = 0; i < NbOffs; i++) {
     if (SearchOffs[i] == prev_offs) {
-      printf ("%s: line %hd, offset 0x%lx\n",
-              get_string(prev_src + string_offset), prev_line,
-	      prev_offs);
+      printf ("%s: line %hd, offset 0x%x\n",
+          get_string(prev_src + string_offset), prev_line,
+          prev_offs);
     }
   }
 }
 
 void HunkDebug (void)
 {
-  long hunksz, symsz, strsz;
+  int32_t hunksz, symsz, strsz;
   struct bsd_header hdr;
-  long pos, init_pos = lseek (ExeFile, 0, SEEK_CUR);
+  int32_t pos, init_pos = lseek (ExeFile, 0, SEEK_CUR);
   char *syms;
 
   if (init_pos < 0)
@@ -218,7 +217,7 @@ void HunkDebug (void)
 
 void DoHunks (struct Header *h)
 {
-  long hnum,size,nsec=0;
+  int32_t hnum,size,nsec=0;
   while (Read4 (&hnum)) {
     switch (hnum) {
     case HUNK_NAME:
@@ -255,7 +254,7 @@ void DoHunks (struct Header *h)
       HunkDebug ();
       break;
     default:
-      fprintf (stderr, "Unexpected hunk 0x%lx\n", hnum);
+      fprintf (stderr, "Unexpected hunk 0x%x\n", hnum);
       return;
     }
   }
@@ -270,7 +269,7 @@ void Out(int code)
 
 int main(int argc,char **argv)
 {
-  long HunkNum;
+  int32_t HunkNum;
   struct Header *header=NULL;
   int i;
 
@@ -284,13 +283,13 @@ int main(int argc,char **argv)
     Out (1);
   }
   NbOffs = argc-2;
-  SearchOffs = (long*)malloc (sizeof (long)*NbOffs);
+  SearchOffs = (int32_t*)malloc (sizeof (int32_t)*NbOffs);
   if (!SearchOffs) {
     fprintf (stderr,"No memory\n");
     Out (1);
   }
   for (i=0; i<NbOffs; i++) {
-    if (sscanf (argv[i+2],"%lx",&SearchOffs[i])!=1) {
+    if (sscanf (argv[i+2],"%x",&SearchOffs[i])!=1) {
       fprintf (stderr, "Operand %s is not an hex offset\n", argv[i+2]);
       Out (1);
     }

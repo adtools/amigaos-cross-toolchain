@@ -42,19 +42,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/file.h>
-#ifdef i386
-#undef i386
-#include <a.out.h>
-#define i386
-#else
-#include <a.out.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdint.h>
 #include <errno.h>
+
+#include "a.out.h"
 
 /* This is really <dos/doshunks.h>, which is a 2.0 header file.
  * You can get those 2.0 headers from CATS.
@@ -81,7 +76,7 @@
 #define DP(a)
 #endif
 
-static char *version_tag = "\0$VER: hunk2aout 2.0 (1.3.97)\r\n";
+char *version_tag = "\0$VER: hunk2aout 2.0 (1.3.97)\r\n";
 
 static uint32_t *file_buf = 0;
 
@@ -117,18 +112,20 @@ struct table {
   int max_el;
 };
 
-void emit_aout_file (int fd, void *text, void *data, void *chip_data,
-		struct exec *hdr, int chip_data_size, int chip_bss_size,
-		struct table *ch_tab, struct table *dh_tab, struct table *bh_tab,
-		struct table *cdh_tab, struct table *cbh_tab,
-		struct table *reloc_tab,  struct table *symbol_tab, int max_hunk);
+static void emit_aout_file(int fd, void *text, void *data, void *chip_data,
+                           struct exec *hdr, int chip_data_size,
+                           int chip_bss_size, struct table *ch_tab,
+                           struct table *dh_tab, struct table *bh_tab,
+                           struct table *cdh_tab, struct table *cbh_tab,
+                           struct table *reloc_tab,  struct table *symbol_tab,
+                           int max_hunk);
 
 #define TAB_START_SIZE 1024
 
 /* advance the hunk-pointer to the next hunk. Assumes the hunk-pointer is
  * pointing at the length-field currently
  */
-static void inline next_hunk(uint32_t **hp)
+static void next_hunk(uint32_t **hp)
 {
   /* skip over the length field and the there given length */
   *hp += 1 + **hp;
@@ -136,7 +133,7 @@ static void inline next_hunk(uint32_t **hp)
 
 
 /* save a lot of space for duplicate string, that all say "only.. with size.. */
-static void inline limit_hunk (char *hunk_name)
+static void limit_hunk (char *hunk_name)
 {
   fprintf (stderr, "only one %s hunk with size!=0 supported.\n", hunk_name);
 }
@@ -148,10 +145,10 @@ static void inline limit_hunk (char *hunk_name)
  * don't need the whole functionality of an obstack, so I kept it simple ;-))
  * Only use the offset, since the table itself may be reallocated.
  */
-char *str_table = 0;
-int strtab_size, strtab_index;
+static char *str_table = 0;
+static int strtab_size, strtab_index;
 
-static int inline stralloc (int len)
+static int stralloc (int len)
 {
   int res;
 
@@ -178,15 +175,14 @@ static int inline stralloc (int len)
   return res;
 }
 
-static void inline
-strfree (int str)
+static void strfree (int str)
 {
   strtab_index = str;
 }
 
 /****************************************************************************/
 
-static void inline add_table (struct table *tab, void *el)
+static void add_table (struct table *tab, void *el)
 {
   if (tab->i == tab->max_el)
   {
@@ -210,8 +206,8 @@ static void inline add_table (struct table *tab, void *el)
   bcopy (el, (uint8_t *)tab->base + (tab->i++ * tab->el_size), tab->el_size);
 }
 
-static void inline add_reloc (struct table *tab, int from, int to, int offset,
-                              int size, int pcrel, int baserel, int sym_num)
+static void add_reloc (struct table *tab, int from, int to, int offset,
+                       int size, int pcrel, int baserel, int sym_num)
 {
   struct reloc r;
 
@@ -228,8 +224,8 @@ static void inline add_reloc (struct table *tab, int from, int to, int offset,
   add_table (tab, &r);
 }
 
-static void inline add_symbol (struct table *tab, int num, uint32_t type,
-                               int value, char *name)
+static void add_symbol (struct table *tab, int num, uint32_t type,
+                        int value, char *name)
 {
   struct symbol s;
 
@@ -267,7 +263,7 @@ static void inline add_symbol (struct table *tab, int num, uint32_t type,
 
 /****************************************************************************/
 
-void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
+static void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
 {
   /* this makes it less clumsy.. */
   uint32_t *file_ptr = *file_pptr;
@@ -601,11 +597,13 @@ void digest_objfile (uint32_t **file_pptr, uint32_t *max_fp)
 }
 
 
-void emit_aout_file (int fd, void *text, void *data, void *chip_data,
-		struct exec *hdr, int chip_data_size, int chip_bss_size,
-		struct table *ch_tab, struct table *dh_tab, struct table *bh_tab,
-		struct table *cdh_tab, struct table *cbh_tab,
-		struct table *reloc_tab,  struct table *symbol_tab, int max_hunk)
+static void emit_aout_file (int fd, void *text, void *data, void *chip_data,
+                            struct exec *hdr, int chip_data_size,
+                            int chip_bss_size, struct table *ch_tab,
+                            struct table *dh_tab, struct table *bh_tab,
+                            struct table *cdh_tab, struct table *cbh_tab,
+                            struct table *reloc_tab, struct table *symbol_tab,
+                            int max_hunk)
 {
   int *code_hunks = ch_tab->base;
   int *data_hunks = dh_tab->base;
@@ -659,9 +657,9 @@ void emit_aout_file (int fd, void *text, void *data, void *chip_data,
     if (r->to_hunk > -1)
     {
       /* the base address of the used source hunk */
-      void *base_hunk;
+      void *base_hunk = NULL;
       /* this is the mentioned hunk-gap */
-      uint32_t offset;
+      uint32_t offset = 0;
 
       switch (htype[r->from_hunk])
       {

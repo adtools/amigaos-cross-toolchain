@@ -9,3 +9,23 @@
  
        /* Duplicate the stdout and stderr file handles
  	 so they can be restored later.  */
+--- gcc-2.95.3/libiberty/strerror.c	2012-02-17 20:46:45.643806527 -0800
++++ gcc-2.95.3/libiberty/strerror.c	2012-02-17 20:49:54.372029811 -0800
+@@ -7,6 +7,8 @@
+ 
+ #include "config.h"
+ 
++#define HAVE_SYS_ERRLIST
++
+ #ifdef HAVE_SYS_ERRLIST
+ /* Note that errno.h (not sure what OS) or stdio.h (BSD 4.4, at least)
+    might declare sys_errlist in a way that the compiler might consider
+@@ -463,7 +464,7 @@
+ #else
+ 
+ extern int sys_nerr;
+-extern char *sys_errlist[];
++extern const char *const sys_errlist[];
+ 
+ #endif
+ 

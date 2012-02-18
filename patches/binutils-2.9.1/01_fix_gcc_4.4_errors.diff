@@ -82,12 +82,16 @@
  #ifndef NEED_sys_errlist
  /* Note that errno.h (not sure what OS) or stdio.h (BSD 4.4, at least)
     might declare sys_errlist in a way that the compiler might consider
-@@ -463,7 +464,7 @@
+@@ -463,7 +464,11 @@
  #else
  
 -extern int sys_nerr;
 -extern char *sys_errlist[];
++#ifdef __APPLE__
 +extern const int sys_nerr;
++#else
++extern int sys_nerr;
++#endif
 +extern const char *const sys_errlist[];
  
  #endif

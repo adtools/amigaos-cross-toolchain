@@ -5,13 +5,14 @@ This project enables one to build m68k-amigaos toolchain on your un*x like
 platform with minimum hassle. Thanks to it you should get complete environment
 targeting m68k-amigaos with:
  * gcc 2.95.3
- * g++ 2.95.2 + libstdc++
+ * g++ 2.95.3 + libstdc++
  * binutils 2.9.1 (assembler, linker, etc.)
  * libnix 2.1 (standard ANSI/C library replacement for AmigaOS)
  * AmigaOS headers & libraries (for AmigaOS 3.9)
 
 Tested on:
  * Ubuntu 10.04 ia32
+ * MacOS X 10.7
 
 Prerequisites (look at bootstrap.conf file):
  * installed locally:
@@ -23,7 +24,7 @@ Prerequisites (look at bootstrap.conf file):
  * sources from GNU project:
    - gcc 2.95.3
    - binutils 2.9.1
-   - bison 1.28
+   - bison 1.35
  * Amiga specific sources & binaries:
    - libnix 2.1
    - AmigaOS NDK 3.9
@@ -38,7 +39,6 @@ Usage:
 
 TODO:
   * Testing on:
-    - MacOS X 10.7
     - Cygwin
   * Remove dependencies:
     - libamiga-bin

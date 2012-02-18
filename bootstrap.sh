@@ -265,6 +265,20 @@ function build_ixemul {
 }
 
 function build {
+  # On 64-bit architecture GNU Assembler crashes writing out an object, due to
+  # (probably) miscalculated structure sizes.  There could be some other bugs
+  # lurking there in 64-bit mode, but I have little incentive chasing them.
+  # Just compile everything in 32-bit mode and forget about the issues.
+  if [ "$(uname -m)" == "x86_64" ]; then
+    CFLAGS="-m32"
+  else
+    CFLAGS=""
+  fi
+
+  # Make sure we always choose known compiler (from the distro) and not one
+  # in user's path that could shadow the original one.
+  export CC="/usr/bin/gcc ${CFLAGS}"
+
   prepare_target
   unpack_sources
   build_tools

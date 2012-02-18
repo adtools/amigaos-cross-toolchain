@@ -118,7 +118,8 @@ function build_binutils {
   cd "${BINUTILS}"
   "${SOURCES}/${BINUTILS}/configure" \
     --prefix="${TARGET_DIR}" \
-    --target=m68k-amigaos
+    --host="i686-linux-gnu" \
+    --target="m68k-amigaos"
   make all
   make install install-info
   popd
@@ -146,7 +147,8 @@ function build_gcc {
   cd "${GCC}"
   "${SOURCES}/${GCC}/configure" \
     --prefix="${TARGET_DIR}" \
-    --target=m68k-amigaos \
+    --target="m68k-amigaos" \
+    --host="i686-linux-gnu" \
     --enable-languages=c \
     --with-headers="${SOURCES}/${IXEMUL}/include"
   make all ${FLAGS_FOR_TARGET[*]}
@@ -165,7 +167,8 @@ function build_gpp {
   cd "${GCC}"
   "${SOURCES}/${GCC}/configure" \
     --prefix="${TARGET_DIR}" \
-    --target=m68k-amigaos \
+    --host="i686-linux-gnu" \
+    --target="m68k-amigaos" \
     --enable-languages=c++ \
     --with-headers="${SOURCES}/${IXEMUL}/include"
   make all ${FLAGS_FOR_TARGET[*]}
@@ -222,7 +225,8 @@ function build_libnix {
   cd "${LIBNIX}"
   "${SOURCES}/${LIBNIX}/configure" \
     --prefix="${TARGET_DIR}" \
-    --target=m68k-amigaos
+    --host="i686-linux-gnu" \
+    --target="m68k-amigaos"
   make all \
     CC=m68k-amigaos-gcc \
     CPP="m68k-amigaos-gcc -E" \
@@ -250,8 +254,9 @@ function build_ixemul {
   AR=m68k-amigaos-ar \
   RANLIB=m68k-amigaos-ranlib \
 	"${SOURCES}/${IXEMUL}/configure" \
-	      --prefix=${TARGET_DIR} \
-	      --target=m68k-amigaos
+    --prefix="${TARGET_DIR}" \
+    --host="i686-linux-gnu" \
+    --target="m68k-amigaos"
   make MAKEINFO=: all
   make MAKEINFO=: install
   popd

@@ -265,11 +265,6 @@ function build_ixemul {
 }
 
 function build {
-  # Strangely enough - this trick is needed in order to make m68k-amigaos-ar
-  # not to crash during libgcc compilation.  It's difficult to say what exactly
-  # is affected by this change.  Nevertheless, build succeeds under gcc 4.4.3.
-  export CC="gcc"
-
   prepare_target
   unpack_sources
   build_tools

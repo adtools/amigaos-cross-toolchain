@@ -10,6 +10,8 @@ targeting m68k-amigaos with:
  * libnix 2.1 (standard ANSI/C library replacement for AmigaOS)
  * AmigaOS headers & libraries (for AmigaOS 3.9)
 
+Patches are welcome!
+
 Tested on:
  * Ubuntu 10.04 32-bit (gcc 4.4.3)
  * MacOS X 10.7 (gcc 4.2.1 (build 5658) (LLVM build 2336.1.00))
@@ -33,7 +35,8 @@ Prerequisites (look at bootstrap.conf file):
 
 Usage:
   1) Download sources (use fetch.sh script in archives directory).
-  2) Run bootstrap script.
+  2) Run bootstrap.sh script (with --prefix option to tell where the toolchain
+     should be installed - note that the path has to be writable).
   3) Wait for the result.
   ?) If something fails, you can try to reach me.
 
@@ -42,7 +45,6 @@ TODO:
     - Cygwin
   * Remove dependencies:
     - libamiga-bin
-  * Make it installable into some prefix.
   * Provide some rudimentary testing (C / C++ sources).
   * Build ixemul.
   * Add auxiliary tools: GccFindHit, hunk2aout.

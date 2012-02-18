@@ -6,17 +6,16 @@ readonly PATCHES="${TOP_DIR}/patches"
 readonly SOURCES="${TOP_DIR}/sources"
 readonly BUILD_DIR="${TOP_DIR}/build"
 readonly HOST_DIR="${TOP_DIR}/host"
-readonly TARGET_DIR="${TOP_DIR}/target"
 readonly STAMP="${TOP_DIR}/stamps"
 
 source "${TOP_DIR}/bootstrap.conf"
 
 function prepare_target {
-  mkdir -p "${STAMP}" "${BUILD_DIR}" "${TARGET_DIR}"
+  mkdir -p "${STAMP}" "${BUILD_DIR}" "${PREFIX}"
 
   [ -f "${STAMP}/prepare-target" ] && return 0
 
-  pushd "${TARGET_DIR}"
+  pushd "${PREFIX}"
   mkdir -p "m68k-amigaos" "lib" "os-include" "os-lib"
   ln -sf "../os-include" "m68k-amigaos/include"
   ln -sf "../lib" "m68k-amigaos/lib"
@@ -117,7 +116,7 @@ function build_binutils {
 	mkdir -p "${BINUTILS}"
   cd "${BINUTILS}"
   "${SOURCES}/${BINUTILS}/configure" \
-    --prefix="${TARGET_DIR}" \
+    --prefix="${PREFIX}" \
     --host="i686-linux-gnu" \
     --target="m68k-amigaos"
   make all
@@ -127,17 +126,6 @@ function build_binutils {
 	touch "${STAMP}/build-binutils"
 }
 
-readonly FLAGS_FOR_TARGET=( \
-    "MAKEINFO=makeinfo" \
-    "CFLAGS_FOR_TARGET=-noixemul" \
-    "AR_FOR_TARGET=${TARGET_DIR}/bin/m68k-amigaos-ar" \
-    "AS_FOR_TARGET=${TARGET_DIR}/bin/m68k-amigaos-as" \
-    "LD_FOR_TARGET=${TARGET_DIR}/bin/m68k-amigaos-ld" \
-    "NM_FOR_TARGET=${TARGET_DIR}/bin/m68k-amigaos-nm" \
-    "OBJCOPY_FOR_TARGET=${TARGET_DIR}/bin/m68k-amigaos-objcopy" \
-    "OBJDUMP_FOR_TARGET=${TARGET_DIR}/bin/m68k-amigaos-objdump" \
-    "RANLIB_FOR_TARGET=${TARGET_DIR}/bin/m68k-amigaos-ranlib")
-
 function build_gcc {
   [ -f "${STAMP}/build-gcc" ] && return 0
 
@@ -146,7 +134,7 @@ function build_gcc {
 	mkdir -p "${GCC}"
   cd "${GCC}"
   "${SOURCES}/${GCC}/configure" \
-    --prefix="${TARGET_DIR}" \
+    --prefix="${PREFIX}" \
     --target="m68k-amigaos" \
     --host="i686-linux-gnu" \
     --enable-languages=c \
@@ -166,7 +154,7 @@ function build_gpp {
 	mkdir -p "${GCC}"
   cd "${GCC}"
   "${SOURCES}/${GCC}/configure" \
-    --prefix="${TARGET_DIR}" \
+    --prefix="${PREFIX}" \
     --host="i686-linux-gnu" \
     --target="m68k-amigaos" \
     --enable-languages=c++ \
@@ -186,12 +174,12 @@ function process_headers {
 	cp -a "${SOURCES}/${SFDC}" "${SFDC}"
   cd "${SFDC}"
   ./configure \
-    --prefix="${TARGET_DIR}"
+    --prefix="${PREFIX}"
   make
 	make install
   popd
 
-  pushd "${TARGET_DIR}/include"
+  pushd "${PREFIX}/include"
   cp -av "${SOURCES}/${NDK}/Include/include_h/"* .
   for file in ${SOURCES}/${NDK}/Include/sfd/*.sfd; do
     base=$(basename ${file%_lib.sfd})
@@ -209,7 +197,7 @@ function process_headers {
 function install_libamiga {
   [ -f "${STAMP}/install-libamiga" ] && return 0
 
-  pushd "${TARGET_DIR}"
+  pushd "${PREFIX}"
   cp -av "${SOURCES}/${LIBAMIGA}/lib" .
   popd
 
@@ -224,7 +212,7 @@ function build_libnix {
 	mkdir -p "${LIBNIX}"
   cd "${LIBNIX}"
   "${SOURCES}/${LIBNIX}/configure" \
-    --prefix="${TARGET_DIR}" \
+    --prefix="${PREFIX}" \
     --host="i686-linux-gnu" \
     --target="m68k-amigaos"
   make all \
@@ -235,7 +223,7 @@ function build_libnix {
     RANLIB=m68k-amigaos-ranlib \
     LD=m68k-amigaos-ld \
     MAKEINFO=:
-  [ -f "${TARGET_DIR}/guide" ] && rm -f "${TARGET_DIR}/guide"
+  [ -f "${PREFIX}/guide" ] && rm -f "${PREFIX}/guide"
   make install MAKEINFO=:
   popd
 
@@ -254,7 +242,7 @@ function build_ixemul {
   AR=m68k-amigaos-ar \
   RANLIB=m68k-amigaos-ranlib \
 	"${SOURCES}/${IXEMUL}/configure" \
-    --prefix="${TARGET_DIR}" \
+    --prefix="${PREFIX}" \
     --host="i686-linux-gnu" \
     --target="m68k-amigaos"
   make MAKEINFO=: all
@@ -288,7 +276,7 @@ function build {
   build_binutils
   build_gcc
 
-  export PATH="${TARGET_DIR}/bin:${PATH}"
+  export PATH="${PREFIX}/bin:${PATH}"
 
   process_headers
   install_libamiga
@@ -298,14 +286,43 @@ function build {
 }
 
 function main {
-  local -r action="${1:-build}"
+  PREFIX="${TOP_DIR}/target"
+
+  local action="build"
+
+  while [ -n "${1:-}" ]; do
+    case "$1" in
+      --prefix=*)
+        PREFIX=${1#*=}
+        ;;
+      --clean)
+        action="clean"
+        ;;
+      *)
+        echo "Unknown option: $1"
+        exit 1
+        ;;
+    esac
+    shift
+  done
+
+  readonly FLAGS_FOR_TARGET=( \
+      "MAKEINFO=makeinfo" \
+      "CFLAGS_FOR_TARGET=-noixemul" \
+      "AR_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-ar" \
+      "AS_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-as" \
+      "LD_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-ld" \
+      "NM_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-nm" \
+      "OBJCOPY_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-objcopy" \
+      "OBJDUMP_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-objdump" \
+      "RANLIB_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-ranlib")
 
   case "${action}" in
     "build")
       build
       ;;
     "clean")
-      for dir in ${SOURCES} ${BUILD_DIR} ${HOST_DIR} ${TARGET_DIR} ${STAMP}; do
+      for dir in ${SOURCES} ${BUILD_DIR} ${HOST_DIR} ${STAMP}; do
         rm -rf "${dir}"
       done
       ;;

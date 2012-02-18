@@ -15,7 +15,7 @@ Tested on:
 
 Prerequisites (look at bootstrap.conf file):
  * installed locally:
-   - gcc 3.4.6
+   - gcc 4.4.3 (hopefully it will work with later compiler)
    - flex
    - make
    - lha
@@ -41,7 +41,6 @@ TODO:
     - MacOS X 10.7
     - Cygwin
   * Remove dependencies:
-    - gcc 3.4
     - libamiga-bin
   * Make it installable into some prefix.
   * Provide some rudimentary testing (C / C++ sources).

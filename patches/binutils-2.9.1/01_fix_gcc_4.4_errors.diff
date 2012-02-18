@@ -1,0 +1,73 @@
+--- binutils-2.9.1/gas/tc.h	1998-05-01 08:45:17.000000000 -0700
++++ binutils-2.9.1/gas/tc.h	2012-02-17 18:46:26.316177981 -0800
+@@ -23,25 +23,6 @@
+ 
+ extern const pseudo_typeS md_pseudo_table[];
+ 
+-/* JF moved this here from as.h under the theory that nobody except MACHINE.c
+-   and write.c care about it anyway. */
+-
+-struct relax_type
+-{
+-  /* Forward reach. Signed number. > 0. */
+-  long rlx_forward;
+-  /* Backward reach. Signed number. < 0. */
+-  long rlx_backward;
+-
+-  /* Bytes length of this address. */
+-  unsigned char rlx_length;
+-
+-  /* Next longer relax-state.  0 means there is no 'next' relax-state. */
+-  relax_substateT rlx_more;
+-};
+-
+-typedef struct relax_type relax_typeS;
+-
+ extern const int md_reloc_size;	/* Size of a relocation record */
+ 
+ char *md_atof PARAMS ((int what_statement_type, char *literalP, int *sizeP));
+--- binutils-2.9.1/gas/as.h	1998-05-01 08:45:05.000000000 -0700
++++ binutils-2.9.1/gas/as.h	2012-02-17 18:46:36.471732667 -0800
+@@ -595,6 +595,22 @@
+ 
+ #include "expr.h"		/* Before targ-*.h */
+ 
++struct relax_type
++{
++  /* Forward reach. Signed number. > 0. */
++  long rlx_forward;
++  /* Backward reach. Signed number. < 0. */
++  long rlx_backward;
++
++  /* Bytes length of this address. */
++  unsigned char rlx_length;
++
++  /* Next longer relax-state.  0 means there is no 'next' relax-state. */
++  relax_substateT rlx_more;
++};
++
++typedef struct relax_type relax_typeS;
++
+ /* this one starts the chain of target dependant headers */
+ #include "targ-env.h"
+ 
+--- binutils-2.9.1/libiberty/cplus-dem.c	1998-05-01 08:47:50.000000000 -0700
++++ binutils-2.9.1/libiberty/cplus-dem.c	2012-02-17 18:30:32.069972111 -0800
+@@ -31,6 +31,7 @@
+ #include <ctype.h>
+ #include <string.h>
+ #include <stdio.h>
++#include <stdlib.h>
+ 
+ #include <demangle.h>
+ #undef CURRENT_DEMANGLING_STYLE
+@@ -3266,9 +3267,6 @@
+   exit (1);
+ }
+ 
+-char * malloc ();
+-char * realloc ();
+-
+ char *
+ xmalloc (size)
+      unsigned size;

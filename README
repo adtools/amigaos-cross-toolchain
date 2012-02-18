@@ -11,12 +11,12 @@ targeting m68k-amigaos with:
  * AmigaOS headers & libraries (for AmigaOS 3.9)
 
 Tested on:
- * Ubuntu 10.04 ia32
- * MacOS X 10.7
+ * Ubuntu 10.04 32-bit (gcc 4.4.3)
+ * MacOS X 10.7 (gcc 4.2.1 (build 5658) (LLVM build 2336.1.00))
 
 Prerequisites (look at bootstrap.conf file):
  * installed locally:
-   - gcc 4.4.3 (hopefully it will work with later compiler)
+   - gcc
    - flex
    - make
    - lha

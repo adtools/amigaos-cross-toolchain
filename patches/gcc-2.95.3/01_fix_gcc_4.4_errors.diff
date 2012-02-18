@@ -23,8 +23,9 @@
 @@ -463,7 +464,7 @@
  #else
  
- extern int sys_nerr;
+-extern int sys_nerr;
 -extern char *sys_errlist[];
++extern const int sys_nerr;
 +extern const char *const sys_errlist[];
  
  #endif

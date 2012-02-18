@@ -53,14 +53,14 @@ function unpack_sources {
   popd
 
   rm -rf "${SFDC}"
-  lha -xq "${ARCHIVES}/${SFDC_SRC}"
+  lha -xgq "${ARCHIVES}/${SFDC_SRC}"
   tar -xzf "${SFDC}.tar.gz"
   for file in $(ls -1d sfdc*); do
     [ -f "${file}" ] && rm "${file}"
   done
 
   rm -rf "${NDK}"
-  lha -xq "${ARCHIVES}/${NDK_SRC}"
+  lha -xgq "${ARCHIVES}/${NDK_SRC}"
   rm -rf ndk_* *.info
   pushd "${NDK}"
   mkdir Include/include_h/inline
@@ -70,7 +70,7 @@ function unpack_sources {
   popd
 
   rm -rf "${IXEMUL}"
-  lha -xq "${ARCHIVES}/${IXEMUL_SRC}"
+  lha -xgq "${ARCHIVES}/${IXEMUL_SRC}"
   mv "ixemul" "${IXEMUL}"
   chmod a+x "${IXEMUL}/configure"
 

@@ -24,6 +24,13 @@ function prepare_target {
   touch "${STAMP}/prepare-target"
 }
 
+function copy_non_diff {
+  find "${PATCHES}/$1" -type f \! -name '*.diff' | while read IN ; do
+    OUT=$(echo "$IN" | sed -e "s,$PATCHES/,$SOURCES/,g")
+    cp "$IN" "$OUT"
+  done
+}
+
 function unpack_sources {
   [ -f "${STAMP}/unpack-sources" ] && return 0
 
@@ -38,8 +45,7 @@ function unpack_sources {
   tar -xzf "${ARCHIVES}/${BINUTILS_SRC}"
   pushd "${BINUTILS}"
   find "${PATCHES}/${BINUTILS}" -type f -iname '*.diff' | xargs cat | patch -p1
-  find "${PATCHES}/${BINUTILS}" -type f \! -name '*.diff' -printf "%p %P\n" | \
-    xargs -n 2 cp -v
+  copy_non_diff "${BINUTILS}"
   popd
 
   rm -rf "${GCC}"
@@ -47,8 +53,7 @@ function unpack_sources {
   tar -xzf "${ARCHIVES}/${GCC_CPP_SRC}"
   pushd "${GCC}"
   find "${PATCHES}/${GCC}" -type f -iname '*.diff' | xargs cat | patch -p1
-  find "${PATCHES}/${GCC}" -type f \! -name '*.diff' -printf "%p %P\n" | \
-    xargs -n 2 cp -v
+  copy_non_diff "${GCC}"
   popd
 
   rm -rf "${SFDC}"
@@ -64,8 +69,7 @@ function unpack_sources {
   pushd "${NDK}"
   mkdir Include/include_h/inline
   find "${PATCHES}/${NDK}" -type f -iname '*.diff' | xargs cat | patch -p1
-  find "${PATCHES}/${NDK}" -type f \! -name '*.diff' -printf "%p %P\n" | \
-    xargs -n 2 cp -v
+  copy_non_diff "${NDK}"
   popd
 
   rm -rf "${IXEMUL}"

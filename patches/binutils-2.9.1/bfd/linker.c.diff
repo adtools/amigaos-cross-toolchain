@@ -1,14 +1,5 @@
 --- binutils-2.9.1/bfd/linker.c	Fri May  1 08:48:12 1998
 +++ binutils-2.9.1/bfd/linker.c	Sun Aug 23 00:00:00 1998
-@@ -74,7 +74,7 @@
- @cindex target vector (_bfd_link_hash_table_create)
- 	The linker routines must create a hash table, which must be
- 	derived from <<struct bfd_link_hash_table>> described in
--	<<bfdlink.c>>.  @xref{Hash Tables} for information on how to
-+	<<bfdlink.c>>.  @xref{Hash Tables}, for information on how to
- 	create a derived hash table.  This entry point is called using
- 	the target vector of the linker output file.
- 
 @@ -428,7 +428,8 @@ static boolean generic_add_output_symbol
  static boolean default_fill_link_order
    PARAMS ((bfd *, struct bfd_link_info *, asection *,

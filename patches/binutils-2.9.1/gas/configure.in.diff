@@ -9,15 +9,6 @@
        m68k-*-vxworks* | m68k-ericsson-ose | m68k-*-sunos*)
  			    fmt=aout em=sun3 ;;
        m68k-motorola-sysv*)  fmt=coff em=delta ;;
-@@ -238,7 +241,7 @@ changequote([,])dnl
- 		            fmt=coff em=pe ;;
-       ppc-*-aix*)           fmt=coff ;;
-       ppc-*-beos*)          fmt=coff ;;
--      ppc-*-*bsd* | ppc-*-elf* | ppc-*-eabi* | ppc-*-sysv4*)
-+      ppc-*-*bsd* | ppc-*-elf* | ppc-*-eabi* | ppc-*-sysv4* | ppc-*-amigaos*)
- 			    fmt=elf ;;
-       ppc-*-linux-gnu*)	    fmt=elf
- 			    case "$endian" in
 @@ -555,7 +558,7 @@ AC_DEFINE_UNQUOTED(DEFAULT_EMULATION, "$
  
  case ${primary_bfd_gas}-${target_cpu_type}-${obj_format} in
@@ -27,21 +18,3 @@
  		AC_DEFINE(MANY_SEGMENTS) ;;
  esac
  
-@@ -604,6 +607,17 @@ AC_DEFINE_UNQUOTED(TARGET_VENDOR,	"${tar
- AC_DEFINE_UNQUOTED(TARGET_OS,		"${target_os}")
- 
- AC_PROG_CC
-+
-+### begin-GG-local
-+# Check for additional host specific CFLAGS.
-+AC_MSG_CHECKING(for host dependent CFLAGS)
-+other_host_cflags=""
-+case "${host}" in
-+	m68*-*-amigaos*)	other_host_cflags="-mstackextend" ;;
-+esac
-+test -n "$other_host_cflags" && CFLAGS="$CFLAGS $other_host_cflags"
-+AC_MSG_RESULT($other_host_cflags)
-+### end-GG-local
- 
- AC_PROG_YACC
- AC_PROG_LEX

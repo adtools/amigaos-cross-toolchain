@@ -2872,10 +2872,6 @@ amiga_set_arch_mach (abfd, arch, machine)
 	  return false;
 	}
     }
-  else if (arch == bfd_arch_powerpc)
-    {
-      return true;
-    }
   return false;
 }
 

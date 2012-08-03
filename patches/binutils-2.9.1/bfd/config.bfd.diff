@@ -11,18 +11,3 @@
    m68*-hp-bsd*)
      targ_defvec=hp300bsd_vec
      targ_underscore=yes
-@@ -463,6 +467,14 @@ case "${targ}" in
- 
-   powerpc-*-aix* | powerpc-*-beos*)
-     targ_defvec=rs6000coff_vec
-+    ;;
-+  powerpc-*-amigaoshunk*)
-+    targ_defvec=amiga_vec
-+    targ_selvecs="bfd_elf32_powerpc_vec bfd_elf32_powerpcle_vec aout_amiga_vec"
-+    ;;
-+  powerpc-*-amigaos*)
-+    targ_defvec=bfd_elf32_powerpc_vec
-+    targ_selvecs="bfd_elf32_powerpcle_vec"
-     ;;
-   powerpc-*-*bsd* | powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | \
-   powerpc-*-solaris2* | powerpc-*-linux-gnu* | powerpc-*-rtems*)

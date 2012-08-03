@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldexp.h"
 #include "ldlang.h"
 
-#if defined(TARGET_IS_amiga) || defined (TARGET_IS_ppcamiga)
+#if defined(TARGET_IS_amiga)
 #include "libamiga.h"
 #else
 extern int amiga_base_relative; /* defined in amigaoslink.c */
@@ -158,7 +158,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 static void
 gld${EMULATION_NAME}_before_parse()
 {
-#if defined(TARGET_IS_amiga_bss) || defined (TARGET_IS_ppcamiga_bss)
+#if defined(TARGET_IS_amiga_bss)
   amiga_base_relative=1;
   amiga_resident=0;
 #endif
@@ -180,7 +180,7 @@ gld${EMULATION_NAME}_after_open()
   ldctor_build_sets ();
 }
 
-#if defined(TARGET_IS_amiga) || defined (TARGET_IS_ppcamiga)
+#if defined(TARGET_IS_amiga)
 
 static void
  amiga_assign_attribute(lang_input_statement_type *);

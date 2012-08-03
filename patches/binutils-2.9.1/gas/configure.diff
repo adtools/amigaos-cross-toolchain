@@ -9,15 +9,6 @@
        m68k-*-vxworks* | m68k-ericsson-ose | m68k-*-sunos*)
  			    fmt=aout em=sun3 ;;
        m68k-motorola-sysv*)  fmt=coff em=delta ;;
-@@ -1567,7 +1780,7 @@ EOF
- 		            fmt=coff em=pe ;;
-       ppc-*-aix*)           fmt=coff ;;
-       ppc-*-beos*)          fmt=coff ;;
--      ppc-*-*bsd* | ppc-*-elf* | ppc-*-eabi* | ppc-*-sysv4*)
-+      ppc-*-*bsd* | ppc-*-elf* | ppc-*-eabi* | ppc-*-sysv4* | ppc-*-amigaos*)
- 			    fmt=elf ;;
-       ppc-*-linux-gnu*)	    fmt=elf
- 			    case "$endian" in
 @@ -1974,7 +2187,7 @@ EOF
  
  case ${primary_bfd_gas}-${target_cpu_type}-${obj_format} in

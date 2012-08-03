@@ -8,12 +8,3 @@
  m68*-*-aout)		targ_emul=m68kaout ;;
  m68*-*-coff)		targ_emul=m68kcoff ;;
  m68*-*-elf)		targ_emul=m68kelf ;;
-@@ -180,6 +182,8 @@ alpha*-*-netbsd*)	targ_emul=elf64alpha ;
- z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001 ;;
- ns32k-pc532-mach* | ns32k-pc532-ux*)	targ_emul=pc532macha ;;
- ns32k-pc532-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
-+powerpc-*-amigaos*)	targ_emul=elf32ppc ;;
-+powerpc-*-amigaoshunk*)	targ_emul=ppcamiga ; targ_extra_emuls=ppcamiga_bss;;
- powerpc-*-elf* | powerpc-*-eabi* | powerpc-*-linux-gnu* | powerpc-*-sysv* \
-   | powerpc-*-netbsd*)
- 	targ_emul=elf32ppc ;;

@@ -9,16 +9,7 @@
  	ealpha.o \
  	earcelf.o \
  	earmaoutb.o \
-@@ -159,6 +161,8 @@
- 	enews.o \
- 	ens32knbsd.o \
- 	epc532macha.o \
-+	eppcamiga.o \
-+	eppcamiga_bss.o \
- 	eppcmacos.o \
- 	eppcnw.o \
- 	eppcpe.o \
-@@ -229,6 +233,18 @@
+@@ -229,6 +233,12 @@
  GEN_DEPENDS = $(srcdir)/genscripts.sh $(srcdir)/emultempl/stringify.sed
  @TDIRS@
  
@@ -28,12 +19,6 @@
 +eamiga_bss.c: $(srcdir)/emulparams/amiga_bss.sh\
 +   $(srcdir)/emultempl/amiga.em $(srcdir)/scripttempl/amiga_bss.sc ${GEN_DEPENDS}
 +	${GENSCRIPTS} amiga_bss "$(tdir_amiga_bss)"
-+eppcamiga.c: $(srcdir)/emulparams/ppcamiga.sh\
-+   $(srcdir)/emultempl/amiga.em $(srcdir)/scripttempl/amiga.sc ${GEN_DEPENDS} 
-+	${GENSCRIPTS} ppcamiga "$(tdir_ppcamiga)"
-+eppcamiga_bss.c: $(srcdir)/emulparams/ppcamiga_bss.sh\
-+   $(srcdir)/emultempl/amiga.em $(srcdir)/scripttempl/amiga_bss.sc ${GEN_DEPENDS}
-+	${GENSCRIPTS} ppcamiga_bss "$(tdir_ppcamiga_bss)"
  ea29k.c: $(srcdir)/emulparams/a29k.sh \
    $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/a29k.sc ${GEN_DEPENDS}
  	${GENSCRIPTS} a29k "$(tdir_a29k)"

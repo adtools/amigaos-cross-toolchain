@@ -31,6 +31,12 @@ function copy_non_diff {
   done
 }
 
+function apply_patches {
+  for file in $(find "${PATCHES}/$1" -type f -iname '*.diff' | sort); do
+    patch -i $file -t -p1
+  done
+}
+
 function mkdir_empty {
   rm -rf "$1"
   mkdir -p "$1"
@@ -82,18 +88,15 @@ function unpack_sources {
   mkdir -p "${SOURCES}"
   pushd "${SOURCES}"
 
-  unpack_clean "${BISON}" "${BISON_SRC}"
-  unpack_clean "${GAWK}" "${GAWK_SRC}"
-
   unpack_clean "${BINUTILS}" "${BINUTILS_SRC}"
   pushd "${BINUTILS}"
-  find "${PATCHES}/${BINUTILS}" -type f -iname '*.diff' | xargs cat | patch -p1
+  apply_patches "${BINUTILS}"
   copy_non_diff "${BINUTILS}"
   popd
 
   unpack_clean "${GCC}" "${GCC_CORE_SRC}" "${GCC_CPP_SRC}"
   pushd "${GCC}"
-  find "${PATCHES}/${GCC}" -type f -iname '*.diff' | xargs cat | patch -p1
+  apply_patches "${GCC}"
   copy_non_diff "${GCC}"
   popd
 
@@ -115,7 +118,7 @@ function unpack_sources {
   rm -rf ndk_* *.info
   pushd "${NDK}"
   mkdir Include/include_h/inline
-  find "${PATCHES}/${NDK}" -type f -iname '*.diff' | xargs cat | patch -p1
+  apply_patches "${NDK}"
   copy_non_diff "${NDK}"
   popd
 
@@ -127,11 +130,13 @@ function unpack_sources {
   mv "libnix" "${LIBNIX}"
   chmod a+x "${LIBNIX}/mkinstalldirs"
 
-  rm -rf "${LIBAMIGA}"
-  mkdir "${LIBAMIGA}"
+  mkdir_empty "${LIBAMIGA}"
   pushd "${LIBAMIGA}"
   tar -xzf "${ARCHIVES}/${LIBAMIGA_SRC}"
   popd
+
+  unpack_clean "${BISON}" "${BISON_SRC}"
+  unpack_clean "${GAWK}" "${GAWK_SRC}"
 
   popd
 

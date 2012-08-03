@@ -7,15 +7,15 @@
 #ifndef _DEFS_H_
 #define _DEFS_H_
 
-#include <endian.h>
+#include <arpa/inet.h>
 #include <dos/doshunks.h>
 
 #include "a.out.h"
 
-#define GETWORD(x) be16toh(x)
-#define GETLONG(x) be32toh(x)
-#define PUTWORD(x) htobe16(x)
-#define PUTLONG(x) htobe32(x)
+#define GETWORD(x) ntohs(x)
+#define GETLONG(x) ntohl(x)
+#define PUTWORD(x) htons(x)
+#define PUTLONG(x) htonl(x)
 
 /* Converts an SLINE value to an offset in the text section.
    This definition is OK for ld 1.8, currently used on the Amiga AFAIK,

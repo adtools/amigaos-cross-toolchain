@@ -36,6 +36,28 @@ function mkdir_empty {
   mkdir -p "$1"
 }
 
+function unpack_clean {
+  local cmd
+
+  rm -rf "$1"
+
+  while (( "$#" > 1 )); do
+    shift
+
+    if grep "\.tar\.gz$" <<<"$1"; then
+      cmd="tar -xzf"
+    elif grep "\.tar.bz2$" <<<"$1"; then
+      cmd="tar -xjf"
+    elif grep "\.lha$" <<<"$1"; then
+      cmd="lha -xgq"
+    else
+      cmd="false"
+    fi
+
+    ${cmd} "${ARCHIVES}/$1"
+  done
+}
+
 function compare_version {
   python - "$1" "$2" "$3" <<EOF
 from distutils.version import StrictVersion
@@ -60,50 +82,36 @@ function unpack_sources {
   mkdir -p "${SOURCES}"
   pushd "${SOURCES}"
 
-  rm -rf "${BISON}"
-  tar -xzf "${ARCHIVES}/${BISON_SRC}"
+  unpack_clean "${BISON}" "${BISON_SRC}"
+  unpack_clean "${GAWK}" "${GAWK_SRC}"
 
-  rm -rf "${BINUTILS}"
-  tar -xzf "${ARCHIVES}/${BINUTILS_SRC}"
+  unpack_clean "${BINUTILS}" "${BINUTILS_SRC}"
   pushd "${BINUTILS}"
   find "${PATCHES}/${BINUTILS}" -type f -iname '*.diff' | xargs cat | patch -p1
   copy_non_diff "${BINUTILS}"
   popd
 
-  rm -rf "${GCC}"
-  tar -xzf "${ARCHIVES}/${GCC_CORE_SRC}"
-  tar -xzf "${ARCHIVES}/${GCC_CPP_SRC}"
+  unpack_clean "${GCC}" "${GCC_CORE_SRC}" "${GCC_CPP_SRC}"
   pushd "${GCC}"
   find "${PATCHES}/${GCC}" -type f -iname '*.diff' | xargs cat | patch -p1
   copy_non_diff "${GCC}"
   popd
 
   if compare_version "${GCC_VER}" "ge" "4.0.0"; then
-    rm -rf "${GMP}"
-    tar -xjf "${ARCHIVES}/${GMP_SRC}"
-
-    rm -rf "${MPC}"
-    tar -xzf "${ARCHIVES}/${MPC_SRC}"
-
-    rm -rf "${MPFR}"
-    tar -xjf "${ARCHIVES}/${MPFR_SRC}"
-
-    rm -rf "${ISL}"
-    tar -xjf "${ARCHIVES}/${ISL_SRC}"
-
-    rm -rf "${CLOOG}"
-    tar -xzf "${ARCHIVES}/${CLOOG_SRC}"
+    unpack_clean "${GMP}" "${GMP_SRC}"
+    unpack_clean "${MPC}" "${MPC_SRC}"
+    unpack_clean "${MPFR}" "${MPFR_SRC}"
+    unpack_clean "${ISL}" "${ISL_SRC}"
+    unpack_clean "${CLOOG}" "${CLOOG_SRC}"
   fi
 
-  rm -rf "${SFDC}"
-  lha -xgq "${ARCHIVES}/${SFDC_SRC}"
+  unpack_clean "${SFDC}" "${SFDC_SRC}"
   tar -xzf "${SFDC}.tar.gz"
   for file in $(ls -1d sfdc*); do
     [ -f "${file}" ] && rm "${file}"
   done
 
-  rm -rf "${NDK}"
-  lha -xgq "${ARCHIVES}/${NDK_SRC}"
+  unpack_clean "${NDK}" "${NDK_SRC}"
   rm -rf ndk_* *.info
   pushd "${NDK}"
   mkdir Include/include_h/inline
@@ -111,13 +119,11 @@ function unpack_sources {
   copy_non_diff "${NDK}"
   popd
 
-  rm -rf "${IXEMUL}"
-  lha -xgq "${ARCHIVES}/${IXEMUL_SRC}"
+  unpack_clean "${IXEMUL}" "${IXEMUL_SRC}"
   mv "ixemul" "${IXEMUL}"
   chmod a+x "${IXEMUL}/configure"
 
-  rm -rf "${LIBNIX}"
-  tar -xzf "${ARCHIVES}/${LIBNIX_SRC}"
+  unpack_clean "${LIBNIX}" "${LIBNIX_SRC}"
   mv "libnix" "${LIBNIX}"
   chmod a+x "${LIBNIX}/mkinstalldirs"
 
@@ -138,6 +144,13 @@ function build_tools {
   mkdir_empty "${HOST_DIR}"
 
   pushd "${BUILD_DIR}"
+
+  mkdir_empty "${GAWK}"
+  pushd "${GAWK}"
+  "${SOURCES}/${GAWK}/configure" \
+    --prefix="${HOST_DIR}"
+  make && make install
+  popd
 
   if compare_version "${GCC_VER}" "eq" "2.95.3"; then
     mkdir_empty "${BISON}"
@@ -351,9 +364,12 @@ function build {
     CFLAGS=""
   fi
 
+  # Take the path over -- for hermeticity reasons.
+  export PATH="/opt/local/bin:/usr/local/bin:/usr/bin:/bin"
+
   # Make sure we always choose known compiler (from the distro) and not one
   # in user's path that could shadow the original one.
-  export CC="/usr/bin/gcc ${CFLAGS}"
+  export CC="$(which gcc) ${CFLAGS}"
 
   prepare_target
   unpack_sources

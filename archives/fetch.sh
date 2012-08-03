@@ -9,6 +9,7 @@ function download {
   fi
 }
 
+download "ftp://ftp.gnu.org/gnu/gawk/gawk-3.1.8.tar.gz"
 download "ftp://ftp.gnu.org/gnu/bison/bison-1.35.tar.gz"
 download "ftp://ftp.gnu.org/gnu/gcc/gcc-2.95.3/gcc-core-2.95.3.tar.gz"
 download "ftp://ftp.gnu.org/gnu/gcc/gcc-2.95.3/gcc-g++-2.95.3.tar.gz"

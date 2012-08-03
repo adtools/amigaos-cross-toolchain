@@ -1,7 +1,10 @@
 *.lha
 *.tar.gz
+*.tar.bz2
+adtools/
 sources/
 stamps/
 build/
 target/
 host/
+tmp/

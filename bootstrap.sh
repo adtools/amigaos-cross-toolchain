@@ -31,6 +31,28 @@ function copy_non_diff {
   done
 }
 
+function mkdir_empty {
+  rm -rf "$1"
+  mkdir -p "$1"
+}
+
+function compare_version {
+  python - "$1" "$2" "$3" <<EOF
+from distutils.version import StrictVersion
+import sys
+
+cmp = lambda x, y: StrictVersion(x).__cmp__(y)
+
+op = {"lt": [-1],    "gt": [1],
+      "le": [-1, 0], "ge": [1, 0],
+      "eq": [0],     "ne": [-1, 1]}
+
+res = cmp(sys.argv[1], sys.argv[3]) in op[sys.argv[2]]
+
+sys.exit(int(not res))
+EOF
+}
+
 function unpack_sources {
   [ -f "${STAMP}/unpack-sources" ] && return 0
 
@@ -55,6 +77,23 @@ function unpack_sources {
   find "${PATCHES}/${GCC}" -type f -iname '*.diff' | xargs cat | patch -p1
   copy_non_diff "${GCC}"
   popd
+
+  if compare_version "${GCC_VER}" "ge" "4.0.0"; then
+    rm -rf "${GMP}"
+    tar -xjf "${ARCHIVES}/${GMP_SRC}"
+
+    rm -rf "${MPC}"
+    tar -xzf "${ARCHIVES}/${MPC_SRC}"
+
+    rm -rf "${MPFR}"
+    tar -xjf "${ARCHIVES}/${MPFR_SRC}"
+
+    rm -rf "${ISL}"
+    tar -xjf "${ARCHIVES}/${ISL_SRC}"
+
+    rm -rf "${CLOOG}"
+    tar -xzf "${ARCHIVES}/${CLOOG_SRC}"
+  fi
 
   rm -rf "${SFDC}"
   lha -xgq "${ARCHIVES}/${SFDC_SRC}"
@@ -96,17 +135,62 @@ function unpack_sources {
 function build_tools {
   [ -f "${STAMP}/build-tools" ] && return 0
 
-  rm -rf "${HOST_DIR}"
-  mkdir -p "${HOST_DIR}"
+  mkdir_empty "${HOST_DIR}"
 
   pushd "${BUILD_DIR}"
-	rm -rf "${BISON}"
-	mkdir -p "${BISON}"
-  cd "${BISON}"
-  "${SOURCES}/${BISON}/configure" \
-    --prefix="${HOST_DIR}"
-	make
-	make install
+
+  if compare_version "${GCC_VER}" "eq" "2.95.3"; then
+    mkdir_empty "${BISON}"
+    pushd "${BISON}"
+    "${SOURCES}/${BISON}/configure" \
+      --prefix="${HOST_DIR}"
+    make && make install
+    popd
+  fi
+
+  if compare_version "${GCC_VER}" "ge" "4.0.0"; then
+    mkdir_empty "${GMP}"
+    pushd "${GMP}"
+    "${SOURCES}/${GMP}/configure" \
+      --prefix="${HOST_DIR}"
+    make && make install
+    popd
+
+    mkdir_empty "${MPFR}"
+    pushd "${MPFR}"
+    "${SOURCES}/${MPFR}/configure" \
+      --prefix="${HOST_DIR}" \
+      --with-gmp="${HOST_DIR}"
+    make && make install
+    popd
+
+    mkdir_empty "${MPC}"
+    pushd "${MPC}"
+    "${SOURCES}/${MPC}/configure" \
+      --prefix="${HOST_DIR}" \
+      --with-gmp="${HOST_DIR}" \
+      --with-mpfr="${HOST_DIR}"
+    make && make install
+    popd
+
+    mkdir_empty "${ISL}"
+    pushd "${ISL}"
+    "${SOURCES}/${ISL}/configure" \
+      --prefix="${HOST_DIR}"
+    make && make install
+    popd
+
+    mkdir_empty "${CLOOG}"
+    pushd "${CLOOG}"
+    "${SOURCES}/${CLOOG}/configure" \
+      --prefix="${HOST_DIR}" \
+      --with-isl=system \
+      --with-gmp-prefix="${HOST_DIR}" \
+      --with-isl-prefix="${HOST_DIR}"
+    make && make install
+    popd
+  fi
+
   popd
 
 	touch "${STAMP}/build-tools"

@@ -27,3 +27,9 @@ download \
 download \
   "http://sourceforge.net/projects/amiga/files/ixemul.library/48.2/ixemul-src.lha/download" \
   "ixemul-48.2.lha"
+
+download "ftp://gcc.gnu.org/pub/gcc/infrastructure/gmp-4.3.2.tar.bz2"
+download "ftp://gcc.gnu.org/pub/gcc/infrastructure/mpc-0.8.1.tar.gz"
+download "ftp://gcc.gnu.org/pub/gcc/infrastructure/mpfr-2.4.2.tar.bz2"
+download "ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.10.tar.bz2"
+download "ftp://gcc.gnu.org/pub/gcc/infrastructure/cloog-0.17.0.tar.gz"

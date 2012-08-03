@@ -1,0 +1,20 @@
+--- ixemul-48.2.orig/utils/Makefile.in	2001-08-21 17:36:26.000000000 +0200
++++ ixemul-48.2/utils/Makefile.in	2012-08-03 19:25:28.000000000 +0200
+@@ -89,7 +89,7 @@
+ 		$(CC) $(OUR_LDFLAGS) -o $@ $^ $(LIBS)
+ 
+ ixpipe-handler:	ixpipe-handler.o
+-		$(CC) -nostdlib -o $@ $? -lc
++		$(CC) $(OUR_LDFLAGS) -nostdlib -o $@ $? -lc
+ 
+ ipcs:		ipcs.o
+ 		$(CC) $(OUR_LDFLAGS) -o $@ $^ $(LIBS)
+@@ -115,7 +115,7 @@
+ zoneinfo/GMT:	zic yearistype
+ 		rm -rf zoneinfo
+ 		mkdir zoneinfo
+-		rootme=`pwd` ; cd $(srcdir)/databases ; \
++		-rootme=`pwd` ; cd $(srcdir)/databases ; \
+ 		$$rootme/zic -d $$rootme/zoneinfo -y "sh $$rootme/yearistype" -p $(POSIXRULES) $(DATABASES)
+ 
+ version.h:	../library/parse_version.c ../version.in

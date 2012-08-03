@@ -1,0 +1,13 @@
+--- ixemul-48.2.orig/library/ixemul.h	2001-08-21 17:33:24.000000000 +0200
++++ ixemul-48.2/library/ixemul.h	2012-08-03 18:58:17.000000000 +0200
+@@ -294,8 +294,10 @@
+ extern int has_68040_or_up;
+ extern int has_68060_or_up;
+ 
++#ifndef AFB_68060
+ #define AFB_68060         (7)
+ #define AFF_68060         (1L<<7)
++#endif
+ 
+ #define usetup            struct user *u_ptr=getuser(SysBase->ThisTask)
+ 

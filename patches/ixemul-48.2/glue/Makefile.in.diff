@@ -1,0 +1,11 @@
+--- ixemul-48.2/glue/Makefile.in	1999-08-12 14:27:36.000000000 +0200
++++ ixemul-48.2/glue/Makefile.in	2012-08-03 17:58:34.000000000 +0200
+@@ -77,7 +77,7 @@
+ 		rm -f *.o
+ 
+ gen_glue:	gen_glue.c $(srcdir)/../include/sys/syscall.def
+-		$(CC) $(ALL_CFLAGS) $< -o $@
++		gcc $(INCS) $< -o $@
+ 
+ clean:
+ 		rm -rf *baserel*

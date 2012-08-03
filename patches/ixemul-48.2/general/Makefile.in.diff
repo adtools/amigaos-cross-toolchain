@@ -1,0 +1,15 @@
+--- ixemul-48.2.orig/general/Makefile.in	2001-08-21 17:32:52.000000000 +0200
++++ ixemul-48.2/general/Makefile.in	2012-08-03 19:29:32.000000000 +0200
+@@ -33,9 +33,9 @@
+ 
+ # I *love* GNU make!
+ define catenate
+-/bin/echo -n creating $@...
+-/bin/echo -e "$(^:%=#include \"%\"\n)" >$@
+-/bin/echo done
++echo -n creating $@...
++echo "$(^:%=#include \"%\"\n)" >$@
++echo done
+ endef
+ 
+ FLAVOR_CFLAGS =	-m$(CPU) -m$(FPU)

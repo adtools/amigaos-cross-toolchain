@@ -9,6 +9,7 @@ targeting m68k-amigaos with:
  * binutils 2.9.1 (assembler, linker, etc.)
  * libnix 2.1 (standard ANSI/C library replacement for AmigaOS)
  * AmigaOS headers & libraries (for AmigaOS 3.9)
+ * ixemul.library 48.2
 
 Patches are welcome!
 
@@ -27,6 +28,7 @@ Prerequisites (look at bootstrap.conf file):
    - gcc 2.95.3
    - binutils 2.9.1
    - bison 1.35
+   - gawk 1.3.8
  * Amiga specific sources & binaries:
    - libnix 2.1
    - AmigaOS NDK 3.9
@@ -46,5 +48,5 @@ TODO:
   * Remove dependencies:
     - libamiga-bin
   * Provide some rudimentary testing (C / C++ sources).
-  * Build ixemul.
-  * Add auxiliary tools: GccFindHit, hunk2aout.
+  * Add auxiliary tools: hunk2aout.
+  * Build timezone data for ixemul (zic).

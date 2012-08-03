@@ -124,7 +124,10 @@ function unpack_sources {
 
   unpack_clean "${IXEMUL}" "${IXEMUL_SRC}"
   mv "ixemul" "${IXEMUL}"
-  chmod a+x "${IXEMUL}/configure"
+  pushd "${IXEMUL}"
+  chmod a+x "configure" "mkinstalldirs"
+  apply_patches "${IXEMUL}"
+  popd
 
   unpack_clean "${LIBNIX}" "${LIBNIX_SRC}"
   mv "libnix" "${LIBNIX}"
@@ -344,7 +347,7 @@ function build_ixemul {
 	mkdir -p "${IXEMUL}"
   cd "${IXEMUL}"
   CC=m68k-amigaos-gcc \
-  CFLAGS=-noixemul \
+  CFLAGS="-noixemul -I${PREFIX}/include" \
   AR=m68k-amigaos-ar \
   RANLIB=m68k-amigaos-ranlib \
 	"${SOURCES}/${IXEMUL}/configure" \
@@ -390,8 +393,8 @@ function build {
   process_headers
   install_libamiga
   build_libnix
-  #build_ixemul
   build_gpp
+  build_ixemul
 }
 
 function main {

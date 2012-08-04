@@ -1,5 +1,5 @@
---- binutils-2.9.1/bfd/config.bfd	1998-05-01 08:48:05.000000000 -0700
-+++ binutils-2.9.1/bfd/config.bfd	2011-05-08 20:28:36.626324556 -0700
+--- binutils-2.9.1/bfd/config.bfd	1998-05-01 17:48:05.000000000 +0200
++++ binutils-2.9.1/bfd/config.bfd	2012-08-04 12:43:35.000000000 +0200
 @@ -284,6 +284,10 @@
    m68*-motorola-sysv*)
      targ_defvec=m68ksysvcoff_vec

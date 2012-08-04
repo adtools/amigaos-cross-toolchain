@@ -1,6 +1,6 @@
---- binutils-2.9.1/bfd/targets.c	Fri May  1 08:48:16 1998
-+++ binutils-2.9.1/bfd/targets.c	Sun Aug 23 00:00:00 1998
-@@ -138,6 +138,7 @@ DESCRIPTION
+--- binutils-2.9.1/bfd/targets.c	1998-05-01 17:48:16.000000000 +0200
++++ binutils-2.9.1/bfd/targets.c	2012-08-04 12:43:35.000000000 +0200
+@@ -138,6 +138,7 @@
  
  .enum bfd_flavour {
  .  bfd_target_unknown_flavour,
@@ -8,7 +8,7 @@
  .  bfd_target_aout_flavour,
  .  bfd_target_coff_flavour,
  .  bfd_target_ecoff_flavour,
-@@ -469,6 +470,8 @@ in this structure.
+@@ -469,6 +470,8 @@
     we can't intermix extern's and initializers.  */
  extern const bfd_target a29kcoff_big_vec;
  extern const bfd_target a_out_adobe_vec;
@@ -17,7 +17,7 @@
  extern const bfd_target aout_arm_big_vec;
  extern const bfd_target aout_arm_little_vec;
  extern const bfd_target aout_mips_big_vec;
-@@ -630,6 +633,8 @@ const bfd_target * const bfd_target_vect
+@@ -630,6 +633,8 @@
  	   it wasn't omitted by mistake.  */
  	&a29kcoff_big_vec,
  	&a_out_adobe_vec,

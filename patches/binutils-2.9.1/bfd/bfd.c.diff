@@ -1,6 +1,6 @@
---- binutils-2.9.1/bfd/bfd.c	Fri May  1 08:48:01 1998
-+++ binutils-2.9.1/bfd/bfd.c	Sun Aug 23 00:00:00 1998
-@@ -177,6 +177,7 @@ CODE_FRAGMENT
+--- binutils-2.9.1/bfd/bfd.c	1998-05-01 17:48:01.000000000 +0200
++++ binutils-2.9.1/bfd/bfd.c	2012-08-04 12:43:35.000000000 +0200
+@@ -177,6 +177,7 @@
  .      struct cisco_core_struct *cisco_core_data;
  .      struct versados_data_struct *versados_data;
  .      struct netbsd_core_struct *netbsd_core_data;
@@ -8,7 +8,7 @@
  .      PTR any;
  .      } tdata;
  .  
-@@ -1153,3 +1154,4 @@ bfd_record_phdr (abfd, type, flags_valid
+@@ -1153,3 +1154,4 @@
  
    return true;
  }

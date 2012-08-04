@@ -1,6 +1,6 @@
---- binutils-2.9.1/gas/Makefile.in	Fri May  1 08:45:03 1998
-+++ binutils-2.9.1/gas/Makefile.in	Sun Aug 23 00:00:00 1998
-@@ -144,6 +150,7 @@ CPU_TYPES = \
+--- binutils-2.9.1/gas/Makefile.in	1998-05-01 17:45:03.000000000 +0200
++++ binutils-2.9.1/gas/Makefile.in	2012-08-04 12:43:35.000000000 +0200
+@@ -144,6 +144,7 @@
  # We deliberately omit som, since it does not work as a cross assembler.
  
  OBJ_FORMATS = \
@@ -8,7 +8,7 @@
  	aout \
  	bout \
  	coff \
-@@ -320,6 +327,7 @@ TARGET_CPU_HFILES = \
+@@ -320,6 +321,7 @@
  # OBJ files in config
  
  OBJ_FORMAT_CFILES = \
@@ -16,7 +16,7 @@
  	config/obj-aout.c \
  	config/obj-bout.c \
  	config/obj-coff.c \
-@@ -332,6 +340,7 @@ OBJ_FORMAT_CFILES = \
+@@ -332,6 +334,7 @@
  	config/obj-vms.c
  
  OBJ_FORMAT_HFILES = \
@@ -24,7 +24,7 @@
  	config/obj-aout.h \
  	config/obj-bout.h \
  	config/obj-coff.h \
-@@ -347,6 +356,7 @@ OBJ_FORMAT_HFILES = \
+@@ -347,6 +350,7 @@
  
  TARG_ENV_HFILES = \
  	config/te-386bsd.h \
@@ -32,7 +32,7 @@
  	config/te-aux.h \
  	config/te-delta.h \
  	config/te-delt88.h \
-@@ -610,6 +620,9 @@ TCDEP_m32r_elf = $(srcdir)/config/obj-el
+@@ -610,6 +614,9 @@
    $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h subsegs.h \
    $(INCDIR)/obstack.h $(INCDIR)/symcat.h cgen-opc.h $(srcdir)/../opcodes/m32r-opc.h \
    $(INCDIR)/opcode/cgen.h
@@ -42,7 +42,7 @@
  TCDEP_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
    $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
    subsegs.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h
-@@ -859,6 +872,9 @@ OBJDEP_m32r_elf = $(srcdir)/config/obj-e
+@@ -859,6 +866,9 @@
    $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
    $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h subsegs.h \
    $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
@@ -52,7 +52,7 @@
  OBJDEP_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
    $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
    $(INCDIR)/obstack.h
-@@ -1082,6 +1098,8 @@ DEP_m32r_coff = $(srcdir)/config/obj-cof
+@@ -1082,6 +1092,8 @@
  DEP_m32r_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
    $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
    $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h
@@ -61,7 +61,7 @@
  DEP_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
    $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
  DEP_m68k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m68k.h \
-@@ -1628,6 +1649,8 @@ ecoff.o : ecoff.c ecoff.h $(INCDIR)/coff
+@@ -1628,6 +1640,8 @@
  # We need all these explicit rules for the multi stuff.  Because of
  # these rules, we don't need one for OBJ_FORMAT_O.
  

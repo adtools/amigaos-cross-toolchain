@@ -1,5 +1,5 @@
---- gcc-2.95.3/gcc/gcc.c	2001-01-25 06:03:16.000000000 -0800
-+++ gcc-2.95.3/gcc/gcc.c	2011-05-08 04:56:30.295286222 -0700
+--- gcc-2.95.3/gcc/gcc.c	2001-01-25 15:03:16.000000000 +0100
++++ gcc-2.95.3/gcc/gcc.c	2012-08-04 11:53:28.000000000 +0200
 @@ -1372,9 +1372,12 @@
  #ifndef STANDARD_EXEC_PREFIX
  #define STANDARD_EXEC_PREFIX "/usr/local/lib/gcc-lib/"

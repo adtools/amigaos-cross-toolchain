@@ -1,5 +1,5 @@
---- gcc-2.95.3/gcc/ginclude/stdarg.h	1999-05-07 18:52:35.000000000 -0700
-+++ gcc-2.95.3/gcc/ginclude/stdarg.h	2011-05-08 04:56:30.305285974 -0700
+--- gcc-2.95.3/gcc/ginclude/stdarg.h	1999-05-08 03:52:35.000000000 +0200
++++ gcc-2.95.3/gcc/ginclude/stdarg.h	2012-08-04 11:53:28.000000000 +0200
 @@ -178,7 +178,7 @@
     But on BSD NET2 we must not test or define or undef it.
     (Note that the comments in NET 2's ansi.h

@@ -1,6 +1,6 @@
---- binutils-2.9.1/gas/read.h	Fri May  1 08:45:16 1998
-+++ binutils-2.9.1/gas/read.h	Sun Aug 23 00:00:00 1998
-@@ -117,6 +117,9 @@ extern void s_app_file PARAMS ((int));
+--- binutils-2.9.1/gas/read.h	1998-05-01 17:45:16.000000000 +0200
++++ binutils-2.9.1/gas/read.h	2012-08-04 12:43:35.000000000 +0200
+@@ -117,6 +117,9 @@
  extern void s_app_line PARAMS ((int));
  extern void s_comm PARAMS ((int));
  extern void s_data PARAMS ((int));

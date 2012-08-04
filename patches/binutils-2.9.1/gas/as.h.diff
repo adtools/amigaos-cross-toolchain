@@ -1,0 +1,25 @@
+--- binutils-2.9.1/gas/as.h	1998-05-01 17:45:05.000000000 +0200
++++ binutils-2.9.1/gas/as.h	2012-08-04 12:43:35.000000000 +0200
+@@ -595,6 +595,22 @@
+ 
+ #include "expr.h"		/* Before targ-*.h */
+ 
++struct relax_type
++{
++  /* Forward reach. Signed number. > 0. */
++  long rlx_forward;
++  /* Backward reach. Signed number. < 0. */
++  long rlx_backward;
++
++  /* Bytes length of this address. */
++  unsigned char rlx_length;
++
++  /* Next longer relax-state.  0 means there is no 'next' relax-state. */
++  relax_substateT rlx_more;
++};
++
++typedef struct relax_type relax_typeS;
++
+ /* this one starts the chain of target dependant headers */
+ #include "targ-env.h"
+ 

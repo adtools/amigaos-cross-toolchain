@@ -1,6 +1,6 @@
---- gcc-2.95.3/gcc/cp/config-lang.in	Wed Jan  6 20:57:30 1999
-+++ gcc-2.95.3/gcc/cp/config-lang.in	Thu Apr  5 20:49:37 2001
-@@ -39,3 +39,8 @@ headers='$(CXX_EXTRA_HEADERS)'
+--- gcc-2.95.3/gcc/cp/config-lang.in	1999-01-06 21:57:30.000000000 +0100
++++ gcc-2.95.3/gcc/cp/config-lang.in	2012-08-04 11:53:28.000000000 +0200
+@@ -39,3 +39,8 @@
  lib2funcs=cplib2.txt
  
  outputs=cp/Makefile

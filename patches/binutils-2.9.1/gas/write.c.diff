@@ -1,6 +1,6 @@
---- binutils-2.9.1/gas/write.c	Fri May  1 08:45:18 1998
-+++ binutils-2.9.1/gas/write.c	Sun Aug 23 00:00:00 1998
-@@ -101,12 +101,12 @@ static int n_fixups;
+--- binutils-2.9.1/gas/write.c	1998-05-01 17:45:18.000000000 +0200
++++ binutils-2.9.1/gas/write.c	2012-08-04 12:43:35.000000000 +0200
+@@ -101,12 +101,12 @@
  static fixS *fix_new_internal PARAMS ((fragS *, int where, int size,
  				       symbolS *add, symbolS *sub,
  				       offsetT offset, int pcrel,
@@ -15,7 +15,7 @@
  #endif
  #if defined (BFD_ASSEMBLER) || (!defined (BFD) && !defined (OBJ_VMS))
  static long fixup_segment PARAMS ((fixS * fixP, segT this_segment_type));
-@@ -140,7 +140,7 @@ static void relax_and_size_all_segments 
+@@ -140,7 +140,7 @@
   */
  static fixS *
  fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
@@ -24,7 +24,7 @@
       fragS *frag;		/* Which frag? */
       int where;			/* Where in that frag? */
       int size;			/* 1, 2, or 4 usually. */
-@@ -153,6 +153,7 @@ fix_new_internal (frag, where, size, add
+@@ -153,6 +153,7 @@
  #else
       int r_type;		/* Relocation type */
  #endif
@@ -32,7 +32,7 @@
  {
    fixS *fixP;
  
-@@ -187,6 +188,7 @@ fix_new_internal (frag, where, size, add
+@@ -187,6 +188,7 @@
    fixP->fx_signed = 0;
  
  #ifdef TC_FIX_TYPE
@@ -40,7 +40,7 @@
    TC_INIT_FIX_DATA(fixP);
  #endif
  
-@@ -233,7 +235,7 @@ fix_new_internal (frag, where, size, add
+@@ -233,7 +235,7 @@
  /* Create a fixup relative to a symbol (plus a constant).  */
  
  fixS *
@@ -49,7 +49,7 @@
       fragS *frag;		/* Which frag? */
       int where;			/* Where in that frag? */
       int size;			/* 1, 2, or 4 usually. */
-@@ -245,9 +247,10 @@ fix_new (frag, where, size, add_symbol, 
+@@ -245,9 +247,10 @@
  #else
       int r_type;		/* Relocation type */
  #endif
@@ -61,7 +61,7 @@
  }
  
  /* Create a fixup for an expression.  Currently we only support fixups
-@@ -255,7 +258,7 @@ fix_new (frag, where, size, add_symbol, 
+@@ -255,7 +258,7 @@
     file formats support anyhow.  */
  
  fixS *
@@ -70,7 +70,7 @@
       fragS *frag;		/* Which frag? */
       int where;			/* Where in that frag? */
       int size;			/* 1, 2, or 4 usually. */
-@@ -266,6 +269,7 @@ fix_new_exp (frag, where, size, exp, pcr
+@@ -266,6 +269,7 @@
  #else
       int r_type;		/* Relocation type */
  #endif
@@ -78,7 +78,7 @@
  {
    symbolS *add = NULL;
    symbolS *sub = NULL;
-@@ -285,7 +289,7 @@ fix_new_exp (frag, where, size, exp, pcr
+@@ -285,7 +289,7 @@
  	exp->X_op_symbol = 0;
  	exp->X_add_symbol = stmp;
  	exp->X_add_number = 0;
@@ -87,7 +87,7 @@
        }
  
      case O_symbol_rva:
-@@ -324,7 +328,7 @@ fix_new_exp (frag, where, size, exp, pcr
+@@ -324,7 +328,7 @@
      }
  
    return fix_new_internal (frag, where, size, add, sub, off,
@@ -96,7 +96,7 @@
  }
  
  /* Append a string onto another string, bumping the pointer along.  */
-@@ -1530,17 +1534,17 @@ write_object_file ()
+@@ -1530,17 +1534,17 @@
  #ifdef TC_CONS_FIX_NEW
  	  TC_CONS_FIX_NEW (lie->frag,
  		       lie->word_goes_here - lie->frag->fr_literal,
@@ -117,7 +117,7 @@
  #else
  #ifdef TC_NS32K
  	  fix_new_ns32k_exp (lie->frag,
-@@ -1549,7 +1553,7 @@ write_object_file ()
+@@ -1549,7 +1553,7 @@
  #else
  	  fix_new_exp (lie->frag,
  		       lie->word_goes_here - lie->frag->fr_literal,
@@ -126,7 +126,7 @@
  #endif /* TC_NS32K */
  #endif /* TC_SPARC|TC_A29K|NEED_FX_R_TYPE */
  #endif /* BFD_ASSEMBLER */
-@@ -2392,6 +2396,7 @@ fixup_segment (fixP, this_segment_type)
+@@ -2392,6 +2396,7 @@
    char *place;
    long where;
    int pcrel, plt;
@@ -134,7 +134,7 @@
    fragS *fragP;
    segT add_symbol_segment = absolute_section;
  
-@@ -2430,6 +2435,9 @@ fixup_segment (fixP, this_segment_type)
+@@ -2430,6 +2435,9 @@
        add_number = fixP->fx_offset;
        pcrel = fixP->fx_pcrel;
        plt = fixP->fx_plt;
@@ -144,15 +144,15 @@
  
        if (add_symbolP != NULL
  	  && add_symbolP->sy_mri_common)
-@@ -2668,6 +2675,11 @@ fixup_segment (fixP, this_segment_type)
- 	      ++seg_reloc_count;
+@@ -2669,6 +2677,11 @@
  	    }
  	}
-+
+ 
 +#if !defined(BFD_ASSEMBLER) && !defined(MANY_SEGMENTS)
 +      if (baserel && add_number)
 +        add_number -= text_last_frag->fr_address;
 +#endif
- 
++
        if (!fixP->fx_bit_fixP && !fixP->fx_no_overflow && size > 0)
  	{
+ 	  if ((size_t) size < sizeof (valueT))

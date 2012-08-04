@@ -1,5 +1,5 @@
---- gcc-2.95.3/gcc/genconfig.c	1999-04-16 12:52:24.000000000 -0700
-+++ gcc-2.95.3/gcc/genconfig.c	2011-05-08 04:56:30.295286222 -0700
+--- gcc-2.95.3/gcc/genconfig.c	1999-04-16 21:52:24.000000000 +0200
++++ gcc-2.95.3/gcc/genconfig.c	2012-08-04 11:53:28.000000000 +0200
 @@ -327,8 +327,8 @@
    printf ("/* Generated automatically by the program `genconfig'\n\
  from the machine description file `md'.  */\n\n");

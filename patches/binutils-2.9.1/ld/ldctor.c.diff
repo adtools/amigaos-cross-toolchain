@@ -1,6 +1,6 @@
---- binutils-2.9.1/ld/ldctor.c	Fri May  1 08:48:48 1998
-+++ binutils-2.9.1/ld/ldctor.c	Sun Aug 23 00:00:00 1998
-@@ -144,10 +144,13 @@ ldctor_build_sets ()
+--- binutils-2.9.1/ld/ldctor.c	1998-05-01 17:48:48.000000000 +0200
++++ binutils-2.9.1/ld/ldctor.c	2012-08-04 12:43:35.000000000 +0200
+@@ -144,10 +144,13 @@
        /* If the symbol is defined, we may have been invoked from
  	 collect, and the sets may already have been built, so we do
  	 not do anything.  */
@@ -17,7 +17,7 @@
        /* For each set we build:
  	   set:
  	     .long number_of_elements
-@@ -239,10 +242,17 @@ ldctor_build_sets ()
+@@ -239,10 +242,17 @@
  	      if (e->name != NULL)
  		minfo ("%T\n", e->name);
  	      else

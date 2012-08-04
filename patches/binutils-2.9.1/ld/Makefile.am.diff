@@ -1,5 +1,5 @@
---- binutils-2.9.1/ld/Makefile.am.orig	1998-05-01 08:48:47.000000000 -0700
-+++ binutils-2.9.1/ld/Makefile.am	2012-02-14 20:07:02.321812291 -0800
+--- binutils-2.9.1/ld/Makefile.am	1998-05-01 17:48:47.000000000 +0200
++++ binutils-2.9.1/ld/Makefile.am	2012-08-04 12:43:35.000000000 +0200
 @@ -93,6 +93,8 @@
  	ea29k.o \
  	eaixppc.o \
@@ -9,7 +9,7 @@
  	ealpha.o \
  	earcelf.o \
  	earmaoutb.o \
-@@ -229,6 +233,12 @@
+@@ -229,6 +231,12 @@
  GEN_DEPENDS = $(srcdir)/genscripts.sh $(srcdir)/emultempl/stringify.sed
  @TDIRS@
  

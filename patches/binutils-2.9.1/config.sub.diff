@@ -1,6 +1,6 @@
---- binutils-2.9.1/config.sub	Fri May  1 08:48:46 1998
-+++ binutils-2.9.1/config.sub	Sun Aug 23 00:00:00 1998
-@@ -287,11 +287,11 @@ case $basic_machine in
+--- binutils-2.9.1/config.sub	1998-05-01 17:48:46.000000000 +0200
++++ binutils-2.9.1/config.sub	2012-08-04 12:43:35.000000000 +0200
+@@ -287,11 +287,11 @@
  		os=-sysv
  		;;
  	amiga | amiga-*)
@@ -16,7 +16,7 @@
  		;;
  	amigaunix | amix)
  		basic_machine=m68k-cbm
-@@ -925,7 +925,7 @@ case $os in
+@@ -925,7 +925,7 @@
  	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
  	      | -*vms* | -sco* | -esix* | -isc* | -aix* | -sunos | -sunos[34]*\
  	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
@@ -25,7 +25,7 @@
  	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* \
  	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \
  	      | -hiux* | -386bsd* | -netbsd* | -openbsd* | -freebsd* | -riscix* \
-@@ -1098,7 +1098,7 @@ case $basic_machine in
+@@ -1098,7 +1098,7 @@
  		os=-sysv
  		;;
  	*-cbm)

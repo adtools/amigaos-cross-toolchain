@@ -1,6 +1,6 @@
---- binutils-2.9.1/bfd/doc/Makefile.in	Fri May  1 08:48:02 1998
-+++ binutils-2.9.1/bfd/doc/Makefile.in	Sun Aug 23 00:00:00 1998
-@@ -91,7 +97,7 @@ wordsize = @wordsize@
+--- binutils-2.9.1/bfd/doc/Makefile.in	1998-05-01 17:48:02.000000000 +0200
++++ binutils-2.9.1/bfd/doc/Makefile.in	2012-08-04 12:43:35.000000000 +0200
+@@ -91,7 +91,7 @@
  
  AUTOMAKE_OPTIONS = cygnus
  
@@ -9,7 +9,7 @@
  	bfdt.texi  cache.texi coffcode.texi \
  	core.texi elf.texi elfcode.texi  format.texi  libbfd.texi  \
  	opncls.texi  reloc.texi  section.texi  \
-@@ -113,6 +119,7 @@ SRCDOC = $(srcdir)/../aoutx.h  $(srcdir)
+@@ -113,6 +113,7 @@
  	$(srcdir)/../cache.c $(srcdir)/../coffcode.h \
  	$(srcdir)/../corefile.c $(srcdir)/../elf.c \
  	$(srcdir)/../elfcode.h  $(srcdir)/../format.c \
@@ -17,11 +17,10 @@
  	$(srcdir)/../libbfd.c $(srcdir)/../opncls.c \
  	$(srcdir)/../reloc.c  $(srcdir)/../section.c \
  	$(srcdir)/../syms.c  $(srcdir)/../targets.c \
-@@ -473,6 +641,18 @@ s-linker: $(MKDOC) $(srcdir)/../linker.c
- 	$(srcdir)/../../move-if-change linker.tmp linker.texi
+@@ -474,6 +475,18 @@
  	touch s-linker
  linker.texi: s-linker
-+
+ 
 +s-amiga: $(MKDOC) $(srcdir)/../amigaos.c $(srcdir)/doc.str
 +	./$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../amigaos.c >amiga.tmp
 +	$(srcdir)/../../move-if-change amiga.tmp amiga.texi
@@ -33,6 +32,7 @@
 +	$(srcdir)/../../move-if-change amigalink.tmp amigalink.texi
 +	touch s-amigalink
 +amigalink.texi: s-amigalink
- 
++
  libbfd.h: $(srcdir)/../libbfd-in.h	\
  	$(srcdir)/../init.c		\
+ 	$(srcdir)/../libbfd.c		\

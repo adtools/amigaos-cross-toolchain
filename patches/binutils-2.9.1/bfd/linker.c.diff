@@ -1,6 +1,6 @@
---- binutils-2.9.1/bfd/linker.c	Fri May  1 08:48:12 1998
-+++ binutils-2.9.1/bfd/linker.c	Sun Aug 23 00:00:00 1998
-@@ -428,7 +428,8 @@ static boolean generic_add_output_symbol
+--- binutils-2.9.1/bfd/linker.c	1998-05-01 17:48:12.000000000 +0200
++++ binutils-2.9.1/bfd/linker.c	2012-08-04 12:43:35.000000000 +0200
+@@ -428,7 +428,8 @@
  static boolean default_fill_link_order
    PARAMS ((bfd *, struct bfd_link_info *, asection *,
  	   struct bfd_link_order *));

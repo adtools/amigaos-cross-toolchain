@@ -9,6 +9,15 @@
  
  ipcs:		ipcs.o
  		$(CC) $(OUR_LDFLAGS) -o $@ $^ $(LIBS)
+@@ -98,7 +98,7 @@
+ 		$(CC) $(OUR_LDFLAGS) -o $@ $^ $(LIBS)
+ 
+ zic:		zic.o ialloc.o scheck.o getopt.o
+-		$(CC) -o $@ $^ $(LIBS)
++		$(CC) $(OUR_LDFLAGS) -o $@ $^ $(LIBS)
+ 
+ tzselect:	tzselect.ksh
+ 		sed \
 @@ -115,7 +115,7 @@
  zoneinfo/GMT:	zic yearistype
  		rm -rf zoneinfo

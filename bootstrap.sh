@@ -133,6 +133,10 @@ function unpack_sources {
   mv "libnix" "${LIBNIX}"
   chmod a+x "${LIBNIX}/mkinstalldirs"
 
+  unpack_clean "${LIBM}" "${LIBM_SRC}"
+  mv "contrib/libm" "${LIBM}"
+  rmdir "contrib"
+
   mkdir_empty "${LIBAMIGA}"
   pushd "${LIBAMIGA}"
   tar -xzf "${ARCHIVES}/${LIBAMIGA_SRC}"
@@ -214,15 +218,14 @@ function build_tools {
 
   popd
 
-	touch "${STAMP}/build-tools"
+  touch "${STAMP}/build-tools"
 }
 
 function build_binutils {
   [ -f "${STAMP}/build-binutils" ] && return 0
 
   pushd "${BUILD_DIR}"
-	rm -rf "${BINUTILS}"
-	mkdir -p "${BINUTILS}"
+  mkdir_empty "${BINUTILS}"
   cd "${BINUTILS}"
   "${SOURCES}/${BINUTILS}/configure" \
     --prefix="${PREFIX}" \
@@ -232,15 +235,14 @@ function build_binutils {
   make install install-info
   popd
 
-	touch "${STAMP}/build-binutils"
+  touch "${STAMP}/build-binutils"
 }
 
 function build_gcc {
   [ -f "${STAMP}/build-gcc" ] && return 0
 
   pushd "${BUILD_DIR}"
-	rm -rf "${GCC}"
-	mkdir -p "${GCC}"
+  mkdir_empty "${GCC}"
   cd "${GCC}"
   "${SOURCES}/${GCC}/configure" \
     --prefix="${PREFIX}" \
@@ -252,16 +254,17 @@ function build_gcc {
   make install ${FLAGS_FOR_TARGET[*]}
   popd
 
-	touch "${STAMP}/build-gcc"
+  touch "${STAMP}/build-gcc"
 }
 
 function build_gpp {
   [ -f "${STAMP}/build-gpp" ] && return 0
 
+  local GPP="${GCC/gcc/g++}"
+
   pushd "${BUILD_DIR}"
-	rm -rf "${GCC}"
-	mkdir -p "${GCC}"
-  cd "${GCC}"
+  mkdir_empty "${GPP}"
+  cd "${GPP}"
   "${SOURCES}/${GCC}/configure" \
     --prefix="${PREFIX}" \
     --host="i686-linux-gnu" \
@@ -272,7 +275,7 @@ function build_gpp {
   make install ${FLAGS_FOR_TARGET[*]}
   popd
 
-	touch "${STAMP}/build-gpp"
+  touch "${STAMP}/build-gpp"
 }
 
 function process_headers {
@@ -284,8 +287,7 @@ function process_headers {
   cd "${SFDC}"
   ./configure \
     --prefix="${PREFIX}"
-  make
-	make install
+  make && make install
   popd
 
   pushd "${PREFIX}/include"
@@ -300,7 +302,7 @@ function process_headers {
   done
   popd
 
-	touch "${STAMP}/process-headers"
+  touch "${STAMP}/process-headers"
 }
 
 function install_libamiga {
@@ -310,15 +312,14 @@ function install_libamiga {
   cp -av "${SOURCES}/${LIBAMIGA}/lib" .
   popd
 
-	touch "${STAMP}/install-libamiga"
+  touch "${STAMP}/install-libamiga"
 }
 
 function build_libnix {
   [ -f "${STAMP}/build-libnix" ] && return 0
 
   pushd "${BUILD_DIR}"
-	rm -rf "${LIBNIX}"
-	mkdir -p "${LIBNIX}"
+  mkdir_empty "${LIBNIX}"
   cd "${LIBNIX}"
   "${SOURCES}/${LIBNIX}/configure" \
     --prefix="${PREFIX}" \
@@ -336,15 +337,34 @@ function build_libnix {
   make install MAKEINFO=:
   popd
 
-	touch "${STAMP}/build-libnix"
+  touch "${STAMP}/build-libnix"
+}
+
+function build_libm {
+  [ -f "${STAMP}/build-libm" ] && return 0
+
+  pushd "${BUILD_DIR}"
+  mkdir_empty "${LIBM}"
+  cd "${LIBM}"
+  CC=m68k-amigaos-gcc \
+  AR=m68k-amigaos-ar \
+  CFLAGS="-noixemul" \
+  RANLIB=m68k-amigaos-ranlib \
+	"${SOURCES}/${LIBM}/configure" \
+    --prefix="${PREFIX}" \
+    --host="i686-linux-gnu" \
+    --build="m68k-amigaos"
+  make && make install
+  popd
+
+  touch "${STAMP}/build-libm"
 }
 
 function build_ixemul {
   [ -f "${STAMP}/build-ixemul" ] && return 0
 
   pushd "${BUILD_DIR}"
-	rm -rf "${IXEMUL}"
-	mkdir -p "${IXEMUL}"
+  mkdir_empty "${IXEMUL}"
   cd "${IXEMUL}"
   CC=m68k-amigaos-gcc \
   CFLAGS="-noixemul -I${PREFIX}/include" \
@@ -358,7 +378,7 @@ function build_ixemul {
   make MAKEINFO=: install
   popd
 
-	touch "${STAMP}/build-ixemul"
+  touch "${STAMP}/build-ixemul"
 }
 
 function build {
@@ -393,6 +413,7 @@ function build {
   process_headers
   install_libamiga
   build_libnix
+  build_libm
   build_gpp
   build_ixemul
 }

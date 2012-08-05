@@ -8,6 +8,7 @@ targeting m68k-amigaos with:
  * g++ 2.95.3 + libstdc++
  * binutils 2.9.1 (assembler, linker, etc.)
  * libnix 2.1 (standard ANSI/C library replacement for AmigaOS)
+ * libm 5.4 (provides math library implementation for non-FPU Amigas)
  * AmigaOS headers & libraries (for AmigaOS 3.9)
  * ixemul.library 48.2
 
@@ -31,6 +32,7 @@ Prerequisites (look at bootstrap.conf file):
    - gawk 1.3.8
  * Amiga specific sources & binaries:
    - libnix 2.1
+   - libm 5.4
    - AmigaOS NDK 3.9
    - sfdc 1.4
    - libamiga-bin

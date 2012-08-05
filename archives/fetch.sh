@@ -26,6 +26,9 @@ download \
   "http://ftp.back2roots.org/geekgadgets/amiga/m68k/snapshots/990529/bin/libamiga-bin.tgz" \
   "libamiga-bin.tar.gz"
 download \
+  "http://ftp.back2roots.org/geekgadgets/amiga/m68k/snapshots/990529/src/libm-5.4-src.tgz" \
+  "libm-5.4.tar.gz"
+download \
   "http://sourceforge.net/projects/amiga/files/ixemul.library/48.2/ixemul-src.lha/download" \
   "ixemul-48.2.lha"
 

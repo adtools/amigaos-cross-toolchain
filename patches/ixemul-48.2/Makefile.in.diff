@@ -1,0 +1,11 @@
+--- ixemul-48.2/Makefile.in	2001-09-01 17:16:28.000000000 +0200
++++ ixemul-48.2/Makefile.in	2012-08-05 11:44:42.000000000 +0200
+@@ -9,7 +9,7 @@
+ # Common prefix for machine-dependent installed files.
+ exec_prefix =	@exec_prefix@
+ 
+-bindir =	$(exec_prefix)/bin
++bindir =	$(exec_prefix)/Sys/bin
+ libdir =	$(exec_prefix)/lib
+ syslibsdir =	$(exec_prefix)/Sys/libs
+ sysldir =	$(exec_prefix)/Sys/l

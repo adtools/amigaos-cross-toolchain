@@ -110,9 +110,6 @@ int amiga_base_relative=0;
 /* This one is used to indicate -resident linking */
 int amiga_resident=0;
 
-/* generate a pOS executable */
-int amiga_pOS_flg;
-
 extern boolean default_indirect_link_order
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   struct bfd_link_order *, boolean));

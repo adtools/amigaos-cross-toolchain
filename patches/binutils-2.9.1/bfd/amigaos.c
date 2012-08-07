@@ -173,8 +173,6 @@ static boolean write_name PARAMS ((bfd*, const char*, long));
 /* AmigaOS doesn't like symbols names longer than 124 characters */
 #define MAX_NAME_SIZE 124
 
-extern int amiga_pOS_flg;
-
 #if DEBUG_AMIGA
 #include <stdarg.h>
 static void
@@ -272,7 +270,7 @@ amiga_object_p (abfd)
 
   /* Does it look like an Amiga object file?  */
   x = GL(buf);
-  if ((x != HUNK_UNIT) && (x != HUNK_HEADER) && (x != HUNK_HEADER_POS))
+  if ((x != HUNK_UNIT) && (x != HUNK_HEADER))
     {
       /* Not an Amiga file.  */
       bfd_set_error(bfd_error_wrong_format);
@@ -283,7 +281,7 @@ amiga_object_p (abfd)
      other bfd requirements).  */
   (void) amiga_mkobject (abfd);
 
-  AMIGA_DATA(abfd)->IsLoadFile = (x == HUNK_HEADER || x == HUNK_HEADER_POS);
+  AMIGA_DATA(abfd)->IsLoadFile = (x == HUNK_HEADER);
 
   if (!amiga_digest_file (abfd))
     {
@@ -434,7 +432,6 @@ amiga_make_unique_section (abfd, name)
 	  (x) == HUNK_OVERLAY ? "HUNK_OVERLAY" :\
 	  (x) == HUNK_BREAK ? "HUNK_BREAK" :\
 	  (x) == HUNK_HEADER ? "HUNK_HEADER" :\
-	  (x) == HUNK_HEADER_POS ? "HUNK_HEADER_POS" :\
 	  (x) == HUNK_CODE ? "HUNK_CODE" :\
 	  (x) == HUNK_DATA ? "HUNK_DATA" :\
 	  (x) == HUNK_BSS ? "HUNK_BSS" :\
@@ -674,7 +671,6 @@ amiga_digest_file (abfd)
       break;
 
     case HUNK_HEADER:
-    case HUNK_HEADER_POS:
       /* This is a load file */
       if (!amiga_read_load (abfd))
 	return(false);
@@ -1327,9 +1323,6 @@ amiga_write_object_contents (abfd)
       DPRINT(5,("Writing Load file\n"));
 
       /* Write out load file header */
-      if (amiga_pOS_flg)
-	n[0] = HUNK_HEADER_POS;
-      else
 	n[0] = HUNK_HEADER;
       n[1] = n[2] = 0;
       for (p=abfd->sections; p!=NULL; p=p->next) {

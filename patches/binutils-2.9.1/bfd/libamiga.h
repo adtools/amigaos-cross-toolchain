@@ -49,7 +49,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define HUNK_DEBUG		1009
 #define HUNK_END		1010
 #define HUNK_HEADER		1011
-#define HUNK_HEADER_POS		(0x00001000 | 1011)
 #define HUNK_OVERLAY		1013
 #define HUNK_BREAK		1014
 #define HUNK_DREL32		1015

@@ -54,9 +54,6 @@ extern int amiga_attribute;
 /* generate a resident executable */
 extern int amiga_resident;
 
-/* generate a pOS executable */
-extern int amiga_pOS_flg;
-
 static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 static int gld${EMULATION_NAME}_parse_args PARAMS ((int, char **));
@@ -82,7 +79,6 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 #define OPTION_AMIGA_DEBUG              (OPTION_AMIGA_ATTRIBUTE + 1)
 #define OPTION_AMIGA_DATADATA_RELOC     (OPTION_AMIGA_DEBUG + 1)
 #define OPTION_FLAVOR			(OPTION_AMIGA_DATADATA_RELOC + 1)
-#define OPTION_AMIGA_POS		(OPTION_FLAVOR + 1)
 
   static struct option longopts[] = {
     {"amiga-datadata-reloc", no_argument, NULL, OPTION_AMIGA_DATADATA_RELOC},
@@ -97,8 +93,6 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     /*'\0', NULL, "Force sections in fast memory", ONE_DASH },*/
     {"flavor", required_argument, NULL, OPTION_FLAVOR},
     /*'\0', NULL, "Select a library flavor", ONE_DASH },*/
-    {"pos", no_argument, NULL, OPTION_AMIGA_POS},
-    /*'\0', NULL, "Output a pOS executable", ONE_DASH },*/
     {NULL, no_argument, NULL, 0}
   };
 
@@ -146,10 +140,6 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 	extern void ldfile_add_flavor (char*);
 	ldfile_add_flavor (optarg);
       }
-      break;
-
-    case OPTION_AMIGA_POS:
-      amiga_pOS_flg = 1;
       break;
     }
   return 1;

@@ -292,18 +292,18 @@ class HunkParser(object):
 
     return hunks
 
-
-for path in sys.argv[1:]:
-  print 'Parsing "%s".' % path
-  with open(path) as hunkfile:
-    parser = HunkParser(hunkfile)
-    for hunk in parser.Parse():
-      print hunk.name
-      if hunk.name == 'HUNK_EXT':
-        for name, symbols in hunk.data.items():
-          print ' ', name
-          for symbol, value in symbols.items():
-            print '   ', symbol, '=', value
-      else:
-        if hunk.data:
-          print ' ', '%r' % hunk.data
+if __name__ == '__main__':
+  for path in sys.argv[1:]:
+    print 'Parsing "%s".' % path
+    with open(path) as hunkfile:
+      parser = HunkParser(hunkfile)
+      for hunk in parser.Parse():
+        print hunk.name
+        if hunk.name == 'HUNK_EXT':
+          for name, symbols in hunk.data.items():
+            print ' ', name
+            for symbol, value in symbols.items():
+              print '   ', symbol, '=', value
+        else:
+          if hunk.data:
+            print ' ', '%r' % hunk.data

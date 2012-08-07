@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 import inspect
 import struct
 import sys
@@ -42,6 +42,8 @@ class HunkMap(object):
   HUNK_RELOC32SHORT = 1020
   HUNK_RELRELOC32   = 1021
   HUNK_ABSRELOC16   = 1022
+  HUNK_PPC_CODE     = 1257
+  HUNK_RELRELOC26   = 1260
 
   @classmethod
   def GetName(cls, number):
@@ -82,6 +84,7 @@ class HunkExtMap(object):
   EXT_RELCOMMON = 137	       # 32 bit PC-relative reference to COMMON block
   EXT_ABSREF16  = 138        # 16 bit absolute reference to symbol
   EXT_ABSREF8   = 139        # 8 bit absolute reference to symbol
+  EXT_RELREF26  = 229
 
   @classmethod
   def GetName(cls, number):
@@ -115,6 +118,11 @@ class HunkParser(object):
   def ReadLong(self):
     data = struct.unpack('>I', self.data[self.index : self.index + 4])[0]
     self.index += 4
+    return data
+
+  def ReadWord(self):
+    data = struct.unpack('>H', self.data[self.index : self.index + 2])[0]
+    self.index += 2
     return data
 
   def ReadInt(self):
@@ -157,7 +165,7 @@ class HunkParser(object):
     return {symbol : refs}
 
   def ReadHunkExt(self):
-    hunks = []
+    hunks = defaultdict(dict)
 
     while True:
       longs = self.ReadLong()
@@ -176,7 +184,7 @@ class HunkParser(object):
       else:
         raise NotImplementedError('%s not handled.' % extName)
 
-      hunks.append(Hunk(extName, data, 0))
+      hunks[extName].update(data)
 
     return hunks
 
@@ -192,6 +200,25 @@ class HunkParser(object):
       hunkRef = self.ReadLong()
       offsets = [self.ReadLong() for i in range(longs)]
       relocs.update({hunkRef : offsets})
+
+    return relocs
+
+  def ReadShortRelocs(self):
+    start = self.index
+    relocs = {}
+
+    while True:
+      words = self.ReadWord()
+
+      if not words:
+        break
+
+      hunkRef = self.ReadWord()
+      offsets = [self.ReadWord() for i in range(words)]
+      relocs.update({hunkRef : offsets})
+
+    if (self.index - start) & 3:
+      self.index += 2
 
     return relocs
 
@@ -213,7 +240,13 @@ class HunkParser(object):
 
     return Header(residents, hunks, first, last, specifiers)
 
+  def ReadOverlay(self):
+    length = self.ReadLong() * 4
+    self.index += length + 4
+    return ''
+
   def Parse(self):
+    executable = None
     hunks = []
 
     while self.index < len(self.data):
@@ -226,7 +259,10 @@ class HunkParser(object):
         print 'Parse error at position %d.' % self.index
         raise
 
-      if name == 'HUNK_END':
+      if executable is None:
+        executable = (name == 'HUNK_HEADER')
+
+      if name in ['HUNK_END', 'HUNK_BREAK']:
         data = None
       elif name == 'HUNK_EXT':
         data = self.ReadHunkExt()
@@ -236,13 +272,19 @@ class HunkParser(object):
         data = self.ReadHeader()
       elif name in ['HUNK_NAME', 'HUNK_UNIT']:
         data = self.ReadString()
-      elif name in ['HUNK_CODE', 'HUNK_DATA', 'HUNK_DEBUG', 'HUNK_INDEX']:
+      elif name in ['HUNK_CODE', 'HUNK_PPC_CODE', 'HUNK_DATA', 'HUNK_DEBUG', 'HUNK_INDEX']:
         data = self.ReadBytes()
+      elif name == 'HUNK_OVERLAY':
+        data = self.ReadOverlay()
       elif name in ['HUNK_BSS', 'HUNK_LIB']:
         data = self.ReadLong() * 4
-      elif name in ['HUNK_RELOC32', 'HUNK_RELOC16', 'HUNK_RELOC8',
-                    'HUNK_DREL32', 'HUNK_DREL16', 'HUNK_DREL8']:
+      elif name in ['HUNK_RELOC32', 'HUNK_RELOC16', 'HUNK_RELOC8']:
         data = self.ReadRelocs()
+      elif name in ['HUNK_DREL32', 'HUNK_DREL16', 'HUNK_DREL8']:
+        if executable:
+          data = self.ReadShortRelocs()
+        else:
+          data = self.ReadRelocs()
       else:
         raise NotImplementedError('%s not handled.' % name)
 
@@ -252,12 +294,16 @@ class HunkParser(object):
 
 
 for path in sys.argv[1:]:
+  print 'Parsing "%s".' % path
   with open(path) as hunkfile:
     parser = HunkParser(hunkfile)
     for hunk in parser.Parse():
+      print hunk.name
       if hunk.name == 'HUNK_EXT':
-        print hunk.name
-        for hunkExt in hunk.data:
-          print ' ', hunkExt
+        for name, symbols in hunk.data.items():
+          print ' ', name
+          for symbol, value in symbols.items():
+            print '   ', symbol, '=', value
       else:
-        print hunk
+        if hunk.data:
+          print ' ', '%r' % hunk.data

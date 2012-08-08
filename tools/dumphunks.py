@@ -306,4 +306,4 @@ if __name__ == '__main__':
               print '   ', symbol, '=', value
         else:
           if hunk.data:
-            print ' ', '%r' % hunk.data
+            print ' ', repr(hunk.data)

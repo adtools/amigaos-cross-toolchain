@@ -57,8 +57,8 @@ asection *text_section, *data_section, *bss_section;
 
 #define obj_frob_symbol(S,PUNT)	obj_amiga_frob_symbol (S, &PUNT)
 #define obj_frob_file()		obj_amiga_frob_file ()
-extern void obj_amiga_frob_symbol PARAMS ((struct symbol *, int *));
-extern void obj_amiga_frob_file PARAMS ((void));
+extern void obj_amiga_frob_symbol (struct symbol *, int *);
+extern void obj_amiga_frob_file (void);
 
 #define obj_sec_sym_ok_for_reloc(SEC)	(1)
 
@@ -194,10 +194,10 @@ extern void obj_amiga_frob_file PARAMS ((void));
 #define H_SET_STRING_SIZE(h,v)		((h)->string_table_size = (v))
 
 typedef struct
-  {
-    struct exec header;		/* a.out header */
-    long string_table_size;	/* names + '\0' + sizeof(int) */
-  }
+{
+  struct exec header;		/* a.out header */
+  long string_table_size;	/* names + '\0' + sizeof(int) */
+}
 
 object_headers;
 
@@ -205,7 +205,8 @@ object_headers;
 #define OBJ_EMIT_LINENO(a, b, c)	{;}
 
 struct fix;
-void tc_aout_fix_to_chars PARAMS ((char *where, struct fix *fixP, relax_addressT segment_address));
+void tc_aout_fix_to_chars
+  (char *where, struct fix *fixP, relax_addressT segment_address);
 
 #endif
 

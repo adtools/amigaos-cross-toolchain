@@ -27,16 +27,16 @@ Boston, MA 02111-1307, USA.  */
 
 /* From collect2.c:  */
 
-void maybe_unlink(char *);
-char* xmalloc(unsigned);
-void fatal_perror(char *, ...);
-void fork_execute(char *, char **);
-void fatal(char*, ...);
+void maybe_unlink (char *);
+char *xmalloc (unsigned);
+void fatal_perror (char *, ...);
+void fork_execute (char *, char **);
+void fatal (char *, ...);
 
 extern char *c_file_name;
 extern int debug;
-
-/* Names of temporary files we create.  */
+
+/* Names of temporary files we create.  */
 #define XLIBS_C_NAME "xlibs.c"
 #define XLIBS_O_NAME "xlibs.o"
 #define SHARED_X_NAME "shared.x"
@@ -54,23 +54,23 @@ struct liblist
 
 /* Not zero if "-static" was specified on GCC command line or if all the
    libraries are static.  */
-static int flag_static=0;
+static int flag_static = 0;
 
 /* Not zero if linking a base relative executable.  This is recognized by
    presence of "-m amiga_bss" on the linker's commandline.  */
-static int flag_baserel=0;
+static int flag_baserel = 0;
 
 /* Not zero if some of the specified libraries are dynamic.  */
-static int found_dynamic_libs=0;
+static int found_dynamic_libs = 0;
 
 /* List of linker libraries.  */
 struct liblist *head = NULL;
-
-/* Return 1 if collect2 should do something more apart from tlink. We want it
+
+/* Return 1 if collect2 should do something more apart from tlink. We want it
    to call "postlink" and "strip" if linking with dynamic libraries.  */
 
 int
-amigaos_do_collecting(void)
+amigaos_do_collecting (void)
 {
   return !flag_static;
 }
@@ -79,23 +79,23 @@ amigaos_do_collecting(void)
    collecting if this flag was specified.  */
 
 void
-amigaos_gccopts_hook(char* arg)
+amigaos_gccopts_hook (char *arg)
 {
-  if (strncmp(arg, "-static", strlen("-static"))==0)
-    flag_static=1;
+  if (strncmp (arg, "-static", strlen ("-static")) == 0)
+    flag_static = 1;
 }
 
 /* Replace unprintable characters with underscores.  Used by "add_lib()".  */
 
 static void
-safename(char *p)
+safename (char *p)
 {
-  if (!isalpha(*p))
+  if (!isalpha (*p))
     *p = '_';
   p++;
   while (*p)
     {
-      if (!isalnum(*p))
+      if (!isalnum (*p))
 	*p = '_';
       p++;
     }
@@ -105,57 +105,57 @@ safename(char *p)
    library is actually dynamic.  Used by "amigaos_libname_hook()".  */
 
 static void
-add_lib(char *name)
+add_lib (char *name)
 {
   struct liblist *lib;
   static char buf[256];
 
   for (lib = head; lib; lib = lib->next)
-    if (!strcmp(lib->name, name))
+    if (!strcmp (lib->name, name))
       return;
 
   /* A2IXDIR_PREFIX is passed by "make".  */
-  sprintf(buf, A2IXDIR_PREFIX "/ldscripts/%s.x", name);
-  if (access(buf, R_OK))
+  sprintf (buf, A2IXDIR_PREFIX "/ldscripts/%s.x", name);
+  if (access (buf, R_OK))
     return;
 
-  lib = (struct liblist*)xmalloc(sizeof(struct liblist));
-  lib->name = strdup(name);
-  lib->cname = strdup(name);
-  safename(lib->cname);
+  lib = (struct liblist *) xmalloc (sizeof (struct liblist));
+  lib->name = strdup (name);
+  lib->cname = strdup (name);
+  safename (lib->cname);
   lib->next = head;
   head = lib;
 
   if (debug)
-    fprintf(stderr, "found dynamic library, name: %s, cname: %s\n", lib->name,
-	    lib->cname);
+    fprintf (stderr, "found dynamic library, name: %s, cname: %s\n",
+	     lib->name, lib->cname);
 
-  found_dynamic_libs=1;
+  found_dynamic_libs = 1;
 }
 
 /* Check if the argument is a linker library.  Call "add_lib()" if yes.  */
 
 void
-amigaos_libname_hook(char* arg)
+amigaos_libname_hook (char *arg)
 {
-  int len = strlen(arg);
+  int len = strlen (arg);
   if (flag_static)
     return;
 
-  if (len > 2 && !memcmp(arg, "-l", 2))
-    add_lib(arg + 2);
-  else if (len > 2 && !strcmp(arg + len - 2, ".a"))
+  if (len > 2 && !memcmp (arg, "-l", 2))
+    add_lib (arg + 2);
+  else if (len > 2 && !strcmp (arg + len - 2, ".a"))
     {
       char *lib;
 
       arg[len - 2] = '\0';
-      lib = strrchr(arg, '/');
+      lib = strrchr (arg, '/');
       if (lib == NULL)
-	lib = strrchr(arg, ':');
+	lib = strrchr (arg, ':');
       if (lib == NULL)
 	lib = arg - 1;
-      if (!strncmp(lib + 1, "lib", 3))
-	add_lib(lib + 4);
+      if (!strncmp (lib + 1, "lib", 3))
+	add_lib (lib + 4);
       arg[len - 2] = '.';
     }
 }
@@ -163,31 +163,31 @@ amigaos_libname_hook(char* arg)
 /* Delete temporary files.  */
 
 void
-amigaos_collect2_cleanup(void)
+amigaos_collect2_cleanup (void)
 {
   if (flag_static)
     return;
-  maybe_unlink(XLIBS_C_NAME);
-  maybe_unlink(XLIBS_O_NAME);
-  maybe_unlink(SHARED_X_NAME);
+  maybe_unlink (XLIBS_C_NAME);
+  maybe_unlink (XLIBS_O_NAME);
+  maybe_unlink (SHARED_X_NAME);
 }
 
 /* Copy file named by FNAME to X.  */
 
 static void
-cat(char *fname, FILE *x)
+cat (char *fname, FILE * x)
 {
 #define BUFSIZE 16384
   FILE *in;
   static char buf[BUFSIZE];
   int bytes;
-  
-  in = fopen(fname, "r");
+
+  in = fopen (fname, "r");
   if (in == NULL)
-    fatal_perror("%s", fname);
-  while (!feof(in) && (bytes = fread(buf, 1, BUFSIZE, in)))
-    fwrite(buf, 1, bytes, x);
-  fclose(in);
+    fatal_perror ("%s", fname);
+  while (!feof (in) && (bytes = fread (buf, 1, BUFSIZE, in)))
+    fwrite (buf, 1, bytes, x);
+  fclose (in);
 }
 
 /* If no dynamic libraries were found, perform like "-static".  Otherwise,
@@ -195,150 +195,152 @@ cat(char *fname, FILE *x)
    have to adjust the linker commandline.  */
 
 void
-amigaos_prelink_hook(char** ld1_argv, int* strip_flag)
+amigaos_prelink_hook (char **ld1_argv, int *strip_flag)
 {
   if (flag_static)
     return;
 
   if (!found_dynamic_libs)
     {
-      flag_static=1;
+      flag_static = 1;
       /* If the user has not requested "-static", but has requested "-s",
-	 collect2 removes "-s" from the "ld1_argv", and calls "strip" after
-	 linking.  However, this would not be efficient if we linked the
-	 executable without any dynamic library.  In this case, we put "-s"
-	 back.  */
+         collect2 removes "-s" from the "ld1_argv", and calls "strip" after
+         linking.  However, this would not be efficient if we linked the
+         executable without any dynamic library.  In this case, we put "-s"
+         back.  */
       if (*strip_flag)
 	{
 	  /* Add "-s" as the last argument on the command line.  */
 	  while (*ld1_argv)
 	    ld1_argv++;
-	  *ld1_argv++="-s";
-	  *ld1_argv=0;
-	  *strip_flag=0;
+	  *ld1_argv++ = "-s";
+	  *ld1_argv = 0;
+	  *strip_flag = 0;
 	}
     }
   else
     {
       FILE *x, *out;
       struct liblist *lib;
-      static char* argv[]={0, "-c", XLIBS_C_NAME, 0};
+      static char *argv[] = { 0, "-c", XLIBS_C_NAME, 0 };
       char **ld1_end, **ld1;
 
       /* Prepend suffixes to dynamic lib names. In addition, check if we are
-	 linking a base relative executable.  */
-      for (ld1=ld1_argv; *ld1; ld1++)
+         linking a base relative executable.  */
+      for (ld1 = ld1_argv; *ld1; ld1++)
 	{
-	  int len=strlen(*ld1);
-	  if (strncmp(*ld1, "-l", strlen("-l"))==0)
+	  int len = strlen (*ld1);
+	  if (strncmp (*ld1, "-l", strlen ("-l")) == 0)
 	    {
-	      for (lib=head; lib; lib=lib->next)
-		if (strcmp(*ld1+strlen("-l"), lib->name)==0)
+	      for (lib = head; lib; lib = lib->next)
+		if (strcmp (*ld1 + strlen ("-l"), lib->name) == 0)
 		  {
-		    char *newname=
-			    xmalloc(strlen(*ld1)+strlen(DYNAMIC_LIB_SUFFIX)+1);
-		    strcpy(newname, *ld1);
-		    strcat(newname, DYNAMIC_LIB_SUFFIX);
-		    *ld1=newname;
+		    char *newname =
+		      xmalloc (strlen (*ld1) + strlen (DYNAMIC_LIB_SUFFIX) +
+			       1);
+		    strcpy (newname, *ld1);
+		    strcat (newname, DYNAMIC_LIB_SUFFIX);
+		    *ld1 = newname;
 		    break;
 		  }
 	    }
-	  else if (len > 2 && !strcmp(*ld1 + len - 2, ".a"))
+	  else if (len > 2 && !strcmp (*ld1 + len - 2, ".a"))
 	    {
 	      char *libname;
-	      int substituted=0;
+	      int substituted = 0;
 
 	      (*ld1)[len - 2] = '\0';
-	      libname = strrchr(*ld1, '/');
+	      libname = strrchr (*ld1, '/');
 	      if (libname == NULL)
-		libname = strrchr(*ld1, ':');
+		libname = strrchr (*ld1, ':');
 	      if (libname == NULL)
 		libname = *ld1 - 1;
-	      if (!strncmp(libname + 1, "lib", 3))
-		for (lib=head; lib; lib=lib->next)
-		  if (strcmp(libname+4, lib->name)==0)
+	      if (!strncmp (libname + 1, "lib", 3))
+		for (lib = head; lib; lib = lib->next)
+		  if (strcmp (libname + 4, lib->name) == 0)
 		    {
-		      char *newname=xmalloc(strlen(*ld1)+
-					    strlen(DYNAMIC_LIB_SUFFIX)+3);
-		      strcpy(newname, *ld1);
-		      strcat(newname, DYNAMIC_LIB_SUFFIX);
-		      strcat(newname, ".a");
-		      *ld1=newname;
-		      substituted=1;
+		      char *newname = xmalloc (strlen (*ld1) +
+					       strlen (DYNAMIC_LIB_SUFFIX) +
+					       3);
+		      strcpy (newname, *ld1);
+		      strcat (newname, DYNAMIC_LIB_SUFFIX);
+		      strcat (newname, ".a");
+		      *ld1 = newname;
+		      substituted = 1;
 		      break;
 		    }
 	      if (!substituted)
 		(*ld1)[len - 2] = '.';
 	    }
-	  else if (strcmp(ld1[0], "-m")==0 && ld1[1]
-		   && strcmp(ld1[1], "amiga_bss")==0)
+	  else if (strcmp (ld1[0], "-m") == 0 && ld1[1]
+		   && strcmp (ld1[1], "amiga_bss") == 0)
 	    {
-	      flag_baserel=1;
+	      flag_baserel = 1;
 	      break;
 	    }
 	}
 
-      out = fopen(XLIBS_C_NAME, "w");
+      out = fopen (XLIBS_C_NAME, "w");
       if (out == NULL)
-	fatal_perror("%s", XLIBS_C_NAME);
-      x = fopen(SHARED_X_NAME, "w");
+	fatal_perror ("%s", XLIBS_C_NAME);
+      x = fopen (SHARED_X_NAME, "w");
       if (x == NULL)
-	fatal_perror("%s", SHARED_X_NAME);
+	fatal_perror ("%s", SHARED_X_NAME);
 
-      cat((flag_baserel ? A2IXDIR_PREFIX "/amiga_exe_baserel_script.x"
-			: A2IXDIR_PREFIX "/amiga_exe_script.x"), x);
+      cat ((flag_baserel ? A2IXDIR_PREFIX "/amiga_exe_baserel_script.x"
+	    : A2IXDIR_PREFIX "/amiga_exe_script.x"), x);
       for (lib = head; lib; lib = lib->next)
 	{
 	  static char buf[256];
-	  sprintf(buf, A2IXDIR_PREFIX "/ldscripts/%s.x", lib->name);
-	  fprintf(out, "extern long %sBase; long *__p%sBase = &%sBase;\n",
-		  lib->cname, lib->cname, lib->cname);
-	  cat(buf, x);
-	} /* {{ */
-      fprintf(x, "}}\n");
-      fclose(out);
-      fclose(x);
-      argv[0]=c_file_name;
-      fork_execute("gcc", argv);
+	  sprintf (buf, A2IXDIR_PREFIX "/ldscripts/%s.x", lib->name);
+	  fprintf (out, "extern long %sBase; long *__p%sBase = &%sBase;\n",
+		   lib->cname, lib->cname, lib->cname);
+	  cat (buf, x);
+	}			/* {{ */
+      fprintf (x, "}}\n");
+      fclose (out);
+      fclose (x);
+      argv[0] = c_file_name;
+      fork_execute ("gcc", argv);
 
       /* Unfortunately, unlike "-s", "-T" cannot be specified as the last
-	 argument. We put it after "-L" args.  */
-      ld1_end=ld1_argv;
+         argument. We put it after "-L" args.  */
+      ld1_end = ld1_argv;
       while (*ld1_end)
 	ld1_end++;
       ld1_end++;
       /* "ld1_end" now points after the terminating 0 of "ld1_argv".  */
 
-      ld1=ld1_end-2;
-      while (ld1>ld1_argv && strncmp(*ld1, "-L", strlen("-L")))
+      ld1 = ld1_end - 2;
+      while (ld1 > ld1_argv && strncmp (*ld1, "-L", strlen ("-L")))
 	ld1--;
-      if (ld1==ld1_argv)
-	fatal("no -L arguments");
+      if (ld1 == ld1_argv)
+	fatal ("no -L arguments");
       ld1++;
       /* "ld1" now points after "-L".  */
 
       /* Shift all the arguments after "-L" one position right.  */
-      memmove(ld1+1, ld1, (ld1_end-ld1)*sizeof(*ld1));
+      memmove (ld1 + 1, ld1, (ld1_end - ld1) * sizeof (*ld1));
       /* Put -Tshared.x in the now empty space.  */
-      *ld1="-T" SHARED_X_NAME;
+      *ld1 = "-T" SHARED_X_NAME;
     }
 }
 
 /* Be lazy and just call "postlink".  */
 
 void
-amigaos_postlink_hook(char* output_file)
+amigaos_postlink_hook (char *output_file)
 {
-  static char* argv[]={"postlink", 0, 0, 0};
+  static char *argv[] = { "postlink", 0, 0, 0 };
   if (flag_static)
     return;
 
   if (flag_baserel)
     {
-      argv[1]="-baserel";
-      argv[2]=output_file;
+      argv[1] = "-baserel";
+      argv[2] = output_file;
     }
   else
-    argv[1]=output_file;
-  fork_execute("postlink", argv);
+    argv[1] = output_file;
+  fork_execute ("postlink", argv);
 }

@@ -25,14 +25,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define MY_exec_hdr_flags 0
 
-extern boolean
-amiga_final_link(bfd *,struct bfd_link_info *);
+extern boolean amiga_final_link (bfd *, struct bfd_link_info *);
 #define MY_bfd_final_link amiga_final_link
 
-extern bfd_byte *
-get_relocated_section_contents(bfd *, struct bfd_link_info *,
-			       struct bfd_link_order *, bfd_byte *,
-			       boolean , asymbol **);
+extern bfd_byte *get_relocated_section_contents (bfd *,
+						 struct bfd_link_info *,
+						 struct bfd_link_order *,
+						 bfd_byte *, boolean,
+						 asymbol **);
 #define MY_bfd_get_relocated_section_contents get_relocated_section_contents
 
 /* Include the usual a.out support.  */
@@ -46,5 +46,5 @@ amiga_aout_bfd_final_link (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  return NAME(aout,final_link) (abfd, info, MY_final_link_callback);
+  return NAME (aout, final_link) (abfd, info, MY_final_link_callback);
 }

@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define JNAME(x) CAT(x,_32)
 #define BYTES_IN_WORD 4
 
-/* Hunk ID numbers.*/  
+/* Hunk ID numbers.*/
 #define HUNK_UNIT		999
 #define HUNK_NAME		1000
 #define HUNK_CODE		1001
@@ -95,14 +95,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define EXT_ABSREF8		139
 
 
-typedef struct amiga_reloc {
+typedef struct amiga_reloc
+{
   arelent relent;
   struct amiga_reloc *next;
   struct amiga_symbol *symbol;
   long target_hunk;
 } amiga_reloc_type;
 
-typedef struct amiga_symbol {
+typedef struct amiga_symbol
+{
   asymbol symbol;
 /*  struct amiga_symbol *next;*/
   unsigned short hunk_number;
@@ -113,27 +115,28 @@ typedef struct amiga_symbol {
   unsigned char type;
 } amiga_symbol_type;
 
-struct amiga_raw_symbol {
+struct amiga_raw_symbol
+{
   struct amiga_raw_symbol *next;
   unsigned long data[1];
 };
 
 typedef struct amiga_per_section
 {
-  amiga_reloc_type *reloc_tail; /* last reloc */ /* first is in section->relocation */
-  int attribute; /* Memory type required by this section */
+  amiga_reloc_type *reloc_tail;	/* last reloc *//* first is in section->relocation */
+  int attribute;		/* Memory type required by this section */
   unsigned long disk_size;	/* Section size on disk. _raw_size may be larger than this */
-  int max_raw_relocs; /* Size of array */
+  int max_raw_relocs;		/* Size of array */
   unsigned long int num_raw_relocs8, num_raw_relocs16, num_raw_relocs32;
-  unsigned long  raw_relocs8, raw_relocs16, raw_relocs32;
+  unsigned long raw_relocs8, raw_relocs16, raw_relocs32;
   struct amiga_raw_symbol *first;
-  struct amiga_raw_symbol *last; /* tail */
+  struct amiga_raw_symbol *last;	/* tail */
 
   /* the symbols for this section */
   amiga_symbol_type *amiga_symbols;
 
   unsigned long hunk_ext_pos;	/* offset of hunk_ext in the bfd file */
-  unsigned long hunk_symbol_pos; /* offset of hunk_symbol in the bfd file */
+  unsigned long hunk_symbol_pos;	/* offset of hunk_symbol in the bfd file */
 } amiga_per_section_type;
 #define amiga_per_section(x) ((amiga_per_section_type *)((x)->used_by_bfd))
 
@@ -141,9 +144,10 @@ typedef struct amiga_per_section
    Various things depend on this struct being around any time an a.out
    file is being handled.  An example is dbxread.c in GDB.  */
 
-struct amiga_data {
-  struct internal_exec *hdr;		/* exec file header */
-  amiga_symbol_type *symbols;		/* symtab for input bfd */
+struct amiga_data
+{
+  struct internal_exec *hdr;	/* exec file header */
+  amiga_symbol_type *symbols;	/* symtab for input bfd */
 
   /* Filler, so we can pretend to be an a.out to GDB.  */
   asection *textsec;
@@ -154,7 +158,7 @@ struct amiga_data {
   file_ptr sym_filepos;
   file_ptr str_filepos;
 
-  unsigned int n_symbols;               /* number of symbols */
+  unsigned int n_symbols;	/* number of symbols */
 
   /* Size of a relocation entry in external form */
   unsigned dummy_reloc_entry_size;
@@ -163,10 +167,11 @@ struct amiga_data {
   unsigned symbol_entry_size;
 
   unsigned exec_bytes_size;
-  unsigned vma_adjusted : 1;
+  unsigned vma_adjusted:1;
 };
 
-typedef struct  amiga_data_struct {
+typedef struct amiga_data_struct
+{
   struct amiga_data a;
 
   unsigned long symtab_size;
@@ -177,17 +182,18 @@ typedef struct  amiga_data_struct {
   unsigned long *file_pointer;
   amiga_symbol_type *symbols;
   amiga_symbol_type *symbol_tail;
-  boolean IsLoadFile; /* If true, this is a load file (for output bfd only) */
-  int maxsymbols;     /* Used by final_link routine to add symbols to output bfd.
-                         This is the # of entries, allocated in abdfd->osymbols */
+  boolean IsLoadFile;		/* If true, this is a load file (for output bfd only) */
+  int maxsymbols;		/* Used by final_link routine to add symbols to output bfd.
+				   This is the # of entries, allocated in abdfd->osymbols */
   int nb_hunks;
   /* The next two fields are set at final_link time
      for the output bfd only */
-  boolean baserel;    /* true if there is ___init_a4 in the global hash table */
-  bfd_vma a4init;     /* cache the value for efficiency */
+  boolean baserel;		/* true if there is ___init_a4 in the global hash table */
+  bfd_vma a4init;		/* cache the value for efficiency */
 } amiga_data_type;
 
-struct arch_syms {
+struct arch_syms
+{
   unsigned long offset;		/* disk offset in the archive */
   unsigned long size;		/* size of the block of symbols */
   unsigned long unit_offset;	/* start of unit on disk */

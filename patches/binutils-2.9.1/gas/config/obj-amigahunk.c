@@ -26,8 +26,7 @@ to the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1
 
 #ifndef BFD_ASSEMBLER
 /* in: segT   out: N_TYPE bits */
-const short seg_N_TYPE[] =
-{
+const short seg_N_TYPE[] = {
   N_ABS,
   N_TEXT,
   N_DATA,
@@ -41,8 +40,7 @@ const short seg_N_TYPE[] =
   N_REGISTER,			/* register */
 };
 
-const segT N_TYPE_seg[N_TYPE + 2] =
-{				/* N_TYPE == 0x1E = 32-2 */
+const segT N_TYPE_seg[N_TYPE + 2] = {	/* N_TYPE == 0x1E = 32-2 */
   SEG_UNKNOWN,			/* N_UNDF == 0 */
   SEG_GOOF,
   SEG_ABSOLUTE,			/* N_ABS == 2 */
@@ -53,19 +51,18 @@ const segT N_TYPE_seg[N_TYPE + 2] =
   SEG_GOOF,
   SEG_BSS,			/* N_BSS == 8 */
   SEG_GOOF,
-  SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF,
-  SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF,
-  SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF,
+  SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF,
+  SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF,
+  SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF, SEG_GOOF,
   SEG_REGISTER,			/* dummy N_REGISTER for regs = 30 */
   SEG_GOOF,
 };
 #endif
 
-static void obj_amiga_line PARAMS ((int));
-static void obj_amiga_weak PARAMS ((int));
+static void obj_amiga_line (int);
+static void obj_amiga_weak (int);
 
-const pseudo_typeS obj_pseudo_table[] =
-{
+const pseudo_typeS obj_pseudo_table[] = {
   {"line", obj_amiga_line, 0},	/* source code line number */
   {"ln", obj_amiga_line, 0},	/* coff line number that we use anyway */
 
@@ -112,10 +109,9 @@ obj_amiga_frob_symbol (sym, punt)
   sec = sym->bsym->section;
 
   /* Only frob simple symbols this way right now.  */
-  if (! (type & ~ (N_TYPE | N_EXT)))
+  if (!(type & ~(N_TYPE | N_EXT)))
     {
-      if (type == (N_UNDF | N_EXT)
-	  && sec == &bfd_abs_section)
+      if (type == (N_UNDF | N_EXT) && sec == &bfd_abs_section)
 	sym->bsym->section = sec = bfd_und_section_ptr;
 
       if ((type & N_TYPE) != N_INDR
@@ -124,8 +120,7 @@ obj_amiga_frob_symbol (sym, punt)
 	  && (type & N_TYPE) != N_SETD
 	  && (type & N_TYPE) != N_SETB
 	  && type != N_WARNING
-	  && (sec == &bfd_abs_section
-	      || sec == &bfd_und_section))
+	  && (sec == &bfd_abs_section || sec == &bfd_und_section))
 	return;
       if (flags & BSF_EXPORT)
 	type |= N_EXT;
@@ -154,7 +149,7 @@ obj_amiga_frob_symbol (sym, punt)
 	    as_bad ("Attempt to put a common symbol into set %s",
 		    S_GET_NAME (sym));
 	  /* Similarly, you can't put an undefined symbol in a set.  */
-	  else if (! S_IS_DEFINED (sym))
+	  else if (!S_IS_DEFINED (sym))
 	    as_bad ("Attempt to put an undefined symbol into set %s",
 		    S_GET_NAME (sym));
 
@@ -166,7 +161,7 @@ obj_amiga_frob_symbol (sym, punt)
 	  if (type & N_EXT)
 	    {
 	      sym->bsym->flags |= BSF_EXPORT;
-	      sym->bsym->flags &=~ BSF_LOCAL;
+	      sym->bsym->flags &= ~BSF_LOCAL;
 	    }
 	  break;
 	case N_WARNING:
@@ -245,21 +240,29 @@ obj_header_append (where, headers)
   tc_headers_hook (headers);
 
 #ifdef CROSS_COMPILE
-  md_number_to_chars (*where, headers->header.a_info, sizeof (headers->header.a_info));
+  md_number_to_chars (*where, headers->header.a_info,
+		      sizeof (headers->header.a_info));
   *where += sizeof (headers->header.a_info);
-  md_number_to_chars (*where, headers->header.a_text, sizeof (headers->header.a_text));
+  md_number_to_chars (*where, headers->header.a_text,
+		      sizeof (headers->header.a_text));
   *where += sizeof (headers->header.a_text);
-  md_number_to_chars (*where, headers->header.a_data, sizeof (headers->header.a_data));
+  md_number_to_chars (*where, headers->header.a_data,
+		      sizeof (headers->header.a_data));
   *where += sizeof (headers->header.a_data);
-  md_number_to_chars (*where, headers->header.a_bss, sizeof (headers->header.a_bss));
+  md_number_to_chars (*where, headers->header.a_bss,
+		      sizeof (headers->header.a_bss));
   *where += sizeof (headers->header.a_bss);
-  md_number_to_chars (*where, headers->header.a_syms, sizeof (headers->header.a_syms));
+  md_number_to_chars (*where, headers->header.a_syms,
+		      sizeof (headers->header.a_syms));
   *where += sizeof (headers->header.a_syms);
-  md_number_to_chars (*where, headers->header.a_entry, sizeof (headers->header.a_entry));
+  md_number_to_chars (*where, headers->header.a_entry,
+		      sizeof (headers->header.a_entry));
   *where += sizeof (headers->header.a_entry);
-  md_number_to_chars (*where, headers->header.a_trsize, sizeof (headers->header.a_trsize));
+  md_number_to_chars (*where, headers->header.a_trsize,
+		      sizeof (headers->header.a_trsize));
   *where += sizeof (headers->header.a_trsize);
-  md_number_to_chars (*where, headers->header.a_drsize, sizeof (headers->header.a_drsize));
+  md_number_to_chars (*where, headers->header.a_drsize,
+		      sizeof (headers->header.a_drsize));
   *where += sizeof (headers->header.a_drsize);
 
 #else /* CROSS_COMPILE */
@@ -280,8 +283,7 @@ obj_symbol_to_chars (where, symbolP)
 		      sizeof (S_GET_OFFSET (symbolP)));
 
   md_number_to_chars ((char *) &(S_GET_DESC (symbolP)),
-		      S_GET_DESC (symbolP),
-		      sizeof (S_GET_DESC (symbolP)));
+		      S_GET_DESC (symbolP), sizeof (S_GET_DESC (symbolP)));
 
   md_number_to_chars ((char *) &(symbolP->sy_symbol.n_value),
 		      S_GET_VALUE (symbolP),
@@ -301,7 +303,7 @@ obj_emit_symbols (where, symbol_rootP)
   for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
     {
       /* Used to save the offset of the name. It is used to point
-	 to the string in memory but must be a file offset. */
+         to the string in memory but must be a file offset. */
       register char *temp;
 
       temp = S_GET_NAME (symbolP);
@@ -316,12 +318,24 @@ obj_emit_symbols (where, symbol_rootP)
 	{
 	  switch (S_GET_TYPE (symbolP))
 	    {
-	    case N_UNDF: S_SET_TYPE (symbolP, N_WEAKU); break;
-	    case N_ABS:	 S_SET_TYPE (symbolP, N_WEAKA); break;
-	    case N_TEXT: S_SET_TYPE (symbolP, N_WEAKT); break;
-	    case N_DATA: S_SET_TYPE (symbolP, N_WEAKD); break;
-	    case N_BSS:  S_SET_TYPE (symbolP, N_WEAKB); break;
-	    default: as_bad ("%s: bad type for weak symbol", temp); break;
+	    case N_UNDF:
+	      S_SET_TYPE (symbolP, N_WEAKU);
+	      break;
+	    case N_ABS:
+	      S_SET_TYPE (symbolP, N_WEAKA);
+	      break;
+	    case N_TEXT:
+	      S_SET_TYPE (symbolP, N_WEAKT);
+	      break;
+	    case N_DATA:
+	      S_SET_TYPE (symbolP, N_WEAKD);
+	      break;
+	    case N_BSS:
+	      S_SET_TYPE (symbolP, N_WEAKB);
+	      break;
+	    default:
+	      as_bad ("%s: bad type for weak symbol", temp);
+	      break;
 	    }
 	}
 
@@ -410,19 +424,19 @@ obj_crawl_symbol_chain (headers)
       resolve_symbol_value (symbolP);
 
       /* OK, here is how we decide which symbols go out into the brave
-	 new symtab.  Symbols that do are:
+         new symtab.  Symbols that do are:
 
-	 * symbols with no name (stabd's?)
-	 * symbols with debug info in their N_TYPE
+         * symbols with no name (stabd's?)
+         * symbols with debug info in their N_TYPE
 
-	 Symbols that don't are:
-	 * symbols that are registers
-	 * symbols with \1 as their 3rd character (numeric labels)
-	 * "local labels" as defined by S_LOCAL_NAME(name) if the -L
-	 switch was passed to gas.
+         Symbols that don't are:
+         * symbols that are registers
+         * symbols with \1 as their 3rd character (numeric labels)
+         * "local labels" as defined by S_LOCAL_NAME(name) if the -L
+         switch was passed to gas.
 
-	 All other symbols are output.  We complain if a deleted
-	 symbol was marked external. */
+         All other symbols are output.  We complain if a deleted
+         symbol was marked external. */
 
 
       if (!S_IS_REGISTER (symbolP)
@@ -436,7 +450,7 @@ obj_crawl_symbol_chain (headers)
 	  symbolP->sy_number = symbol_number++;
 
 	  /* The + 1 after strlen account for the \0 at the
-			   end of each string */
+	     end of each string */
 	  if (!S_IS_STABD (symbolP))
 	    {
 	      /* Ordinary case. */
@@ -454,7 +468,8 @@ obj_crawl_symbol_chain (headers)
 	       Well, maybe if you're doing twisted things with
 	       register names...  */
 	    {
-	      as_bad ("Local symbol %s never defined.", decode_local_label_name (S_GET_NAME (symbolP)));
+	      as_bad ("Local symbol %s never defined.",
+		      decode_local_label_name (S_GET_NAME (symbolP)));
 	    }			/* oops. */
 
 	  /* Unhook it from the chain */
@@ -480,7 +495,8 @@ obj_emit_strings (where)
   md_number_to_chars (*where, string_byte_count, sizeof (string_byte_count));
   *where += sizeof (string_byte_count);
 #else /* CROSS_COMPILE */
-  append (where, (char *) &string_byte_count, (unsigned long) sizeof (string_byte_count));
+  append (where, (char *) &string_byte_count,
+	  (unsigned long) sizeof (string_byte_count));
 #endif /* CROSS_COMPILE */
 
   for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))

@@ -1,0 +1,26 @@
+--- binutils-2.10.1/bfd/configure	2000-10-16 13:27:20.000000000 +0200
++++ binutils-2.10.1/bfd/configure	2012-08-08 13:04:49.000000000 +0200
+@@ -1835,7 +1835,6 @@
+ EXEEXT=""
+ test x"${ac_cv_exeext}" != xno && EXEEXT=${ac_cv_exeext}
+ echo "$ac_t""${ac_cv_exeext}" 1>&6
+-ac_exeext=$EXEEXT
+ 
+ 
+ host64=false
+@@ -5052,6 +5051,7 @@
+     # with the two vector lists in targets.c.
+     a29kcoff_big_vec)		tb="$tb coff-a29k.lo cofflink.lo" ;;
+     a_out_adobe_vec)		tb="$tb aout-adobe.lo aout32.lo" ;;
++    amiga_vec)			tb="$tb amigaos.lo amigaoslink.lo" ;;
+     armcoff_little_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
+     armcoff_big_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
+     armnetbsd_vec)		tb="$tb armnetbsd.lo aout32.lo" ;;
+@@ -5064,6 +5064,7 @@
+     arm_epoc_pei_little_vec)	tb="$tb epoc-pei-arm.lo peigen.lo cofflink.lo " ;;
+     arm_epoc_pei_big_vec)	tb="$tb epoc-pei-arm.lo peigen.lo cofflink.lo " ;;
+     aout0_big_vec)		tb="$tb aout0.lo aout32.lo" ;;
++    aout_amiga_vec)		tb="$tb aout-amiga.lo aout32.lo stab-syms.lo";;
+     aout_arm_big_vec)		tb="$tb aout-arm.lo aout32.lo" ;;
+     aout_arm_little_vec)	tb="$tb aout-arm.lo aout32.lo" ;;
+     aout_mips_big_vec)		tb="$tb mipsbsd.lo aout32.lo" ;;

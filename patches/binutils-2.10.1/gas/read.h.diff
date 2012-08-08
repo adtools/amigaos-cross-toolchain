@@ -1,0 +1,12 @@
+--- binutils-2.10.1/gas/read.h	2000-02-08 20:06:00.000000000 +0100
++++ binutils-2.10.1/gas/read.h	2012-08-08 12:35:51.000000000 +0200
+@@ -128,6 +128,9 @@
+ extern void s_app_line PARAMS ((int));
+ extern void s_comm PARAMS ((int));
+ extern void s_data PARAMS ((int));
++#ifdef OBJ_AMIGAHUNK
++extern void s_data_chip PARAMS ((int));
++#endif
+ extern void s_desc PARAMS ((int));
+ extern void s_else PARAMS ((int arg));
+ extern void s_elseif PARAMS ((int arg));

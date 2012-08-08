@@ -1,0 +1,35 @@
+--- binutils-2.10.1/gas/config/m68k-parse.y	1999-05-03 09:28:41.000000000 +0200
++++ binutils-2.10.1/gas/config/m68k-parse.y	2012-08-08 12:35:51.000000000 +0200
+@@ -945,6 +945,7 @@
+     }
+ 
+   yylval.exp.size = SIZE_UNSPEC;
++  yylval.exp.baserel = 0;
+   if (s <= str + 2
+       || (s[-2] != '.' && s[-2] != ':'))
+     tail = 0;
+@@ -952,18 +953,21 @@
+     {
+       switch (s[-1])
+ 	{
++	case 'B':
++          yylval.exp.baserel = 1;
+ 	case 's':
+ 	case 'S':
+ 	case 'b':
+-	case 'B':
+ 	  yylval.exp.size = SIZE_BYTE;
+ 	  break;
+-	case 'w':
+ 	case 'W':
++          yylval.exp.baserel = 1;
++	case 'w':
+ 	  yylval.exp.size = SIZE_WORD;
+ 	  break;
+-	case 'l':
+ 	case 'L':
++          yylval.exp.baserel = 1;
++	case 'l':
+ 	  yylval.exp.size = SIZE_LONG;
+ 	  break;
+ 	default:

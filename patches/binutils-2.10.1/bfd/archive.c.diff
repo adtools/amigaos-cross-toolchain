@@ -1,0 +1,38 @@
+--- binutils-2.10.1/bfd/archive.c	2000-05-28 12:57:49.000000000 +0200
++++ binutils-2.10.1/bfd/archive.c	2012-08-08 12:35:51.000000000 +0200
+@@ -1407,7 +1407,7 @@
+   sprintf ((hdr->ar_uid), "%ld", (long) status.st_uid);
+   sprintf ((hdr->ar_gid), "%ld", (long) status.st_gid);
+   sprintf ((hdr->ar_mode), "%-8o", (unsigned int) status.st_mode);
+-  sprintf ((hdr->ar_size), "%-10ld", (long) status.st_size);
++  sprintf ((hdr->ar_size), "%-9ld", (long) status.st_size);
+   /* Correct for a lossage in sprintf whereby it null-terminates.  I cannot
+      understand how these C losers could design such a ramshackle bunch of
+      IO operations */
+@@ -1689,7 +1689,7 @@
+       memset ((char *) (&hdr), 0, sizeof (struct ar_hdr));
+       strcpy (hdr.ar_name, ename);
+       /* Round size up to even number in archive header.  */
+-      sprintf (&(hdr.ar_size[0]), "%-10d",
++      sprintf (&(hdr.ar_size[0]), "%-9d",
+ 	       (int) ((elength + 1) & ~1));
+       strncpy (hdr.ar_fmag, ARFMAG, 2);
+       for (i = 0; i < sizeof (struct ar_hdr); i++)
+@@ -1944,7 +1944,7 @@
+   sprintf (hdr.ar_date, "%ld", bfd_ardata (arch)->armap_timestamp);
+   sprintf (hdr.ar_uid, "%ld", (long) getuid ());
+   sprintf (hdr.ar_gid, "%ld", (long) getgid ());
+-  sprintf (hdr.ar_size, "%-10d", (int) mapsize);
++  sprintf (hdr.ar_size, "%-9d", (int) mapsize);
+   strncpy (hdr.ar_fmag, ARFMAG, 2);
+   for (i = 0; i < sizeof (struct ar_hdr); i++)
+     if (((char *) (&hdr))[i] == '\0')
+@@ -2096,7 +2096,7 @@
+ 
+   memset ((char *) (&hdr), 0, sizeof (struct ar_hdr));
+   hdr.ar_name[0] = '/';
+-  sprintf (hdr.ar_size, "%-10d", (int) mapsize);
++  sprintf (hdr.ar_size, "%-9d", (int) mapsize);
+   sprintf (hdr.ar_date, "%ld", (long) time (NULL));
+   /* This, at least, is what Intel coff sets the values to.: */
+   sprintf ((hdr.ar_uid), "%d", 0);

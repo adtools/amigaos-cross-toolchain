@@ -1,0 +1,20 @@
+--- binutils-2.10.1/gas/configure	2000-10-16 13:27:25.000000000 +0200
++++ binutils-2.10.1/gas/configure	2012-08-08 12:35:51.000000000 +0200
+@@ -1767,6 +1767,8 @@
+ 
+       m32r-*-*)		    fmt=elf bfd_gas=yes ;;
+ 
++      m68*-*-amigaoshunk)   fmt=amigahunk em=amiga bfd_gas=yes ;;
++      m68*-*-amigaos*)      fmt=aout em=amiga ;;
+       m68k-*-vxworks* | m68k-ericsson-ose | m68k-*-sunos*)
+ 			    fmt=aout em=sun3 ;;
+       m68k-motorola-sysv*)  fmt=coff em=delta ;;
+@@ -2317,7 +2319,7 @@
+ 
+ case ${primary_bfd_gas}-${target_cpu_type}-${obj_format} in
+   yes-*-coff)	need_bfd=yes ;;
+-  no-*-coff)	need_bfd=yes
++  no-*-coff | yes-m68k-amigahunk | no-m68k-amigahunk)	need_bfd=yes
+ 		cat >> confdefs.h <<\EOF
+ #define MANY_SEGMENTS 1
+ EOF

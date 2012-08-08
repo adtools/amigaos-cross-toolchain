@@ -1,0 +1,13 @@
+--- binutils-2.10.1/bfd/config.bfd	2000-09-06 22:57:43.000000000 +0200
++++ binutils-2.10.1/bfd/config.bfd	2012-08-08 12:35:51.000000000 +0200
+@@ -404,6 +404,10 @@
+   m68*-motorola-sysv*)
+     targ_defvec=m68ksysvcoff_vec
+     ;;
++  m68*-*-amigaos*)
++    targ_defvec=amiga_vec
++    targ_selvecs="aout_amiga_vec amiga_vec"
++    ;;
+   m68*-hp-bsd*)
+     targ_defvec=hp300bsd_vec
+     targ_underscore=yes

@@ -1,0 +1,13 @@
+--- binutils-2.10.1/ltconfig	2000-02-27 17:46:19.000000000 +0100
++++ binutils-2.10.1/ltconfig	2012-08-08 12:35:51.000000000 +0200
+@@ -679,10 +679,6 @@
+     # We can build DLLs from non-PIC.
+     ;;
+   amigaos*)
+-    # FIXME: we need at least 68020 code to build shared libraries, but
+-    # adding the `-m68020' flag to GCC prevents building anything better,
+-    # like `-m68040'.
+-    pic_flag='-m68020 -resident32 -malways-restore-a4'
+     ;;
+   sysv4*MP*)
+     if test -d /usr/nec; then

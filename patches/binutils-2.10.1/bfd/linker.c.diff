@@ -1,0 +1,62 @@
+--- binutils-2.10.1/bfd/linker.c	2000-01-14 19:13:40.000000000 +0100
++++ binutils-2.10.1/bfd/linker.c	2012-08-08 12:35:51.000000000 +0200
+@@ -429,7 +429,8 @@
+ static boolean default_fill_link_order
+   PARAMS ((bfd *, struct bfd_link_info *, asection *,
+ 	   struct bfd_link_order *));
+-static boolean default_indirect_link_order
++/*Amiga hack - used in amigaoslink.c so must be global */
++/*static*/ boolean default_indirect_link_order
+   PARAMS ((bfd *, struct bfd_link_info *, asection *,
+ 	   struct bfd_link_order *, boolean));
+ 
+@@ -1197,8 +1198,17 @@
+ 	  h->u.c.size = size;
+ 
+ 	  power = bfd_log2 (size);
+-	  if (power > 4)
+-	    power = 4;
++	  /* For the amiga, we don't want an alignment bigger than
++	     2**2. Doing this here is a horribly kludgy, but IMHO the
++	     max power alignment really should be target-dependant so
++	     that we wouldn't have to do this -- daniel */
++	  if (bfd_get_flavour(abfd) == bfd_target_amiga_flavour) {
++	    if (power > 2)
++	      power = 2;
++	  }
++	  else
++	    if (power > 4)
++	      power = 4;
+ 	  h->u.c.p->alignment_power = power;
+ 
+ 	  if (p->section == bfd_com_section_ptr)
+@@ -1659,8 +1669,18 @@
+ 	    unsigned int power;
+ 
+ 	    power = bfd_log2 (value);
+-	    if (power > 4)
+-	      power = 4;
++	    /* For the amiga, we don't want an alignment bigger than
++               2**2. Doing this here is a horribly kludgy, but IMHO
++               the max power alignment really should be
++               target-dependant so that we wouldn't have to do this --
++               daniel */
++	    if (bfd_get_flavour(abfd) == bfd_target_amiga_flavour) {
++	      if (power > 2)
++		power = 2;
++	    }
++	    else
++	      if (power > 4)
++		power = 4;
+ 	    h->u.c.p->alignment_power = power;
+ 	  }
+ 
+@@ -2640,7 +2660,7 @@
+ 
+ /* Default routine to handle a bfd_indirect_link_order.  */
+ 
+-static boolean
++/*static*/ boolean
+ default_indirect_link_order (output_bfd, info, output_section, link_order,
+ 			     generic_linker)
+      bfd *output_bfd;

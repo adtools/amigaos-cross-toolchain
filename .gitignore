@@ -1,6 +1,7 @@
 *.lha
 *.tar.gz
 *.tar.bz2
+*~
 adtools/
 sources/
 stamps/

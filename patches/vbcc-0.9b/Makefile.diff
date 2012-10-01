@@ -1,0 +1,10 @@
+--- vbcc-0.9b/Makefile	2011-01-04 02:31:53.000000000 +0100
++++ vbcc-0.9b/Makefile	2012-09-30 22:43:31.000000000 +0200
+@@ -1,6 +1,6 @@
+ 
+ # used to create vbcc, vc and ucpp
+-CC = gcc -std=c9x -g -DHAVE_AOS4 #-DHAVE_ECPP -DHAVE_MISRA
++CC = gcc -std=c9x -O2 -fomit-frame-pointer #-DHAVE_ECPP -DHAVE_MISRA
+ LDFLAGS = -lm
+ 
+ # native version; used to create dtgen

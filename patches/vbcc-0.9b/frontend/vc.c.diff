@@ -1,0 +1,11 @@
+--- vbcc-0.9b/frontend/vc.c	2012-10-01 17:35:34.000000000 +0200
++++ vbcc-0.9b/frontend/vc.c	2012-10-01 17:38:59.000000000 +0200
+@@ -91,7 +91,7 @@
+ const char *search_dirs[]={"","C:\\"};
+ #else
+ const char *config_name="vc.config";
+-const char *search_dirs[]={"","~/","/etc/"};
++const char *search_dirs[]={ETCDIR,"~/","/etc/"};
+ #endif
+ 
+ /*  String fuer die Default libraries   */

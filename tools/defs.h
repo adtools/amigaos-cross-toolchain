@@ -7,7 +7,11 @@
 #ifndef _DEFS_H_
 #define _DEFS_H_
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
+
 #include <dos/doshunks.h>
 
 #include "a.out.h"

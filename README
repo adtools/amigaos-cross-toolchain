@@ -11,6 +11,9 @@ targeting m68k-amigaos with:
  * libm 5.4 (provides math library implementation for non-FPU Amigas)
  * AmigaOS headers & libraries (for AmigaOS 3.9)
  * ixemul.library 48.2
+ * vbcc 0.9b + vclib
+ * vasm 1.5c
+ * vlink 0.14a
 
 Patches are welcome!
 
@@ -36,6 +39,11 @@ Prerequisites (look at bootstrap.conf file):
    - AmigaOS NDK 3.9
    - sfdc 1.4
    - libamiga-bin
+ * VBCC related sources & binaries:
+   - vbcc 0.9b
+   - vasm 1.5c
+   - vlink 0.14a
+   - vbcc m68k-amigaos target files
 
 Usage:
   1) Download sources (use fetch.sh script in archives directory).

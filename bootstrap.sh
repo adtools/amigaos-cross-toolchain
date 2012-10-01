@@ -16,7 +16,8 @@ function prepare_target {
   [ -f "${STAMP}/prepare-target" ] && return 0
 
   pushd "${PREFIX}"
-  mkdir -p "m68k-amigaos" "lib" "os-include" "os-lib"
+  mkdir -p "bin" "etc" "lib" "m68k-amigaos"
+  mkdir -p "os-include/lvo" "os-lib" "vbcc-include" "vbcc-lib"
   ln -sf "../os-include" "m68k-amigaos/include"
   ln -sf "../lib" "m68k-amigaos/lib"
   popd
@@ -145,6 +146,22 @@ function unpack_sources {
   unpack_clean "${BISON}" "${BISON_SRC}"
   unpack_clean "${GAWK}" "${GAWK_SRC}"
 
+  unpack_clean "${VASM}" "${VASM_SRC}"
+  mv "vasm" "${VASM}"
+
+  unpack_clean "${VLINK}" "${VLINK_SRC}"
+  mv "vlink" "${VLINK}"
+
+  unpack_clean "${VBCC}" "${VBCC_SRC}"
+  mv "vbcc" "${VBCC}"
+  pushd "${VBCC}"
+  apply_patches "${VBCC}"
+  popd
+
+  unpack_clean "${VCLIB}" "${VCLIB_SRC}"
+  mv "vbcc_target_m68k-amigaos" "${VCLIB}"
+  rm "vbcc_target_m68k-amigaos.info"
+
   popd
 
   touch "${STAMP}/unpack-sources"
@@ -221,6 +238,102 @@ function build_tools {
   touch "${STAMP}/build-tools"
 }
 
+function build_vasm {
+  [ -f "${STAMP}/build-vasm" ] && return 0
+
+  pushd "${BUILD_DIR}"
+  rm -rf "${VASM}"
+  cp -a "${SOURCES}/${VASM}" .
+  cd "${VASM}"
+  make CPU="m68k" SYNTAX="mot"
+  cp "vasmm68k_mot" "vobjdump" "${PREFIX}/bin/"
+  popd
+
+  touch "${STAMP}/build-vasm"
+}
+
+function build_vlink {
+  [ -f "${STAMP}/build-vlink" ] && return 0
+
+  pushd "${BUILD_DIR}"
+  rm -rf "${VLINK}"
+  cp -a "${SOURCES}/${VLINK}" .
+  cd "${VLINK}"
+  make
+  cp "vlink" "${PREFIX}/bin/"
+  popd
+
+  touch "${STAMP}/build-vlink"
+}
+
+function build_vbcc {
+  [ -f "${STAMP}/build-vbcc" ] && return 0
+
+  pushd "${BUILD_DIR}"
+  rm -rf "${VBCC}"
+  cp -a "${SOURCES}/${VBCC}" .
+  cd "${VBCC}"
+  mkdir "bin"
+  make TARGET="m68k" CC+="-DETCDIR=\\\"${PREFIX}/etc/\\\"" <<EOF
+y
+y
+signed char
+y
+unsigned char
+n
+y
+signed short
+n
+y
+unsigned short
+n
+y
+signed int
+n
+y
+unsigned int
+n
+y
+signed long
+n
+y
+unsigned long
+n
+y
+float
+n
+y
+double
+EOF
+  cp "bin/vbccm68k" "bin/vc" "bin/vprof" "${PREFIX}/bin/"
+  popd
+
+  touch "${STAMP}/build-vbcc"
+}
+
+function install_vclib {
+  [ -f "${STAMP}/install-vclib" ] && return 0
+
+  pushd "${PREFIX}/vbcc-include"
+  cp -av "${SOURCES}/${VCLIB}/targets/m68k-amigaos/include/"* .
+  popd
+
+  pushd "${PREFIX}/vbcc-lib"
+  cp -av "${SOURCES}/${VCLIB}/targets/m68k-amigaos/lib/"* .
+  popd
+
+  sed -e "s,-Ivincludeos3:,-I${PREFIX}/vbcc-include -I${PREFIX}/os-include,g" \
+      -e "s,-Lvlibos3:,-L${PREFIX}/vbcc-lib -L${PREFIX}/vbcc-include,g" \
+      -e "s,vlibos3:,${PREFIX}/vbcc-lib/,g" \
+      -e "s,-lvc,-lvc -lamiga,g" \
+      -e "/^-as/s,\$, -I${PREFIX}/os-include,g" \
+      -e "s,delete quiet,rm,g" \
+      -e "s,delete,rm -v,g" \
+      "${SOURCES}/${VCLIB}/config/aos68k" > "${PREFIX}/etc/vc.config"
+
+  touch "${STAMP}/install-vclib"
+}
+
 function build_binutils {
   [ -f "${STAMP}/build-binutils" ] && return 0
 
@@ -278,8 +391,8 @@ function build_gpp {
   touch "${STAMP}/build-gpp"
 }
 
-function process_headers {
-  [ -f "${STAMP}/process-headers" ] && return 0
+function process_ndk {
+  [ -f "${STAMP}/process-ndk" ] && return 0
 
   pushd "${BUILD_DIR}"
 	rm -rf "${SFDC}"
@@ -290,8 +403,9 @@ function process_headers {
   make && make install
   popd
 
-  pushd "${PREFIX}/include"
+  pushd "${PREFIX}/os-include"
   cp -av "${SOURCES}/${NDK}/Include/include_h/"* .
+  cp -av "${SOURCES}/${NDK}/Include/include_i/"* .
   for file in ${SOURCES}/${NDK}/Include/sfd/*.sfd; do
     base=$(basename ${file%_lib.sfd})
 
@@ -299,10 +413,16 @@ function process_headers {
       --output="proto/${base}.h" $file
     sfdc --target=m68k-amigaos --mode=macros \
       --output="inline/${base}.h" $file
+    sfdc --target=m68k-amigaos --mode=lvo \
+      --output="lvo/${base}.i" $file
   done
   popd
 
-  touch "${STAMP}/process-headers"
+  pushd "${PREFIX}/os-lib"
+  cp -av "${SOURCES}/${NDK}/Include/linker_libs/"* .
+  popd
+
+  touch "${STAMP}/process-ndk"
 }
 
 function install_libamiga {
@@ -367,7 +487,7 @@ function build_ixemul {
   mkdir_empty "${IXEMUL}"
   cd "${IXEMUL}"
   CC=m68k-amigaos-gcc \
-  CFLAGS="-noixemul -I${PREFIX}/include" \
+  CFLAGS="-noixemul -I${PREFIX}/os-include" \
   AR=m68k-amigaos-ar \
   RANLIB=m68k-amigaos-ranlib \
 	"${SOURCES}/${IXEMUL}/configure" \
@@ -405,12 +525,17 @@ function build {
 
   export PATH="${HOST_DIR}/bin:${PATH}"
 
+  build_vasm
+  build_vlink
+  build_vbcc
+  install_vclib
+
   build_binutils
   build_gcc
 
   export PATH="${PREFIX}/bin:${PATH}"
 
-  process_headers
+  process_ndk
   install_libamiga
   build_libnix
   build_libm

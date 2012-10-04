@@ -247,6 +247,12 @@ function build_vasm {
   cd "${VASM}"
   make CPU="m68k" SYNTAX="mot"
   cp "vasmm68k_mot" "vobjdump" "${PREFIX}/bin/"
+
+  cat >"${PREFIX}/bin/vasm" <<EOF
+#!/bin/sh
+
+vasmm68k_mot -I${PREFIX}/os-include "\$@"
+EOF
   popd
 
   touch "${STAMP}/build-vasm"

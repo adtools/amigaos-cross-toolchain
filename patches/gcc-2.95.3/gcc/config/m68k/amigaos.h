@@ -169,6 +169,22 @@ Boston, MA 02111-1307, USA.  */
   "%{resident32:-fbaserel32} "						\
   "%{msmall-code:-fno-function-cse} "
 
+/* A modified copy of LINK_COMMAND_SPEC from gcc/gcc.c file.  If -noixemul
+ * option is enabled, don't prepend libgcc.a to link libraries and make sure
+ * the options is at the end of command line.  Otherwise linker chooses main()
+ * function from libgcc.a instead from libnix.a. */
+
+#define LINK_COMMAND_SPEC                                                           \
+  "%{!fsyntax-only: "                                                               \
+  "%{!c:%{!M:%{!MM:%{!E:%{!S:%(linker) %l %X %{o*} %{A} %{d} %{e*} %{m} %{N} %{n} " \
+  "%{r} %{s} %{t} %{u*} %{x} %{z} %{Z} "                                            \
+  "%{!A:%{!nostdlib:%{!nostartfiles:%S}}} "                                         \
+  "%{static:} %{L*} %D %o "                                                         \
+  "%{!nostdlib:%{!nodefaultlibs:%{!noixemul:%G} %L}} "                              \
+  "%{!A:%{!nostdlib:%{!nostartfiles:%E}}} "                                         \
+  "%{!nostdlib:%{!nodefaultlibs:%G}} "                                              \
+  "%{T*} }}}}}} "
+
 /* Compile with stack extension.  */
 
 #define MASK_STACKEXTEND 0x40000000

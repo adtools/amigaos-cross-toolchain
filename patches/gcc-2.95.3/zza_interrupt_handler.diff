@@ -1,0 +1,156 @@
+diff -durN gcc-2.95.3/gcc/config/m68k/amigaos.c gcc-2.95.3/gcc/config/m68k/amigaos.c
+--- gcc-2.95.3/gcc/config/m68k/amigaos.c	2012-11-01 18:18:09.000000000 +0100
++++ gcc-2.95.3/gcc/config/m68k/amigaos.c	2012-11-01 16:57:00.000000000 +0100
+@@ -144,14 +144,16 @@
+     {
+       if (is_attribute_p ("stackext", identifier))
+ 	{
+-	  if (lookup_attribute ("interrupt", attributes))
++	  if (lookup_attribute ("interrupt", attributes) ||
++             lookup_attribute ("interrupt_handler", attributes))
+ 	    {
+ 	      error ("`stackext' and `interrupt' are mutually exclusive");
+ 	      return 0;
+ 	    }
+ 	  return 1;
+ 	}
+-      if (is_attribute_p ("interrupt", identifier))
++      if (is_attribute_p ("interrupt", identifier) ||
++          is_attribute_p ("interrupt_handler", identifier))
+ 	{
+ 	  if (lookup_attribute ("stackext", attributes))
+ 	    {
+diff -durN gcc-2.95.3/gcc/config/m68k/amigaos.h gcc-2.95.3/gcc/config/m68k/amigaos.h
+--- gcc-2.95.3/gcc/config/m68k/amigaos.h	2012-11-01 18:18:09.000000000 +0100
++++ gcc-2.95.3/gcc/config/m68k/amigaos.h	2012-11-01 17:14:26.000000000 +0100
+@@ -92,6 +92,7 @@
+  -D__chip=__attribute__((__chip__))\
+  -D__saveds=__attribute__((__saveds__))\
+  -D__interrupt=__attribute__((__interrupt__))\
++ -D__interrupt_handler=__attribute__((__interrupt_handler__))\
+  -D__stackext=__attribute__((__stackext__))\
+  -D__regargs=__attribute__((__regparm__))\
+  -D__stdargs=__attribute__((__stkparm__))\
+@@ -190,6 +191,8 @@
+ #define MASK_STACKEXTEND 0x40000000
+ #define TARGET_STACKEXTEND (((target_flags & MASK_STACKEXTEND)		\
+   && !lookup_attribute ("interrupt",					\
++			TYPE_ATTRIBUTES (TREE_TYPE (current_function_decl))) \
++  && !lookup_attribute ("interrupt_handler",				\
+ 			TYPE_ATTRIBUTES (TREE_TYPE (current_function_decl)))) \
+   || lookup_attribute ("stackext",					\
+ 		       TYPE_ATTRIBUTES (TREE_TYPE (current_function_decl))))
+@@ -201,6 +204,8 @@
+   && !(target_flags & MASK_STACKEXTEND)					\
+   && !lookup_attribute ("interrupt",					\
+ 			TYPE_ATTRIBUTES (TREE_TYPE (current_function_decl))) \
++  && !lookup_attribute ("interrupt_handler",				\
++			TYPE_ATTRIBUTES (TREE_TYPE (current_function_decl))) \
+   && !lookup_attribute ("stackext",					\
+ 			TYPE_ATTRIBUTES (TREE_TYPE (current_function_decl))))
+ 
+@@ -588,10 +593,17 @@
+   (asm_fprintf ((STREAM), "\tjra %U__unlk_a5_rts\n"))
+ 
+ #define HAVE_ALTERNATE_RETURN						\
+-  (TARGET_STACKEXTEND && frame_pointer_needed &&			\
+-   current_function_calls_alloca)
++  ((TARGET_STACKEXTEND && frame_pointer_needed &&			\
++    current_function_calls_alloca)                                     \
++   || current_function_is_interrupt)
+ 
+-#define ALTERNATE_RETURN(STREAM)
++#define ALTERNATE_RETURN(STREAM)                                       \
++do									\
++  {									\
++    if (current_function_is_interrupt)                                 \
++      asm_fprintf ((STREAM), "\trte\n");				\
++  }									\
++while (0)
+ 
+ struct rtx_def* gen_stack_cleanup_call ();
+ #define HAVE_restore_stack_nonlocal TARGET_STACKEXTEND
+diff -durN gcc-2.95.3/gcc/config/m68k/m68k.md gcc-2.95.3/gcc/config/m68k/m68k.md
+--- gcc-2.95.3/gcc/config/m68k/m68k.md	2012-11-01 18:18:09.000000000 +0100
++++ gcc-2.95.3/gcc/config/m68k/m68k.md	2012-11-01 17:51:35.000000000 +0100
+@@ -6965,7 +6965,10 @@
+   "*
+ {
+   if (current_function_pops_args == 0)
+-    return \"rts\";
++    if (current_function_is_interrupt == 0)
++      return \"rts\";
++    else
++      return \"rte\";
+   operands[0] = GEN_INT (current_function_pops_args);
+   return \"rtd %0\";
+ }")
+diff -durN gcc-2.95.3/gcc/function.c gcc-2.95.3/gcc/function.c
+--- gcc-2.95.3/gcc/function.c	2012-11-01 18:18:09.000000000 +0100
++++ gcc-2.95.3/gcc/function.c	2012-11-01 17:53:42.000000000 +0100
+@@ -165,6 +165,8 @@
+    we should try to cut corners where we can.  */
+ int current_function_is_thunk;
+ 
++int current_function_is_interrupt;
++
+ /* Nonzero if function being compiled can call alloca,
+    either as a subroutine or builtin.  */
+ 
+@@ -572,6 +574,7 @@
+   p->contains_functions = current_function_contains_functions;
+   p->has_computed_jump = current_function_has_computed_jump;
+   p->is_thunk = current_function_is_thunk;
++  p->is_interrupt = current_function_is_interrupt;
+   p->args_size = current_function_args_size;
+   p->pretend_args_size = current_function_pretend_args_size;
+   p->arg_offset_rtx = current_function_arg_offset_rtx;
+@@ -658,6 +661,7 @@
+   current_function_has_nonlocal_label = p->has_nonlocal_label;
+   current_function_has_nonlocal_goto = p->has_nonlocal_goto;
+   current_function_is_thunk = p->is_thunk;
++  current_function_is_interrupt = p->is_interrupt;
+   current_function_args_size = p->args_size;
+   current_function_pretend_args_size = p->pretend_args_size;
+   current_function_arg_offset_rtx = p->arg_offset_rtx;
+@@ -5130,6 +5134,9 @@
+   current_function_pops_args = RETURN_POPS_ARGS (fndecl, TREE_TYPE (fndecl),
+ 						 current_function_args_size);
+ 
++  current_function_is_interrupt = lookup_attribute ("interrupt_handler",
++                                                    TYPE_ATTRIBUTES (TREE_TYPE (fndecl)));
++
+   /* For stdarg.h function, save info about
+      regs and stack space used by the named args.  */
+ 
+@@ -5958,6 +5965,7 @@
+   current_function_uses_only_leaf_regs = 0;
+   current_function_has_computed_jump = 0;
+   current_function_is_thunk = 0;
++  current_function_is_interrupt = 0;
+ 
+   current_function_returns_pcc_struct = 0;
+   current_function_returns_struct = 0;
+diff -durN gcc-2.95.3/gcc/function.h gcc-2.95.3/gcc/function.h
+--- gcc-2.95.3/gcc/function.h	1999-07-02 01:49:42.000000000 +0200
++++ gcc-2.95.3/gcc/function.h	2012-11-01 17:39:11.000000000 +0100
+@@ -82,6 +82,7 @@
+   int contains_functions;
+   int has_computed_jump;
+   int is_thunk;
++  int is_interrupt;
+   rtx nonlocal_goto_handler_slots;
+   rtx nonlocal_goto_handler_labels;
+   rtx nonlocal_goto_stack_level;
+diff -durN gcc-2.95.3/gcc/output.h gcc-2.95.3/gcc/output.h
+--- gcc-2.95.3/gcc/output.h	1999-05-27 04:02:14.000000000 +0200
++++ gcc-2.95.3/gcc/output.h	2012-11-01 17:47:53.000000000 +0100
+@@ -346,6 +346,8 @@
+    May affect compilation of return insn or of function epilogue.  */
+ 
+ extern int current_function_pops_args;
++
++extern int current_function_is_interrupt;
+ 
+ /* Nonzero if function being compiled needs to be given an address
+    where the value should be stored.  */

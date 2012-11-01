@@ -1,7 +1,3 @@
 libnix:
   Fix amiga_bss.sc (linker script template) to ensure that correct bss size is
   calculated and it's cleared on KS1.3.
-
-gcc:
-  Fix __interrupt attribute handling to put RTE instead of RTS at the end of
-  function.

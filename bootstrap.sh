@@ -91,14 +91,14 @@ function unpack_sources {
 
   unpack_clean "${BINUTILS}" "${BINUTILS_SRC}"
   pushd "${BINUTILS}"
-  apply_patches "${BINUTILS}"
   copy_non_diff "${BINUTILS}"
+  apply_patches "${BINUTILS}"
   popd
 
   unpack_clean "${GCC}" "${GCC_CORE_SRC}" "${GCC_CPP_SRC}"
   pushd "${GCC}"
-  apply_patches "${GCC}"
   copy_non_diff "${GCC}"
+  apply_patches "${GCC}"
   popd
 
   if compare_version "${GCC_VER}" "ge" "4.0.0"; then
@@ -119,8 +119,8 @@ function unpack_sources {
   rm -rf ndk_* *.info
   pushd "${NDK}"
   mkdir Include/include_h/inline
-  apply_patches "${NDK}"
   copy_non_diff "${NDK}"
+  apply_patches "${NDK}"
   popd
 
   unpack_clean "${IXEMUL}" "${IXEMUL_SRC}"

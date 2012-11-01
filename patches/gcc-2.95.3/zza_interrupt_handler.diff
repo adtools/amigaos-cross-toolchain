@@ -1,4 +1,4 @@
-diff -durN gcc-2.95.3/gcc/config/m68k/amigaos.c gcc-2.95.3/gcc/config/m68k/amigaos.c
+unchanged:
 --- gcc-2.95.3/gcc/config/m68k/amigaos.c	2012-11-01 18:18:09.000000000 +0100
 +++ gcc-2.95.3/gcc/config/m68k/amigaos.c	2012-11-01 16:57:00.000000000 +0100
 @@ -144,14 +144,16 @@
@@ -20,7 +20,7 @@ diff -durN gcc-2.95.3/gcc/config/m68k/amigaos.c gcc-2.95.3/gcc/config/m68k/amiga
  	{
  	  if (lookup_attribute ("stackext", attributes))
  	    {
-diff -durN gcc-2.95.3/gcc/config/m68k/amigaos.h gcc-2.95.3/gcc/config/m68k/amigaos.h
+unchanged:
 --- gcc-2.95.3/gcc/config/m68k/amigaos.h	2012-11-01 18:18:09.000000000 +0100
 +++ gcc-2.95.3/gcc/config/m68k/amigaos.h	2012-11-01 17:14:26.000000000 +0100
 @@ -92,6 +92,7 @@
@@ -70,7 +70,7 @@ diff -durN gcc-2.95.3/gcc/config/m68k/amigaos.h gcc-2.95.3/gcc/config/m68k/amiga
  
  struct rtx_def* gen_stack_cleanup_call ();
  #define HAVE_restore_stack_nonlocal TARGET_STACKEXTEND
-diff -durN gcc-2.95.3/gcc/config/m68k/m68k.md gcc-2.95.3/gcc/config/m68k/m68k.md
+unchanged:
 --- gcc-2.95.3/gcc/config/m68k/m68k.md	2012-11-01 18:18:09.000000000 +0100
 +++ gcc-2.95.3/gcc/config/m68k/m68k.md	2012-11-01 17:51:35.000000000 +0100
 @@ -6965,7 +6965,10 @@
@@ -85,7 +85,7 @@ diff -durN gcc-2.95.3/gcc/config/m68k/m68k.md gcc-2.95.3/gcc/config/m68k/m68k.md
    operands[0] = GEN_INT (current_function_pops_args);
    return \"rtd %0\";
  }")
-diff -durN gcc-2.95.3/gcc/function.c gcc-2.95.3/gcc/function.c
+unchanged:
 --- gcc-2.95.3/gcc/function.c	2012-11-01 18:18:09.000000000 +0100
 +++ gcc-2.95.3/gcc/function.c	2012-11-01 17:53:42.000000000 +0100
 @@ -165,6 +165,8 @@
@@ -131,7 +131,7 @@ diff -durN gcc-2.95.3/gcc/function.c gcc-2.95.3/gcc/function.c
  
    current_function_returns_pcc_struct = 0;
    current_function_returns_struct = 0;
-diff -durN gcc-2.95.3/gcc/function.h gcc-2.95.3/gcc/function.h
+unchanged:
 --- gcc-2.95.3/gcc/function.h	1999-07-02 01:49:42.000000000 +0200
 +++ gcc-2.95.3/gcc/function.h	2012-11-01 17:39:11.000000000 +0100
 @@ -82,6 +82,7 @@
@@ -142,7 +142,7 @@ diff -durN gcc-2.95.3/gcc/function.h gcc-2.95.3/gcc/function.h
    rtx nonlocal_goto_handler_slots;
    rtx nonlocal_goto_handler_labels;
    rtx nonlocal_goto_stack_level;
-diff -durN gcc-2.95.3/gcc/output.h gcc-2.95.3/gcc/output.h
+unchanged:
 --- gcc-2.95.3/gcc/output.h	1999-05-27 04:02:14.000000000 +0200
 +++ gcc-2.95.3/gcc/output.h	2012-11-01 17:47:53.000000000 +0100
 @@ -346,6 +346,8 @@
@@ -154,3 +154,55 @@ diff -durN gcc-2.95.3/gcc/output.h gcc-2.95.3/gcc/output.h
  
  /* Nonzero if function being compiled needs to be given an address
     where the value should be stored.  */
+only in patch2:
+unchanged:
+--- gcc-2.95.3/gcc/config/m68k/m68k.c	2012-11-01 21:25:02.000000000 +0100
++++ gcc-2.95.3/gcc/config/m68k/m68k.c	2012-11-01 21:07:45.000000000 +0100
+@@ -342,7 +342,8 @@
+   if (TARGET_68881)
+     {
+       for (regno = 16; regno < 24; regno++)
+-	if (regs_ever_live[regno] && ! call_used_regs[regno])
++	if (regs_ever_live[regno] && (! call_used_regs[regno]
++                                     || current_function_is_interrupt))
+ 	  {
+ 	    mask |= 1 << (regno - 16);
+ 	    num_saved_regs++;
+@@ -375,7 +376,8 @@
+       num_saved_regs = 0;
+     }
+   for (regno = 0; regno < 16; regno++)
+-    if (regs_ever_live[regno] && ! call_used_regs[regno])
++    if (regs_ever_live[regno] && (! call_used_regs[regno]
++                                  || current_function_is_interrupt))
+       {
+         mask |= 1 << (15 - regno);
+         num_saved_regs++;
+@@ -528,7 +530,8 @@
+      separate layout routine to perform the common work.  */
+   
+   for (regno = 0 ; regno < FIRST_PSEUDO_REGISTER ; regno++)
+-    if (regs_ever_live[regno] && ! call_used_regs[regno])
++    if (regs_ever_live[regno] && (! call_used_regs[regno]
++                                  || current_function_is_interrupt))
+       return 0;
+   
+   return 1;
+@@ -589,7 +592,8 @@
+   if (TARGET_68881)
+     {
+       for (regno = 16; regno < 24; regno++)
+-	if (regs_ever_live[regno] && ! call_used_regs[regno])
++	if (regs_ever_live[regno] && (! call_used_regs[regno]
++                                     || current_function_is_interrupt))
+ 	  {
+ 	    nregs++;
+ 	    fmask |= 1 << (23 - regno);
+@@ -600,7 +604,8 @@
+   if (frame_pointer_needed)
+     regs_ever_live[FRAME_POINTER_REGNUM] = 0;
+   for (regno = 0; regno < 16; regno++)
+-    if (regs_ever_live[regno] && ! call_used_regs[regno])
++    if (regs_ever_live[regno] && (! call_used_regs[regno]
++                                  || current_function_is_interrupt))
+       {

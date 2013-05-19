@@ -1,0 +1,13 @@
+--- binutils-2.14/binutils/objcopy.c	2003-06-02 22:35:15.000000000 +0200
++++ binutils-2.14-patched/binutils/objcopy.c	2013-04-24 18:38:17.000000000 +0200
+@@ -1843,7 +1848,9 @@
+       if (relcount < 0)
+ 	RETURN_NONFATAL (bfd_get_filename (ibfd));
+ 
+-      if (strip_symbols == STRIP_ALL)
++      /* Never, ever, strip reloc data on the Amiga! */
++      if (strip_symbols == STRIP_ALL &&
++	  bfd_get_flavour(obfd) != bfd_target_amiga_flavour)
+ 	{
+ 	  /* Remove relocations which are not in
+ 	     keep_strip_specific_list.  */

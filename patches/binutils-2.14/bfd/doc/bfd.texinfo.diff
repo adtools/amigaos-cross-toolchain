@@ -1,0 +1,29 @@
+--- binutils-2.14/bfd/doc/bfd.texinfo	2003-02-13 12:26:41.000000000 +0100
++++ binutils-2.14-patched/bfd/doc/bfd.texinfo	2013-04-24 18:38:20.000000000 +0200
+@@ -299,6 +299,7 @@
+ * aout ::	a.out backends
+ * coff ::	coff backends
+ * elf  ::	elf backends
++* amiga ::      amigaos backend
+ * mmo  ::	mmo backend
+ @ignore
+ * oasys ::	oasys backends
+@@ -315,12 +316,16 @@
+ @node coff, elf, aout, BFD back ends
+ @include  coffcode.texi
+ 
+-@node elf, mmo, coff, BFD back ends
++@node elf, amiga, coff, BFD back ends
+ @include  elf.texi
+ @c Leave this out until the file has some actual contents...
+ @c @include  elfcode.texi
+ 
+-@node mmo,  , elf, BFD back ends
++@node amiga, mmo, elf, BFD back ends
++@include amiga.texi
++@include amigalink.texi
++
++@node mmo, , amiga, BFD back ends
+ @include  mmo.texi
+ 
+ @node GNU Free Documentation License, Index, BFD back ends, Top

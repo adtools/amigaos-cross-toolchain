@@ -1,0 +1,43 @@
+--- binutils-2.14/gas/config/tc-m68k.h	2003-01-23 13:51:05.000000000 +0100
++++ binutils-2.14-patched/gas/config/tc-m68k.h	2013-04-24 18:38:13.000000000 +0200
+@@ -35,6 +35,9 @@
+ #ifdef TE_NetBSD
+ #define TARGET_FORMAT "a.out-m68k-netbsd"
+ #endif
++#ifdef TE_AMIGA
++#define TARGET_FORMAT "a.out-amiga"
++#endif
+ #ifdef TE_LINUX
+ #define TARGET_FORMAT "a.out-m68k-linux"
+ #endif
+@@ -43,6 +46,10 @@
+ #endif
+ #endif
+ 
++#ifdef OBJ_AMIGAHUNK
++#define TARGET_FORMAT "amiga"
++#endif
++
+ #ifdef OBJ_ELF
+ #define TARGET_FORMAT "elf32-m68k"
+ #endif
+@@ -81,6 +88,9 @@
+ 
+ #define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE (2<<16|OMAGIC);	/* Magic byte for file header */
+ #endif /* TE_SUN3 */
++#ifdef TE_AMIGA
++#define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE (OMAGIC);	/* Magic byte for file header */
++#endif
+ 
+ #ifndef AOUT_MACHTYPE
+ #define AOUT_MACHTYPE m68k_aout_machtype
+@@ -209,6 +219,9 @@
+ extern struct relax_type md_relax_table[];
+ #define TC_GENERIC_RELAX_TABLE md_relax_table
+ 
++#define TC_FIX_TYPE char
++#define TC_INIT_FIX_DATA(p)
++
+ /* We can't do a byte jump to the next instruction, so in that case
+    force word mode by faking AIM.  */
+ #define md_prepare_relax_scan(fragP, address, aim, this_state, this_type) \

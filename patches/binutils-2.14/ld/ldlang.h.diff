@@ -1,0 +1,11 @@
+--- binutils-2.14/ld/ldlang.h	2003-03-03 21:00:35.000000000 +0100
++++ binutils-2.14-patched/ld/ldlang.h	2013-04-24 18:37:50.000000000 +0200
+@@ -255,6 +255,8 @@
+ #endif
+   const char *target;
+   bfd_boolean real;
++  /* Added for AMIGA support of section attributes */
++  int amiga_attribute;
+ } lang_input_statement_type;
+ 
+ typedef struct {

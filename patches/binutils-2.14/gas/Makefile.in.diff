@@ -1,0 +1,75 @@
+--- binutils-2.14/gas/Makefile.in	2003-04-24 14:47:32.000000000 +0200
++++ binutils-2.14/gas/Makefile.in	2013-05-18 12:00:58.000000000 +0200
+@@ -205,6 +205,7 @@
+ # We deliberately omit SOM, since it does not work as a cross assembler.
+ 
+ OBJ_FORMATS = \
++	amigahunk \
+ 	aout \
+ 	bout \
+ 	coff \
+@@ -456,6 +457,7 @@
+ # OBJ files in config
+ 
+ OBJ_FORMAT_CFILES = \
++	config/obj-amigahunk.c \
+ 	config/obj-aout.c \
+ 	config/obj-bout.c \
+ 	config/obj-coff.c \
+@@ -469,6 +471,7 @@
+ 
+ 
+ OBJ_FORMAT_HFILES = \
++	config/obj-amigahunk.h \
+ 	config/obj-aout.h \
+ 	config/obj-bout.h \
+ 	config/obj-coff.h \
+@@ -485,6 +488,7 @@
+ 
+ TARG_ENV_HFILES = \
+ 	config/te-386bsd.h \
++	config/te-amiga.h \
+ 	config/te-aux.h \
+ 	config/te-delta.h \
+ 	config/te-delt88.h \
+@@ -964,6 +968,10 @@
+   $(INCDIR)/opcode/m68hc11.h dwarf2dbg.h $(INCDIR)/elf/m68hc11.h \
+   $(INCDIR)/elf/reloc-macros.h
+ 
++DEPTC_m68k_amigaoshunk = $(INCDIR)/symcat.h $(srcdir)/config/obj-amigahunk.h \
++  $(srcdir)/config/tc-m68k.h $(BFDDIR)/libamiga.h $(INCDIR)/bfdlink.h \
++  $(INCDIR)/obstack.h subsegs.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h
++
+ DEPTC_m68k_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
+   $(srcdir)/config/tc-m68k.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+   $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h subsegs.h \
+@@ -1631,6 +1639,10 @@
+   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
+   struc-symbol.h $(INCDIR)/aout/aout64.h
+ 
++DEPOBJ_m68k_amigaoshunk = $(INCDIR)/symcat.h $(srcdir)/config/obj-amigahunk.h \
++  $(srcdir)/config/tc-m68k.h $(BFDDIR)/libamiga.h $(INCDIR)/bfdlink.h \
++  $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
++
+ DEPOBJ_m68k_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
+   $(srcdir)/config/tc-m68k.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
+   $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
+@@ -2185,6 +2197,9 @@
+   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m68hc11.h
+ 
++DEP_m68k_amigaoshunk = $(srcdir)/config/obj-amigahunk.h \
++  $(srcdir)/config/tc-m68k.h $(BFDDIR)/libamiga.h $(INCDIR)/bfdlink.h
++
+ DEP_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
+   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
+ 
+@@ -2940,6 +2955,8 @@
+ # We need all these explicit rules for the multi stuff.  Because of
+ # these rules, we don't need one for OBJ_FORMAT_O.
+ 
++obj-amigahunk.o : $(srcdir)/config/obj-amigahunk.c
++	$(COMPILE) -c $(srcdir)/config/obj-amigahunk.c
+ obj-aout.o : $(srcdir)/config/obj-aout.c
+ 	$(COMPILE) -c $(srcdir)/config/obj-aout.c
+ obj-bout.o : $(srcdir)/config/obj-bout.c

@@ -1,0 +1,20 @@
+--- binutils-2.14/opcodes/configure	2013-05-18 12:54:01.000000000 +0200
++++ binutils-2.14-patched/opcodes/configure	2013-05-18 12:51:35.000000000 +0200
+@@ -1771,7 +1771,7 @@
+   if { (eval echo configure:1772: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+     for file in conftest.*; do
+       case $file in
+-      *.c | *.o | *.obj | *.ilk | *.pdb) ;;
++      *.c | *.o | *.obj | *.ilk | *.pdb | *.dSYM) ;;
+       *) ac_cv_exeext=`echo $file | sed -e s/conftest//` ;;
+       esac
+     done
+@@ -2407,7 +2407,7 @@
+   if { (eval echo configure:2408: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+     for file in conftest.*; do
+       case $file in
+-      *.c | *.o | *.obj | *.ilk | *.pdb) ;;
++      *.c | *.o | *.obj | *.ilk | *.pdb | *.dSYM) ;;
+       *) ac_cv_exeext=`echo $file | sed -e s/conftest//` ;;
+       esac
+     done

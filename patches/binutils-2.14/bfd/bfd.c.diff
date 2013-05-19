@@ -1,0 +1,10 @@
+--- binutils-2.14/bfd/bfd.c	2003-03-01 00:43:35.000000000 +0100
++++ binutils-2.14-patched/bfd/bfd.c	2013-04-24 18:38:25.000000000 +0200
+@@ -188,6 +188,7 @@
+ .      struct bfd_pef_data_struct *pef_data;
+ .      struct bfd_pef_xlib_data_struct *pef_xlib_data;
+ .      struct bfd_sym_data_struct *sym_data;
++.      struct amiga_data_struct *amiga_data;
+ .      PTR any;
+ .    }
+ .  tdata;

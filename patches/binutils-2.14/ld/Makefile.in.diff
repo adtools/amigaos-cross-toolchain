@@ -1,0 +1,24 @@
+--- binutils-2.14/ld/Makefile.in	2003-04-24 14:36:07.000000000 +0200
++++ binutils-2.14-patched/ld/Makefile.in	2013-04-24 18:37:45.000000000 +0200
+@@ -225,6 +272,8 @@
+ 	ea29k.o \
+ 	eaixppc.o \
+ 	eaixrs6.o \
++	eamiga.o \
++	eamiga_bss.o \
+ 	ealpha.o \
+ 	earcelf.o \
+ 	earm_epoc_pe.o \
+@@ -1158,6 +1183,12 @@
+ 	  cp ${srcdir}/emultempl/$(STRINGIFY) stringify.sed
+ @TDIRS@
+ 
++eamiga.c: $(srcdir)/emulparams/amiga.sh\
++   $(srcdir)/emultempl/amiga.em $(srcdir)/scripttempl/amiga.sc ${GEN_DEPENDS} 
++	${GENSCRIPTS} amiga "$(tdir_amiga)"
++eamiga_bss.c: $(srcdir)/emulparams/amiga_bss.sh\
++   $(srcdir)/emultempl/amiga.em $(srcdir)/scripttempl/amiga_bss.sc ${GEN_DEPENDS}
++	${GENSCRIPTS} amiga_bss "$(tdir_amiga_bss)"
+ ea29k.c: $(srcdir)/emulparams/a29k.sh \
+   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/a29k.sc ${GEN_DEPENDS}
+ 	${GENSCRIPTS} a29k "$(tdir_a29k)"

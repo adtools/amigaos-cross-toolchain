@@ -1,0 +1,12 @@
+--- binutils-2.14/bfd/configure.in	2003-06-12 16:25:46.000000000 +0200
++++ binutils-2.14-patched/bfd/configure.in	2013-04-24 18:38:25.000000000 +0200
+@@ -545,7 +545,9 @@
+     a29kcoff_big_vec)		tb="$tb coff-a29k.lo cofflink.lo" ;;
+     a_out_adobe_vec)		tb="$tb aout-adobe.lo aout32.lo" ;;
+     aix5coff64_vec)		tb="$tb coff64-rs6000.lo xcofflink.lo aix5ppc-core.lo"; target_size=64 ;;
++    amiga_vec)			tb="$tb amigaos.lo amigaoslink.lo" ;;
+     aout0_big_vec)		tb="$tb aout0.lo aout32.lo" ;;
++    aout_amiga_vec)		tb="$tb aout-amiga.lo aout32.lo";;
+     aout_arm_big_vec)		tb="$tb aout-arm.lo aout32.lo" ;;
+     aout_arm_little_vec)	tb="$tb aout-arm.lo aout32.lo" ;;
+     aout_mips_big_vec)		tb="$tb mipsbsd.lo aout32.lo" ;;

@@ -1,0 +1,63 @@
+--- binutils-2.14/bfd/linker.c	2003-03-31 20:13:25.000000000 +0200
++++ binutils-2.14-patched/bfd/linker.c	2013-04-24 18:38:23.000000000 +0200
+@@ -431,7 +431,8 @@
+ static bfd_boolean default_data_link_order
+   PARAMS ((bfd *, struct bfd_link_info *, asection *,
+ 	   struct bfd_link_order *));
+-static bfd_boolean default_indirect_link_order
++/*Amiga hack - used in amigaoslink.c so must be global */
++/*static*/ bfd_boolean default_indirect_link_order
+   PARAMS ((bfd *, struct bfd_link_info *, asection *,
+ 	   struct bfd_link_order *, bfd_boolean));
+ 
+@@ -1246,6 +1247,13 @@
+ 	  h->u.c.size = size;
+ 
+ 	  power = bfd_log2 (size);
++	  /* For the amiga, we don't want an alignment bigger than 2**2.
++	     Doing this here is horrible kludgy, but IMHO the maximal
++	     power alignment really should be target-dependant so that
++	     we wouldn't have to do this -- daniel */
++	  if (info->hash->creator->flavour == bfd_target_amiga_flavour
++	      && power > 2)
++	    power = 2;
+ 	  if (power > 4)
+ 	    power = 4;
+ 	  h->u.c.p->alignment_power = power;
+@@ -1708,6 +1716,13 @@
+ 	    unsigned int power;
+ 
+ 	    power = bfd_log2 (value);
++	    /* For the amiga, we don't want an alignment bigger than 2**2.
++	       Doing this here is horrible kludgy, but IMHO the maximal
++	       power alignment really should be target-dependant so that
++	       we wouldn't have to do this -- daniel */
++	    if (info->hash->creator->flavour == bfd_target_amiga_flavour
++		&& power > 2)
++	      power = 2;
+ 	    if (power > 4)
+ 	      power = 4;
+ 	    h->u.c.p->alignment_power = power;
+@@ -1763,6 +1778,13 @@
+ 	      /* Select a default alignment based on the size.  This may
+ 		 be overridden by the caller.  */
+ 	      power = bfd_log2 (value);
++	      /* For the amiga, we don't want an alignment bigger than 2**2.
++		 Doing this here is horrible kludgy, but IMHO the maximal
++		 power alignment really should be target-dependant so that
++		 we wouldn't have to do this -- daniel */
++	      if (info->hash->creator->flavour == bfd_target_amiga_flavour
++		  && power > 2)
++		power = 2;
+ 	      if (power > 4)
+ 		power = 4;
+ 	      h->u.c.p->alignment_power = power;
+@@ -2739,7 +2761,7 @@
+ 
+ /* Default routine to handle a bfd_indirect_link_order.  */
+ 
+-static bfd_boolean
++/*static*/ bfd_boolean
+ default_indirect_link_order (output_bfd, info, output_section, link_order,
+ 			     generic_linker)
+      bfd *output_bfd;

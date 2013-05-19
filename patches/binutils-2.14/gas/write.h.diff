@@ -1,0 +1,25 @@
+--- binutils-2.14/gas/write.h	2002-09-20 01:51:35.000000000 +0200
++++ binutils-2.14-patched/gas/write.h	2013-04-24 18:38:14.000000000 +0200
+@@ -198,17 +198,18 @@
+ #ifdef BFD_ASSEMBLER
+ extern fixS *fix_new
+   PARAMS ((fragS * frag, int where, int size, symbolS * add_symbol,
+-	   offsetT offset, int pcrel, bfd_reloc_code_real_type r_type));
++	   offsetT offset, int pcrel, bfd_reloc_code_real_type r_type,
++	   int baserel));
+ extern fixS *fix_new_exp
+   PARAMS ((fragS * frag, int where, int size, expressionS *exp, int pcrel,
+-	   bfd_reloc_code_real_type r_type));
++	   bfd_reloc_code_real_type r_type, int baserel));
+ #else
+ extern fixS *fix_new
+   PARAMS ((fragS * frag, int where, int size, symbolS * add_symbol,
+-	   offsetT offset, int pcrel, int r_type));
++	   offsetT offset, int pcrel, int r_type, int baserel));
+ extern fixS *fix_new_exp
+   PARAMS ((fragS * frag, int where, int size, expressionS *exp, int pcrel,
+-	   int r_type));
++	   int r_type, int baserel));
+ #endif
+ 
+ extern void write_print_statistics PARAMS ((FILE *));

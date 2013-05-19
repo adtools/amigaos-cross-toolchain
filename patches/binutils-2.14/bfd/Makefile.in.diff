@@ -1,0 +1,48 @@
+--- binutils-2.14/bfd/Makefile.in	2003-05-02 19:06:14.000000000 +0200
++++ binutils-2.14-patched/bfd/Makefile.in	2013-04-24 18:38:25.000000000 +0200
+@@ -289,7 +337,10 @@
+ # The .o files needed by all of the 32 bit vectors that are configured into
+ # target_vector in targets.c if configured with --enable-targets=all.
+ BFD32_BACKENDS = \
++	amigaos.lo \
++	amigaoslink.lo \
+ 	aout-adobe.lo \
++	aout-amiga.lo \
+ 	aout-arm.lo \
+ 	aout-cris.lo \
+ 	aout-ns32k.lo \
+@@ -454,7 +507,10 @@
+ 
+ 
+ BFD32_BACKENDS_CFILES = \
++	amigaos.c \
++	amigaoslink.c \
+ 	aout-adobe.c \
++	aout-amiga.c \
+ 	aout-arm.c \
+ 	aout-cris.c \
+ 	aout-ns32k.c \
+@@ -721,7 +779,7 @@
+ 	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
+ 	elf-bfd.h elf-hppa.h elf32-arm.h elf32-hppa.h \
+ 	elf64-hppa.h elfcode.h elfcore.h elflink.h \
+-	freebsd.h genlink.h go32stub.h \
++	freebsd.h genlink.h go32stub.h libamiga.h \
+ 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h libieee.h \
+ 	libnlm.h liboasys.h libpei.h libxcoff.h mach-o.h \
+ 	netbsd.h nlm-target.h nlmcode.h nlmswap.h ns32k.h \
+@@ -1502,9 +1508,14 @@
+ cpu-xstormy16.lo: cpu-xstormy16.c $(INCDIR)/filenames.h
+ cpu-xtensa.lo: cpu-xtensa.c $(INCDIR)/filenames.h
+ cpu-z8k.lo: cpu-z8k.c $(INCDIR)/filenames.h
++amigaos.lo: amigaos.c libamiga.h
++amigaoslink.lo: amigaoslink.c $(INCDIR)/bfdlink.h genlink.h libamiga.h
+ aout-adobe.lo: aout-adobe.c $(INCDIR)/filenames.h $(INCDIR)/aout/adobe.h \
+   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h \
+   $(INCDIR)/bfdlink.h
++aout-amiga.lo: aout-amiga.c libaout.h $(INCDIR)/bfdlink.h \
++  $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
++  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h aout-target.h 
+ aout-arm.lo: aout-arm.c $(INCDIR)/filenames.h libaout.h \
+   $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h aoutx.h \
+   $(INCDIR)/safe-ctype.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \

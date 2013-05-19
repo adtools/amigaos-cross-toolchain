@@ -1,0 +1,40 @@
+--- binutils-2.14/bfd/doc/Makefile.in	2002-11-18 17:37:54.000000000 +0100
++++ binutils-2.14-patched/bfd/doc/Makefile.in	2013-04-24 18:38:20.000000000 +0200
+@@ -122,9 +122,9 @@
+ tdefaults = @tdefaults@
+ wordsize = @wordsize@
+ 
+ AUTOMAKE_OPTIONS = cygnus
+ 
+-DOCFILES = aoutx.texi  archive.texi archures.texi \
++DOCFILES = amiga.texi amigalink.texi aoutx.texi  archive.texi archures.texi \
+ 	bfdt.texi  cache.texi coffcode.texi \
+ 	core.texi elf.texi elfcode.texi  format.texi \
+ 	libbfd.texi bfdwin.texi bfdio.texi \
+@@ -156,6 +156,7 @@
+ 	$(srcdir)/../cache.c $(srcdir)/../coffcode.h \
+ 	$(srcdir)/../corefile.c $(srcdir)/../elf.c \
+ 	$(srcdir)/../elfcode.h  $(srcdir)/../format.c \
++	$(srcdir)/../amigaos.c $(srcdir)/../amigaoslink.c \
+ 	$(srcdir)/../libbfd.c $(srcdir)/../opncls.c \
+ 	$(srcdir)/../reloc.c  $(srcdir)/../section.c \
+ 	$(srcdir)/../syms.c  $(srcdir)/../targets.c \
+@@ -622,6 +623,18 @@
+ 	touch s-linker
+ linker.texi: s-linker
+ 
++s-amiga: $(MKDOC) $(srcdir)/../amigaos.c $(srcdir)/doc.str
++	./$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../amigaos.c >amiga.tmp
++	$(srcdir)/../../move-if-change amiga.tmp amiga.texi
++	touch s-amiga
++amiga.texi: s-amiga
++
++s-amigalink: $(MKDOC) $(srcdir)/../amigaoslink.c $(srcdir)/doc.str
++	./$(MKDOC) -f $(srcdir)/doc.str <$(srcdir)/../amigaoslink.c >amigalink.tmp
++	$(srcdir)/../../move-if-change amigalink.tmp amigalink.texi
++	touch s-amigalink
++amigalink.texi: s-amigalink
++
+ libbfd.h: $(LIBBFD_H_DEP)
+ 	echo "$(LIBBFD_H_DEP)" | sed -f $(srcdir)/header.sed > $@
+ 	for file in $(LIBBFD_H_DEP); do \

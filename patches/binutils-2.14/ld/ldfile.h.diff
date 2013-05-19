@@ -1,0 +1,12 @@
+--- binutils-2.14/ld/ldfile.h	2003-03-03 21:00:35.000000000 +0100
++++ binutils-2.14-patched/ld/ldfile.h	2013-04-24 18:37:50.000000000 +0200
+@@ -61,4 +61,9 @@
+   PARAMS ((const char *arch, struct lang_input_statement_struct *,
+ 	   const char *lib, const char *suffix));
+ 
++extern void ldfile_sort_flavors
++  PARAMS ((void));
++extern void ldfile_add_flavor
++  PARAMS ((const char *));
++
+ #endif

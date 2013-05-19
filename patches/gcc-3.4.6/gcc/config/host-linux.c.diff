@@ -1,0 +1,11 @@
+--- gcc-3.4.6/gcc/config/host-linux.c	2013-05-19 20:51:29.000000000 +0200
++++ gcc-3.4.6-patched/gcc/config/host-linux.c	2013-05-19 20:51:47.000000000 +0200
+@@ -189,7 +189,7 @@
+ 
+   /* Try to make an anonymous private mmap at the desired location.  */
+   addr = mmap (base, size, PROT_READ | PROT_WRITE,
+-	       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
++	       MAP_PRIVATE | MAP_ANON, -1, 0);
+ 
+   if (addr != base)
+     {

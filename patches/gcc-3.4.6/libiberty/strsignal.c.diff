@@ -1,0 +1,13 @@
+--- gcc-3.4.6/libiberty/strsignal.c	2003-04-15 22:36:33.000000000 +0200
++++ gcc-3.4.6-patched/libiberty/strsignal.c	2013-05-19 20:23:32.000000000 +0200
+@@ -558,8 +558,8 @@
+ 
+ void
+ psignal (signo, message)
+-  unsigned signo;
+-  char *message;
++  unsigned int signo;
++  const char *message;
+ {
+   if (signal_names == NULL)
+     {

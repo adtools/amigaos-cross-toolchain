@@ -1,0 +1,105 @@
+--- gcc-3.4.6/libiberty/configure	2003-10-01 19:11:29.000000000 +0200
++++ gcc-3.4.6-patched/libiberty/configure	2013-05-19 20:23:32.000000000 +0200
+@@ -347,6 +347,10 @@
+ includedir='${prefix}/include'
+ oldincludedir='/usr/include'
+ infodir='${prefix}/info'
++guidedir='${prefix}/guide'
++htmldir='${prefix}/html'
++psdir='${prefix}/ps'
++dvidir='${prefix}/dvi'
+ mandir='${prefix}/man'
+ 
+ ac_prev=
+@@ -450,6 +454,26 @@
+   -infodir=* | --infodir=* | --infodi=* | --infod=* | --info=* | --inf=*)
+     infodir=$ac_optarg ;;
+ 
++  -guidedir | --guidedir | --guidedi | --guided | --guide | --gui)
++    ac_prev=guidedir ;;
++  -guidedir=* | --guidedir=* | --guidedi=* | --guided=* | --guide=* |--gui=*)
++    guidedir=$ac_optarg ;;
++
++  -htmldir | --htmldir | --htmldi | --htmld | --html | --htm)
++    ac_prev=htmldir ;;
++  -htmldir=* | --htmldir=* | --htmldi=* | --htmld=* | --html=* |--htm=*)
++    htmldir=$ac_optarg ;;
++
++  -psdir | --psdir | --psdi | --psd | --ps)
++    ac_prev=psdir ;;
++  -psdir=* | --psdir=* | --psdi=* | --psd=* | --ps=*)
++    psdir=$ac_optarg ;;
++
++  -dvidir | --dvidir | --dvidi | --dvid | --dvi | --dv)
++    ac_prev=dvidir ;;
++  -dvidir=* | --dvidir=* | --dvidi=* | --dvid=* | --dvi=* |--dv=*)
++    dvidir=$ac_optarg ;;
++
+   -libdir | --libdir | --libdi | --libd)
+     ac_prev=libdir ;;
+   -libdir=* | --libdir=* | --libdi=* | --libd=*)
+@@ -825,6 +849,10 @@
+   --includedir=DIR       C header files [PREFIX/include]
+   --oldincludedir=DIR    C header files for non-gcc [/usr/include]
+   --infodir=DIR          info documentation [PREFIX/info]
++  --guidedir=DIR         Amigaguide documentation in DIR [PREFIX/guide]
++  --htmldir=DIR          HTML documentation in DIR [PREFIX/html]
++  --psdir=DIR            postscript documentation in DIR [PREFIX/ps]
++  --dvidir=DIR           TeX dvi documentation in DIR [PREFIX/dvi]
+   --mandir=DIR           man documentation [PREFIX/man]
+ _ACEOF
+ 
+@@ -3322,7 +3350,7 @@
+   # Account for people who put trailing slashes in PATH elements.
+ case $as_dir/ in
+   ./ | .// | /cC/* | \
+-  /etc/* | /usr/sbin/* | /usr/etc/* | /sbin/* | /usr/afsws/bin/* | \
++  /etc/* | /c/* | /usr/sbin/* | /usr/etc/* | /sbin/* | /usr/afsws/bin/* | \
+   /usr/ucb/* ) ;;
+   *)
+     # OSF1 and SCO ODT 3.0 have their own names for install.
+@@ -5108,6 +5136,12 @@
+ 
+   sparc_address_test (0);
+ 
++#ifdef __amigaos__
++  /* Force this test to succeed for AmigaOS, which has a fairly good
++     vfork() emulation, but doesn't support fork() at all.  -fnf */
++  exit (0);
++#endif
++
+   child = vfork ();
+ 
+   if (child == 0) {
+@@ -5208,6 +5242,11 @@
+ #define HAVE_WORKING_FORK 1
+ _ACEOF
+ 
++else
++  cat >> confdefs.h <<\EOF
++#define HAVE_VFORK 1
++EOF
++
+ fi
+ 
+   if test $ac_cv_func_vfork_works = no; then
+@@ -6761,6 +6800,10 @@
+ s,@includedir@,$includedir,;t t
+ s,@oldincludedir@,$oldincludedir,;t t
+ s,@infodir@,$infodir,;t t
++s,@guidedir@,$guidedir,;t t
++s,@htmldir@,$htmldir,;t t
++s,@psdir@,$psdir,;t t
++s,@dvidir@,$dvidir,;t t
+ s,@mandir@,$mandir,;t t
+ s,@build_alias@,$build_alias,;t t
+ s,@host_alias@,$host_alias,;t t
+@@ -7297,7 +7340,7 @@
+   case $ac_dest in
+     default ) test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h
+ if test -n "$CONFIG_FILES"; then
+-  if test -n "${with_build_subdir}" || test -n "${with_target_subdir}"; then
++  if test -n "${with_target_subdir}"; then
+     # FIXME: We shouldn't need to set ac_file
+     ac_file=Makefile
+     LD="${ORIGINAL_LD_FOR_MULTILIBS}"

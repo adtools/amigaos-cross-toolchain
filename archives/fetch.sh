@@ -11,9 +11,9 @@ function download {
 
 download "ftp://ftp.gnu.org/gnu/gawk/gawk-3.1.8.tar.gz"
 download "ftp://ftp.gnu.org/gnu/bison/bison-1.35.tar.gz"
-download "ftp://ftp.gnu.org/gnu/gcc/gcc-2.95.3/gcc-core-2.95.3.tar.gz"
-download "ftp://ftp.gnu.org/gnu/gcc/gcc-2.95.3/gcc-g++-2.95.3.tar.gz"
-download "ftp://ftp.gnu.org/gnu/binutils/binutils-2.9.1.tar.gz"
+download "ftp://ftp.gnu.org/gnu/gcc/gcc-3.4.6/gcc-core-3.4.6.tar.gz"
+download "ftp://ftp.gnu.org/gnu/gcc/gcc-3.4.6/gcc-g++-3.4.6.tar.gz"
+download "ftp://ftp.gnu.org/gnu/binutils/binutils-2.14.tar.gz"
 
 download \
   "http://sourceforge.net/projects/libnix/files/latest/download" \

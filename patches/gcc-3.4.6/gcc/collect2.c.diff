@@ -1,0 +1,200 @@
+--- gcc-3.4.6/gcc/collect2.c	2013-05-19 20:08:05.000000000 +0200
++++ gcc-3.4.6-patched/gcc/collect2.c	2013-05-19 20:23:32.000000000 +0200
+@@ -144,6 +144,12 @@
+ #define SCAN_LIBRARIES
+ #endif
+ 
++/* begin-GG-local: dynamic libraries */
++#ifndef DO_COLLECTING
++#define DO_COLLECTING do_collecting
++#endif
++/* end-GG-local */
++
+ #ifdef USE_COLLECT2
+ int do_collecting = 1;
+ #else
+@@ -256,8 +262,10 @@
+ static void prefix_from_env (const char *, struct path_prefix *);
+ static void prefix_from_string (const char *, struct path_prefix *);
+ static void do_wait (const char *);
+-static void fork_execute (const char *, char **);
+-static void maybe_unlink (const char *);
++/* begin-GG-local: dynamic libraries */
++void fork_execute (const char *, char **);
++void maybe_unlink (const char *);
++/* end-GG-local */
+ static void add_to_list (struct head *, const char *);
+ static int extract_init_priority (const char *);
+ static void sort_ids (struct head *);
+@@ -335,6 +343,12 @@
+   if (status != 0 && output_file != 0 && output_file[0])
+     maybe_unlink (output_file);
+ 
++/* begin-GG-local: dynamic libraries */
++#ifdef COLLECT2_EXTRA_CLEANUP
++  COLLECT2_EXTRA_CLEANUP();
++#endif
++/* end-GG-local */
++
+   exit (status);
+ }
+ 
+@@ -423,6 +437,12 @@
+     maybe_unlink (export_file);
+ #endif
+ 
++/* begin-GG-local: dynamic libraries */
++#ifdef COLLECT2_EXTRA_CLEANUP
++  COLLECT2_EXTRA_CLEANUP();
++#endif
++/* end-GG-local */
++
+   signal (signo, SIG_DFL);
+   kill (getpid (), signo);
+ }
+@@ -609,11 +629,7 @@
+ 
+   /* Determine the filename to execute (special case for absolute paths).  */
+ 
+-  if (*name == '/'
+-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+-      || (*name && name[1] == ':')
+-#endif
+-      )
++  if (IS_ABSOLUTE_PATH (name))
+     {
+       if (access (name, X_OK) == 0)
+ 	{
+@@ -881,6 +897,11 @@
+       const char *q = extract_string (&p);
+       if (*q == '-' && (q[1] == 'm' || q[1] == 'f'))
+ 	num_c_args++;
++/* begin-GG-local: dynamic libraries */
++#ifdef COLLECT2_GCC_OPTIONS_HOOK
++      COLLECT2_GCC_OPTIONS_HOOK(q);
++#endif
++/* end-GG-local */
+     }
+   obstack_free (&temporary_obstack, temporary_firstobj);
+ 
+@@ -1112,6 +1133,11 @@
+ 		add_to_list (&libs, s);
+ 	      }
+ #endif
++/* begin-GG-local: dynamic libraries */
++#ifdef COLLECT2_LIBNAME_HOOK
++	      COLLECT2_LIBNAME_HOOK(arg);
++#endif
++/* end-GG-local */
+ 	      break;
+ 
+ #ifdef COLLECT_EXPORT_LIST
+@@ -1146,7 +1172,9 @@
+ 	      break;
+ 
+ 	    case 's':
+-	      if (arg[2] == '\0' && do_collecting)
++/* begin-GG-local: dynamic libraries */
++	      if (arg[2] == '\0' && DO_COLLECTING)
++/* end-GG-local */
+ 		{
+ 		  /* We must strip after the nm run, otherwise C++ linking
+ 		     will not work.  Thus we strip in the second ld run, or
+@@ -1190,6 +1218,11 @@
+               add_to_list (&libs, arg);
+             }
+ #endif
++/* begin-GG-local: dynamic libraries */
++#ifdef COLLECT2_LIBNAME_HOOK
++	  COLLECT2_LIBNAME_HOOK(arg);
++#endif
++/* end-GG-local */
+ 	}
+     }
+ 
+@@ -1283,6 +1316,12 @@
+       fprintf (stderr, "\n");
+     }
+ 
++/* begin-GG-local: dynamic libraries */
++#ifdef COLLECT2_PRELINK_HOOK
++  COLLECT2_PRELINK_HOOK(ld1_argv, &strip_flag);
++#endif
++/* end-GG-local */
++
+   /* Load the program, searching all libraries and attempting to provide
+      undefined symbols from repository information.  */
+ 
+@@ -1295,7 +1334,9 @@
+      constructor or destructor list, just return now.  */
+   if (rflag
+ #ifndef COLLECT_EXPORT_LIST
+-      || ! do_collecting
++/* begin-GG-local: dynamic libraries */
++      || ! DO_COLLECTING
++/* end-GG-local */
+ #endif
+       )
+     {
+@@ -1312,6 +1353,8 @@
+       return 0;
+     }
+ 
++/* begin-GG-local: dynamic libraries */
++#ifndef COLLECT2_POSTLINK_HOOK
+   /* Examine the namelist with nm and search it for static constructors
+      and destructors to call.
+      Write the constructor and destructor tables to a .s file and reload.  */
+@@ -1331,6 +1374,10 @@
+       notice ("%d destructor(s)  found\n", destructors.number);
+       notice ("%d frame table(s) found\n", frame_tables.number);
+     }
++#else /* COLLECT2_POSTLINK_HOOK */
++  COLLECT2_POSTLINK_HOOK(output_file);
++#endif
++/* end-GG-local */
+ 
+   if (constructors.number == 0 && destructors.number == 0
+       && frame_tables.number == 0
+@@ -1363,6 +1410,11 @@
+ #endif
+       maybe_unlink (c_file);
+       maybe_unlink (o_file);
++/* begin-GG-local: dynamic libraries */
++#ifdef COLLECT2_EXTRA_CLEANUP
++      COLLECT2_EXTRA_CLEANUP();
++#endif
++/* end-GG-local */
+       return 0;
+     }
+ 
+@@ -1454,6 +1506,11 @@
+   maybe_unlink (export_file);
+ #endif
+ 
++/* begin-GG-local: dynamic libraries */
++#ifdef COLLECT2_EXTRA_CLEANUP
++  COLLECT2_EXTRA_CLEANUP();
++#endif
++/* end-GG-local */
+   return 0;
+ }
+ 
+@@ -1567,7 +1624,7 @@
+    fatal_perror (errmsg_fmt, errmsg_arg);
+ }
+ 
+-static void
++void
+ fork_execute (const char *prog, char **argv)
+ {
+   collect_execute (prog, argv, NULL);
+@@ -1576,7 +1633,7 @@
+ 
+ /* Unlink a file unless we are debugging.  */
+ 
+-static void
++void
+ maybe_unlink (const char *file)
+ {
+   if (!debug)

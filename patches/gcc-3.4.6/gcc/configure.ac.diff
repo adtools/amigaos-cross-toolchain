@@ -1,0 +1,35 @@
+--- gcc-3.4.6/gcc/configure.ac	2013-05-19 20:09:27.000000000 +0200
++++ gcc-3.4.6-patched/gcc/configure.ac	2013-05-19 20:23:32.000000000 +0200
+@@ -101,10 +101,11 @@
+ # Directories
+ # -----------
+ 
++### begin-GG-local: local prefix
+ # Specify the local prefix
+ local_prefix=
+ AC_ARG_WITH(local-prefix,
+-[  --with-local-prefix=DIR specifies directory to put local include],
++[  --with-local-prefix=DIR specifies directory to put local include directory (not files).],
+ [case "${withval}" in
+ yes)	AC_MSG_ERROR(bad value ${withval} given for local include directory prefix) ;;
+ no)	;;
+@@ -113,8 +114,9 @@
+ 
+ # Default local prefix if it is empty
+ if test x$local_prefix = x; then
+-	local_prefix=/usr/local
++	local_prefix='${prefix}'/local
+ fi
++### end-GG-local
+ 
+ # Don't set gcc_gxx_include_dir to gxx_include_dir since that's only
+ # passed in by the toplevel make and thus we'd get different behavior
+@@ -962,6 +964,8 @@
+ 
+ gcc_AC_INITFINI_ARRAY
+ 
++AC_FUNC_ALLOCA
++
+ # mkdir takes a single argument on some systems. 
+ gcc_AC_FUNC_MKDIR_TAKES_ONE_ARG
+ 

@@ -1,0 +1,63 @@
+--- gcc-3.4.6/gcc/gcc.c	2013-05-19 20:22:04.000000000 +0200
++++ gcc-3.4.6-patched/gcc/gcc.c	2013-05-19 20:23:32.000000000 +0200
+@@ -1403,16 +1403,29 @@
+ #define MD_STARTFILE_PREFIX_1 ""
+ #endif
+ 
++#ifndef STANDARD_EXEC_PREFIX_1
++#define STANDARD_EXEC_PREFIX_1 "/usr/libexec/gcc/"
++#endif
++#ifndef STANDARD_EXEC_PREFIX_2
++#define STANDARD_EXEC_PREFIX_2 "/usr/lib/gcc/"
++#endif
++#ifndef STANDARD_STARTFILE_PREFIX_1
++#define STANDARD_STARTFILE_PREFIX_1 "/lib/"
++#endif
++#ifndef STANDARD_STARTFILE_PREFIX_2
++#define STANDARD_STARTFILE_PREFIX_2 "/usr/lib/"
++#endif
++
+ static const char *const standard_exec_prefix = STANDARD_EXEC_PREFIX;
+-static const char *const standard_exec_prefix_1 = "/usr/libexec/gcc/";
+-static const char *const standard_exec_prefix_2 = "/usr/lib/gcc/";
++static const char *const standard_exec_prefix_1 = STANDARD_EXEC_PREFIX_1;
++static const char *const standard_exec_prefix_2 = STANDARD_EXEC_PREFIX_2;
+ static const char *md_exec_prefix = MD_EXEC_PREFIX;
+ 
+ static const char *md_startfile_prefix = MD_STARTFILE_PREFIX;
+ static const char *md_startfile_prefix_1 = MD_STARTFILE_PREFIX_1;
+ static const char *const standard_startfile_prefix = STANDARD_STARTFILE_PREFIX;
+-static const char *const standard_startfile_prefix_1 = "/lib/";
+-static const char *const standard_startfile_prefix_2 = "/usr/lib/";
++static const char *const standard_startfile_prefix_1 = STANDARD_STARTFILE_PREFIX_1;
++static const char *const standard_startfile_prefix_2 = STANDARD_STARTFILE_PREFIX_2;
+ 
+ static const char *const tooldir_base_prefix = TOOLDIR_BASE_PREFIX;
+ static const char *tooldir_prefix;
+@@ -4483,7 +4496,9 @@
+ 		     and it is better not to use them for searching
+ 		     at run time.  In particular, stage1 loses.  */
+ 		  if (!IS_ABSOLUTE_PATH (pl->prefix))
++#ifndef VOL_SEPARATOR
+ 		    continue;
++#endif /* VOL_SEPARATOR */
+ #endif
+ 		  /* Try subdirectory if there is one.  */
+ 		  if (multilib_dir != NULL
+@@ -5853,12 +5868,11 @@
+   /* Exclude directories that the linker is known to search.  */
+   if (linker
+       && ((cp - path == 6
+-	   && strcmp (path, concat (dir_separator_str, "lib",
+-				    dir_separator_str, ".", NULL)) == 0)
++	   && strcmp (path, concat (STANDARD_STARTFILE_PREFIX_1,
++				    ".", NULL)) == 0)
+ 	  || (cp - path == 10
+-	      && strcmp (path, concat (dir_separator_str, "usr",
+-				       dir_separator_str, "lib",
+-				       dir_separator_str, ".", NULL)) == 0)))
++	      && strcmp (path, concat (STANDARD_STARTFILE_PREFIX_2,
++				       ".", NULL)) == 0)))
+     return 0;
+ 
+   return (stat (path, &st) >= 0 && S_ISDIR (st.st_mode));

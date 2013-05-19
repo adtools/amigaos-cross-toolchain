@@ -1,0 +1,14 @@
+--- gcc-3.4.6/gcc/config.host	2013-05-19 20:09:27.000000000 +0200
++++ gcc-3.4.6-patched/gcc/config.host	2013-05-19 20:23:32.000000000 +0200
+@@ -154,6 +154,11 @@
+   i860-*-sysv4*)
+     host_xmake_file=i860/x-sysv4
+     ;;
++  m68k-*-amigaos*)
++    host_xm_file=m68k/xm-amigaos.h
++    host_xmake_file=m68k/x-amigaos
++    out_host_hook_obj=host-amigaos.o
++    ;;
+   powerpc-*-darwin*)
+     # powerpc-darwin host support.
+     out_host_hook_obj=host-darwin.o

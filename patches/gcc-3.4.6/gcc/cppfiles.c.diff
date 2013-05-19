@@ -1,0 +1,48 @@
+--- gcc-3.4.6/gcc/cppfiles.c	2013-05-19 20:22:04.000000000 +0200
++++ gcc-3.4.6-patched/gcc/cppfiles.c	2013-05-19 20:23:32.000000000 +0200
+@@ -50,6 +50,10 @@
+ #ifndef O_BINARY
+ # define O_BINARY 0
+ #endif
++#ifndef OPEN_CASE_SENSITIVE
++/* Default is standard open().  */
++# define OPEN_CASE_SENSITIVE open
++#endif
+ 
+ /* This structure represents a file searched for by CPP, whether it
+    exists or not.  An instance may be pointed to by more than one
+@@ -210,7 +214,7 @@
+       set_stdin_to_binary_mode ();
+     }
+   else
+-    file->fd = open (file->path, O_RDONLY | O_NOCTTY | O_BINARY, 0666);
++    file->fd = OPEN_CASE_SENSITIVE (file->path, O_RDONLY | O_NOCTTY | O_BINARY, 0666);
+ 
+   if (file->fd != -1)
+     {
+@@ -1109,7 +1113,11 @@
+   flen = strlen (fname);
+   path = xmalloc (dlen + 1 + flen + 1);
+   memcpy (path, dir->name, dlen);
+-  if (dlen && path[dlen - 1] != '/')
++  if (dlen
++#ifdef VOL_SEPARATOR
++      && path[dlen - 1] != VOL_SEPARATOR
++#endif
++      && path[dlen - 1] != '/')
+     path[dlen++] = '/';
+   memcpy (&path[dlen], fname, flen + 1);
+ 
+@@ -1157,7 +1165,11 @@
+   len = dir->len;
+   name = alloca (len + sizeof (FILE_NAME_MAP_FILE) + 1);
+   memcpy (name, dir->name, len);
+-  if (len && name[len - 1] != '/')
++  if (len
++#ifdef VOL_SEPARATOR
++      && name[len - 1] != VOL_SEPARATOR
++#endif
++      && name[len - 1] != '/')
+     name[len++] = '/';
+   strcpy (name + len, FILE_NAME_MAP_FILE);
+   f = fopen (name, "r");

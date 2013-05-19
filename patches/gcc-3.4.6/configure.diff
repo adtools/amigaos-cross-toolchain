@@ -1,0 +1,12 @@
+--- gcc-3.4.6/configure	2013-05-19 20:08:05.000000000 +0200
++++ gcc-3.4.6-patched/configure	2013-05-19 20:23:32.000000000 +0200
+@@ -1060,6 +1060,9 @@
+   *-*-cygwin*)
+     noconfigdirs="autoconf automake send-pr rcs guile perl"
+     ;;
++  m68k-*-amigaos*)
++    noconfigdirs="$noconfigdirs texinfo"
++    ;;
+   *-*-netbsd*)
+     noconfigdirs="rcs"
+     ;;

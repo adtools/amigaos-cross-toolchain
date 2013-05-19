@@ -1,0 +1,61 @@
+--- gcc-3.4.6/gcc/configure	2013-05-19 20:09:27.000000000 +0200
++++ gcc-3.4.6-patched/gcc/configure	2013-05-19 20:23:32.000000000 +0200
+@@ -1583,6 +1583,7 @@
+ # Directories
+ # -----------
+ 
++### begin-GG-local: local prefix
+ # Specify the local prefix
+ local_prefix=
+ 
+@@ -1600,8 +1601,9 @@
+ 
+ # Default local prefix if it is empty
+ if test x$local_prefix = x; then
+-	local_prefix=/usr/local
++	local_prefix='${prefix}'/local
+ fi
++### end-GG-local
+ 
+ # Don't set gcc_gxx_include_dir to gxx_include_dir since that's only
+ # passed in by the toplevel make and thus we'd get different behavior
+@@ -7258,7 +7260,7 @@
+    # read() to the same fd.  The only system known to have a problem here
+    # is VMS, where text files have record structure.
+    case "$host_os" in
+-     vms* | ultrix*)
++     vms* | ultrix* | amigaos*)
+         gcc_cv_func_mmap_file=no ;;
+      *)
+         gcc_cv_func_mmap_file=yes;;
+@@ -7282,7 +7284,7 @@
+    # Systems known to be in this category are Windows (all variants),
+    # VMS, and Darwin.
+    case "$host_os" in
+-     vms* | cygwin* | pe | mingw* | darwin* | ultrix* | hpux10* | hpux11.00)
++     vms* | cygwin* | pe | mingw* | darwin* | ultrix* | hpux10* | hpux11.00 | amigaos*)
+         gcc_cv_func_mmap_dev_zero=no ;;
+      *)
+         gcc_cv_func_mmap_dev_zero=yes;;
+@@ -7367,7 +7369,7 @@
+    # above for use of /dev/zero.
+    # Systems known to be in this category are Windows, VMS, and SCO Unix.
+    case "$host_os" in
+-     vms* | cygwin* | pe | mingw* | sco* | udk* )
++     vms* | cygwin* | pe | mingw* | sco* | udk* | amigaos*)
+         gcc_cv_func_mmap_anon=no ;;
+      *)
+         gcc_cv_func_mmap_anon=yes;;
+@@ -7762,6 +7764,12 @@
+ 
+   sparc_address_test (0);
+ 
++#ifdef __amigaos__
++  /* Force this test to succeed for AmigaOS, which has a fairly good
++     vfork() emulation, but doesn't support fork() at all.  -fnf */
++  exit (0);
++#endif
++
+   child = vfork ();
+ 
+   if (child == 0) {

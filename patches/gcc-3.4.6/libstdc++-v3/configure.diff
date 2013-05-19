@@ -1,0 +1,13 @@
+--- gcc-3.4.6/libstdc++-v3/configure	2013-05-19 20:08:06.000000000 +0200
++++ gcc-3.4.6-patched/libstdc++-v3/configure	2013-05-19 20:23:32.000000000 +0200
+@@ -31093,6 +31093,10 @@
+ 
+ # Base decisions on target environment.
+ case "${host}" in
++  m68k-*-amigaos*)
++    #os_include_dir="os/newlib"
++    ;;
++
+   *-darwin*)
+     # Darwin versions vary, but the linker should work in a cross environment,
+     # so we just check for all the features here.

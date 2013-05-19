@@ -1,0 +1,17 @@
+--- gcc-3.4.6/gcc/common.opt	2013-05-19 20:02:45.000000000 +0200
++++ gcc-3.4.6-patched/gcc/common.opt	2013-05-19 20:23:32.000000000 +0200
+@@ -226,6 +226,14 @@
+ Common
+ Generate unwind tables that are exact at each instruction boundary
+ 
++fbaserel
++Common
++Generate base-relative code
++
++fbaserel32
++Common
++Generate base-relative code with no data limits
++
+ fbounds-check
+ Common
+ Generate code to check bounds before indexing arrays

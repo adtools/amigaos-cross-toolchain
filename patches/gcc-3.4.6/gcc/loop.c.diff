@@ -1,0 +1,13 @@
+--- gcc-3.4.6/gcc/loop.c	2013-05-19 20:09:27.000000000 +0200
++++ gcc-3.4.6-patched/gcc/loop.c	2013-05-19 20:23:32.000000000 +0200
+@@ -934,6 +934,10 @@
+ 			  == INSN_UID (regs->array[regno].single_usage))
+ 		      && regs->array[regno].set_in_loop == 1
+ 		      && GET_CODE (SET_SRC (set)) != ASM_OPERANDS
++		      && (regno >= FIRST_PSEUDO_REGISTER
++			  || asm_noperands (PATTERN (regs->array[regno]
++						     .single_usage))
++			  < 0)
+ 		      && ! side_effects_p (SET_SRC (set))
+ 		      && ! find_reg_note (p, REG_RETVAL, NULL_RTX)
+ 		      && (! SMALL_REGISTER_CLASSES

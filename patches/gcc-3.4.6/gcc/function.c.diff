@@ -1,0 +1,31 @@
+--- gcc-3.4.6/gcc/function.c	2013-05-19 20:08:05.000000000 +0200
++++ gcc-3.4.6-patched/gcc/function.c	2013-05-19 20:23:32.000000000 +0200
+@@ -8153,3 +8153,28 @@
+ }
+ 
+ #include "gt-function.h"
++
++/* begin-GG-local: explicit register specification for parameters */
++/* Return 1 if an argument for the current function was passed in
++   register REGNO.  */
++
++int
++function_arg_regno_p (int regno)
++{
++  tree parm = DECL_ARGUMENTS (current_function_decl);
++  for (; parm; parm = TREE_CHAIN (parm))
++    {
++      rtx incoming = DECL_INCOMING_RTL (parm);
++      if (GET_CODE (incoming) == REG)
++	{
++	  int incoming_reg;
++	  incoming_reg = REGNO (incoming);
++	  if (regno >= incoming_reg &&
++	      regno < incoming_reg + HARD_REGNO_NREGS (incoming_reg,
++						       GET_MODE (incoming)))
++	    return 1;
++	}
++    }
++  return 0;
++}
++/* end-GG-local */

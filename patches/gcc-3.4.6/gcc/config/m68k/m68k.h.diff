@@ -1,0 +1,175 @@
+--- gcc-3.4.6/gcc/config/m68k/m68k.h	2013-05-19 20:09:27.000000000 +0200
++++ gcc-3.4.6-patched/gcc/config/m68k/m68k.h	2013-05-19 20:23:32.000000000 +0200
+@@ -226,6 +226,11 @@
+ #define MASK_ID_SHARED_LIBRARY	(1<<18)
+ #define TARGET_ID_SHARED_LIBRARY	(target_flags & MASK_ID_SHARED_LIBRARY)
+ 
++/* Compile using the first 'm68k_regparm' data, address and float
++   registers for arguments passing.  */
++#define MASK_REGPARM	(1<<24)
++#define TARGET_REGPARM (target_flags & MASK_REGPARM)
++
+ /* Compile for a CPU32.  A 68020 without bitfields is a good
+    heuristic for a CPU32.  */
+ #define TARGET_CPU32	(TARGET_68020 && !TARGET_BITFIELD)
+@@ -342,6 +347,10 @@
+       N_("Use different calling convention using 'rtd'") },		\
+     { "nortd", - MASK_RTD,						\
+       N_("Use normal calling convention") },				\
++    { "regparm", MASK_REGPARM,						\
++      N_("Pass arguments through registers") },				\
++    { "no-regparm", - MASK_REGPARM,					\
++      N_("Don't pass arguments through registers") },			\
+     SUBTARGET_SWITCHES							\
+     { "", TARGET_DEFAULT, "" }}
+ /* TARGET_DEFAULT is defined in m68k-none.h, netbsd.h, etc.  */
+@@ -364,6 +373,8 @@
+     N_("Function starts are aligned to this power of 2"), 0},		\
+   { "shared-library-id=",	&m68k_library_id_string,		\
+     N_("ID of shared library to build"), 0},				\
++  { "regparm=",		&m68k_regparm_string,				\
++    N_("Use this register count to pass arguments"), 0},		\
+   SUBTARGET_OPTIONS							\
+ }
+ 
+@@ -556,7 +567,8 @@
+ 
+ /* Value is 1 if hard register REGNO can hold a value of machine-mode MODE.
+    On the 68000, the cpu registers can hold any mode except bytes in
+-   address registers, the 68881 registers can hold only SFmode or DFmode.  */
++   address registers, the 68881 registers can hold only SFmode or DFmode.
++   The 68881 registers can't hold anything if 68881 use is disabled.  */
+ 
+ #define HARD_REGNO_MODE_OK(REGNO, MODE) \
+   m68k_regno_mode_ok ((REGNO), (MODE))
+@@ -805,7 +817,7 @@
+ /* On the 68000, this is the size of MODE in words,
+    except in the FP regs, where a single reg is always enough.  */
+ #define CLASS_MAX_NREGS(CLASS, MODE)	\
+- ((CLASS) == FP_REGS ? 1 \
++ ((CLASS) == FP_REGS ? GET_MODE_NUNITS (MODE) \
+   : ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD))
+ 
+ /* Moves between fp regs and other regs are two insns.  */
+@@ -901,10 +913,19 @@
+ 
+ #define PCC_STATIC_STRUCT_RETURN
+ 
+-/* 1 if N is a possible register number for function argument passing.
+-   On the 68000, no registers are used in this way.  */
++/* 1 if N is a possible register number for function argument passing.  */
+ 
+-#define FUNCTION_ARG_REGNO_P(N) 0
++#define FUNCTION_ARG_REGNO_P(N)			\
++  ((((int)N) >= 0 && (N) < M68K_MAX_REGPARM)		\
++   || ((N) >= 8 && (N) < 8 + M68K_MAX_REGPARM)	\
++   || (TARGET_68881 && (N) >= 16 && (N) < 16 + M68K_MAX_REGPARM))
++
++/* Nonzero if we need to generate special stack-allocating insns.
++   On most systems they are not needed.
++   When they are needed, also define ALTERNATE_ALLOCATE_STACK (see m68k.md)
++   to perform the necessary actions.  */
++
++#define TARGET_ALTERNATE_ALLOCATE_STACK 0
+ 
+ /* Define a data type for recording info about an argument list
+    during the scan of that argument list.  This data type should
+@@ -912,28 +933,52 @@
+    and about the args processed so far, enough to enable macros
+    such as FUNCTION_ARG to determine where the next arg should go.
+ 
+-   On the m68k, this is a single integer, which is a number of bytes
+-   of arguments scanned so far.  */
++   On the m68k, this is a structure:
++   num_of_regs: number of data, address and float registers to use for
++     arguments passing (if it's 2, than pass arguments in d0, d1, a0, a1,
++     fp0 and fp1). 0 - pass everything on stack. vararg calls are
++     always passed entirely on stack.
++   regs_already_used: bitmask of the already used registers.
++   last_arg_reg - register number of the most recently passed argument.
++     -1 if passed on stack.
++   last_arg_len - number of registers used by the most recently passed
++     argument.
++*/
+ 
+-#define CUMULATIVE_ARGS int
++struct m68k_args
++{
++  int num_of_regs;
++  long regs_already_used;
++  int last_arg_reg;
++  int last_arg_len;
++};
++
++#define CUMULATIVE_ARGS struct m68k_args
++
++/* Max. number of data, address and float registers to be used for passing
++   integer, pointer and float arguments when TARGET_REGPARM.
++   It's 4, so d0-d3, a0-a3 and fp0-fp3 can be used.  */
++
++#define M68K_MAX_REGPARM 4
++
++/* The default number of data, address and float registers to use when
++   user specified '-mregparm' switch, not '-mregparm=<value>' option.  */
++
++#define M68K_DEFAULT_REGPARM 2
+ 
+ /* Initialize a variable CUM of type CUMULATIVE_ARGS
+    for a call to a function whose data type is FNTYPE.
+-   For a library call, FNTYPE is 0.
+-
+-   On the m68k, the offset starts at 0.  */
++   For a library call, FNTYPE is 0.  */
+ 
+ #define INIT_CUMULATIVE_ARGS(CUM, FNTYPE, LIBNAME, INDIRECT, N_NAMED_ARGS) \
+- ((CUM) = 0)
++  (m68k_init_cumulative_args (&(CUM), (FNTYPE)))
+ 
+ /* Update the data in CUM to advance over an argument
+    of mode MODE and data type TYPE.
+    (TYPE is null for libcalls where that information may not be available.)  */
+ 
+ #define FUNCTION_ARG_ADVANCE(CUM, MODE, TYPE, NAMED)	\
+- ((CUM) += ((MODE) != BLKmode			\
+-	    ? (GET_MODE_SIZE (MODE) + 3) & ~3	\
+-	    : (int_size_in_bytes (TYPE) + 3) & ~3))
++  (m68k_function_arg_advance (&(CUM)))
+ 
+ /* Define where to put the arguments to a function.
+    Value is zero to push the argument on the stack,
+@@ -948,9 +993,15 @@
+    NAMED is nonzero if this argument is a named parameter
+     (otherwise it is an extra parameter matching an ellipsis).
+ 
+-   On the m68k all args are always pushed.  */
++   On m68k all args are pushed, except if -mregparm is specified, then
++   a number of arguments is passed in the first 'm68k_regparm' data,
++   address and float registers.
++   Note: by default, the static-chain is passed in a0. Targets that want
++   to make full use of '-mregparm' are advised to pass the static-chain
++   somewhere else.  */
+ 
+-#define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) 0
++#define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) \
++  (m68k_function_arg (&(CUM), (MODE), (TYPE)))
+ 
+ /* For an arg passed partly in registers and partly in memory,
+    this is the number of registers used.
+@@ -1688,14 +1739,17 @@
+ 
+ #define PRINT_OPERAND_ADDRESS(FILE, ADDR) print_operand_address (FILE, ADDR)
+ 
++
+ /* Variables in m68k.c */
+ extern const char *m68k_align_loops_string;
+ extern const char *m68k_align_jumps_string;
+ extern const char *m68k_align_funcs_string;
+ extern const char *m68k_library_id_string;
++extern const char *m68k_regparm_string;
+ extern int m68k_align_loops;
+ extern int m68k_align_jumps;
+ extern int m68k_align_funcs;
++extern int m68k_regparm;
+ extern int m68k_last_compare_had_fp_operands;
+ 
+ 

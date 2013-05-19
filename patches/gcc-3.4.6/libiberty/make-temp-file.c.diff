@@ -1,0 +1,27 @@
+--- gcc-3.4.6/libiberty/make-temp-file.c	2001-10-17 23:15:41.000000000 +0200
++++ gcc-3.4.6-patched/libiberty/make-temp-file.c	2013-05-19 20:23:32.000000000 +0200
+@@ -50,6 +50,10 @@
+ #define DIR_SEPARATOR '/'
+ #endif
+ 
++#ifdef __amigaos__
++#define VOL_SEPARATOR ':'
++#endif
++
+ /* Name of temporary file.
+    mktemp requires 6 trailing X's.  */
+ #define TEMP_FILE "ccXXXXXX"
+@@ -126,8 +130,13 @@
+   len = strlen (base);
+   tmpdir = xmalloc (len + 2);
+   strcpy (tmpdir, base);
++#ifdef VOL_SEPARATOR
++  if (tmpdir[len-1] != DIR_SEPARATOR && tmpdir[len-1] != VOL_SEPARATOR)
++#endif
++{
+   tmpdir[len] = DIR_SEPARATOR;
+   tmpdir[len+1] = '\0';
++}
+ 
+   memoized_tmpdir = tmpdir;
+   return tmpdir;

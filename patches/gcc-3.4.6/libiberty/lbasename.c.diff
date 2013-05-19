@@ -1,0 +1,13 @@
+--- gcc-3.4.6/libiberty/lbasename.c	2003-12-22 20:21:37.000000000 +0100
++++ gcc-3.4.6-patched/libiberty/lbasename.c	2013-05-19 20:23:32.000000000 +0200
+@@ -42,6 +42,10 @@
+ #include "safe-ctype.h"
+ #include "filenames.h"
+ 
++#ifdef __amigaos__
++#define VOL_SEPARATOR ':'
++#endif
++
+ const char *
+ lbasename (name)
+      const char *name;

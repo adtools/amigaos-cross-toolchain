@@ -1,0 +1,14 @@
+--- gcc-3.4.6/include/filenames.h	2003-07-01 22:29:16.000000000 +0200
++++ gcc-3.4.6-patched/include/filenames.h	2013-05-19 20:23:32.000000000 +0200
+@@ -43,7 +43,11 @@
+ #else  /* not DOSish */
+ 
+ #define IS_DIR_SEPARATOR(c)	((c) == '/')
++#if !defined(__amigaos__)
+ #define IS_ABSOLUTE_PATH(f)	(IS_DIR_SEPARATOR((f)[0]))
++#else
++#define IS_ABSOLUTE_PATH(f)	(IS_DIR_SEPARATOR((f)[0]) || strchr((f), VOL_SEPARATOR))
++#endif
+ #define FILENAME_CMP(s1, s2)	strcmp(s1, s2)
+ 
+ #endif /* not DOSish */

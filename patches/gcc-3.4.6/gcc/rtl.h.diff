@@ -1,0 +1,11 @@
+--- gcc-3.4.6/gcc/rtl.h	2013-05-19 20:22:04.000000000 +0200
++++ gcc-3.4.6-patched/gcc/rtl.h	2013-05-19 20:23:32.000000000 +0200
+@@ -587,7 +587,7 @@
+ 		   JUMP_INSN, INSN_LIST, BARRIER, CODE_LABEL, CONST,	\
+ 		   NOTE)->integrated)
+ #define RTX_UNCHANGING_P(RTX)						\
+-  (RTL_FLAG_CHECK3("RTX_UNCHANGING_P", (RTX), REG, MEM, CONCAT)->unchanging)
++  (RTL_FLAG_CHECK4("RTX_UNCHANGING_P", (RTX), REG, MEM, CONCAT, PLUS)->unchanging)
+ #define RTX_FRAME_RELATED_P(RTX)					\
+   (RTL_FLAG_CHECK5("RTX_FRAME_RELATED_P", (RTX), INSN, CALL_INSN,	\
+ 		   JUMP_INSN, BARRIER, SET)->frame_related)

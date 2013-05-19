@@ -1,0 +1,26 @@
+--- gcc-3.4.6/gcc/opts.c	2004-02-18 01:09:04.000000000 +0100
++++ gcc-3.4.6-patched/gcc/opts.c	2013-05-19 20:23:32.000000000 +0200
+@@ -619,7 +619,7 @@
+ 
+   if (flag_pie)
+     flag_pic = flag_pie;
+-  if (flag_pic && !flag_pie)
++  if (flag_pic && flag_pic < 3 && !flag_pie)
+     flag_shlib = 1;
+ 
+   if (flag_no_inline == 2)
+@@ -889,6 +889,14 @@
+       flag_bounds_check = value;
+       break;
+ 
++    case OPT_fbaserel:
++      flag_pic = value + value + value;
++      break;
++
++    case OPT_fbaserel32:
++      flag_pic = value + value + value + value;
++      break;
++
+     case OPT_fbranch_count_reg:
+       flag_branch_on_count_reg = value;
+       break;

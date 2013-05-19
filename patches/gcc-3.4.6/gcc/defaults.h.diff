@@ -1,0 +1,13 @@
+--- gcc-3.4.6/gcc/defaults.h	2013-05-19 20:08:05.000000000 +0200
++++ gcc-3.4.6-patched/gcc/defaults.h	2013-05-19 20:23:32.000000000 +0200
+@@ -280,8 +280,10 @@
+ /* If we have a definition of INCOMING_RETURN_ADDR_RTX, assume that
+    the rest of the DWARF 2 frame unwind support is also provided.  */
+ #if !defined (DWARF2_UNWIND_INFO) && defined (INCOMING_RETURN_ADDR_RTX)
++#if !defined (NO_DWARF2_UNWIND_INFO)
+ #define DWARF2_UNWIND_INFO 1
+ #endif
++#endif
+ 
+ /* If we have named sections, and we're using crtstuff to run ctors,
+    use them for registering eh frame information.  */

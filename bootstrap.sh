@@ -518,7 +518,7 @@ function build {
     CFLAGS=""
   fi
 
-  # Take the path over -- for hermeticity reasons.
+  # Take over the path -- to preserve hermetic build. 
   export PATH="/opt/local/bin:/usr/local/bin:/usr/bin:/bin"
 
   # Make sure we always choose known compiler (from the distro) and not one
@@ -545,8 +545,12 @@ function build {
   install_libamiga
   build_libnix
   build_libm
-  build_gpp
-  build_ixemul
+
+  # TODO: C++ compiler needs more testing.
+  #build_gpp
+
+  # TODO: Ixemul is not suited for cross compilation very well.
+  #build_ixemul
 }
 
 function main {

@@ -181,7 +181,7 @@ function build_tools {
   make && make install
   popd
 
-  if compare_version "${GCC_VER}" "eq" "2.95.3"; then
+  if compare_version "${GCC_VER}" "le" "3.4.6"; then
     mkdir_empty "${BISON}"
     pushd "${BISON}"
     "${SOURCES}/${BISON}/configure" \
@@ -545,11 +545,12 @@ function build {
   install_libamiga
   build_libnix
   build_libm
+  build_gpp
 
-  # TODO: C++ compiler needs more testing.
-  #build_gpp
+  # TODO: Ixemul is not suited for cross compilation very well.  The build
+  # process compiles some tools with cross compiler and tries to run them
+  # locally.
 
-  # TODO: Ixemul is not suited for cross compilation very well.
   #build_ixemul
 }
 

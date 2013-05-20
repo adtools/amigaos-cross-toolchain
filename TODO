@@ -1,3 +1,28 @@
 libnix:
-  Fix amiga_bss.sc (linker script template) to ensure that correct bss size is
+- Fix amiga_bss.sc (linker script template) to ensure that correct bss size is
   calculated and it's cleared on KS1.3.
+- Migrate libnix from sourceforge to github (cvs2git).
+- Merge 2.2 and 3.0 versions into 3.1.
+- Support gcc 3.x constructor and destructor attributes:
+  ___CTOR_LIST__, ___DTOR_LIST__
+
+ixemul:
+- Use vamos to run amiga binaries during build phase.
+
+gcc:
+- Add missing support for chip data and bss section in 3.4.6.
+- Use vamos to run gcc testsuite.
+
+binutils:
+- Fix "GNU as" crash during g++ 3.4.6 build (for both 2.9.1 and 2.14).
+
+tools:
+- Fix hunk2aout utility.
+
+examples:
+- Write bunch of simple programs to illustrate some amigaos specific features.
+  They'll be used as tests also.
+
+releases:
+- Build a binary release for MinGW, Darwin, Linux and publish it.
+- Announce the toolchain on some popular Amiga sites.

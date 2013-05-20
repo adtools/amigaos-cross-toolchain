@@ -51,12 +51,3 @@ Usage:
      should be installed - note that the path has to be writable).
   3) Wait for the result.
   ?) If something fails, you can try to reach me.
-
-TODO:
-  * Testing on:
-    - Cygwin
-  * Remove dependencies:
-    - libamiga-bin
-  * Provide some rudimentary testing (C / C++ sources).
-  * Add auxiliary tools: hunk2aout.
-  * Build timezone data for ixemul (zic).

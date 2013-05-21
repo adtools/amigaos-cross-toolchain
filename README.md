@@ -35,7 +35,7 @@ GCC compiler for AmigaOS 3.x
 
 #### Fetched by the script
 
-As listed in `bootstrap.conf` file.
+As listed in `bootstrap.conf` file:
 
  * sources from GNU project:
    - gcc 2.95.3

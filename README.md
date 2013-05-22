@@ -1,4 +1,4 @@
-GCC compiler for AmigaOS 3.x
+GCC compiler for AmigaOS/m68k
 ===
 
 **Author:** [Krystian Bacławski](mailto:krystian.baclawski@gmail.com)
@@ -53,9 +53,23 @@ You have to have following packages installed in your system:
 
 Follow steps listed below:
 
-1. Download sources (use `fetch.sh` script in `archives` directory).
-2. Run `bootstrap.sh` script (with `--prefix` option to specify where to install the toolchain).
-3. Wait for the result :-)
+1. Fetch *m68k-amigaos-toolchain* project to your local drive:  
+      
+       git clone git://github.com/cahirwpz/m68k-amigaos-toolchain.git
+       cd m68k-amigaos-toolchain
+      
+2. Download sources (use `fetch.sh` script in `archives` directory):   
+   
+       cd archives
+       ./fetch.sh
+   
+3. Run `bootstrap.sh` script (with `--prefix` option to specify where to install the toolchain).
+
+       cd ..
+       ./bootstrap.sh --prefix=/opt/m68k-amigaos build
+
+
+4. Wait for the result :-)
 
 **Note:** *If the build process fails, please write me an e-mail.  I'll try to help out. Don't forget to put into e-mail as much data about your environment as possible!*
 

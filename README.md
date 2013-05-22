@@ -5,9 +5,9 @@ GCC compiler for AmigaOS 3.x
 
 **Short description:** m68k-amigaos gcc / binutils toolchain build script.
 
-### Overview:
+### Overview
 
-**m68k-amigaos-toolchain** provides you a shell script that builds M68k AmigaOS 3.x) toolchain in your un*x-like environment. Build process should produce following set of tools that targets m68k-amigaos platform:
+**m68k-amigaos-toolchain** provides you a shell script that builds M68k AmigaOS 3.x) toolchain in your Un\*x-like environment. Build process should produce following set of tools that targets m68k-amigaos platform:
 
  * gcc 2.95.3
  * g++ 2.95.3
@@ -23,9 +23,23 @@ GCC compiler for AmigaOS 3.x
 
 **Note:** *Patches are welcome!*
 
-### Prerequisites
+### Downloads
 
-#### Installed in your system
+There are no downloads provided for the time being. I do as much as possible to make the toolchain portable among Un\*x-like environments. Following platforms were tested and the toolchain is known to work for them:
+
+ * Cygwin 1.7.18 (gcc 4.5.3)
+ * Ubuntu 12.04 LTS 32-bit (gcc 4.6.3)
+ * Ubuntu 12.04 LTS 64-bit (gcc 4.6.3) *requires gcc-multilib*
+ * MacOS X 10.7.5 (MacPorts - gcc 4.7.3)
+ 
+
+### Compiling
+
+*Firstly… you should have basic understanding of Un\*x console environment, really* ;-)
+
+#### Prerequisites
+
+You have to have following packages installed in your system:
 
  * GNU autoconf
  * GNU flex 2.5.x
@@ -35,30 +49,9 @@ GCC compiler for AmigaOS 3.x
  * lha
  * perl 5.10
 
-#### Fetched by the script
+#### How to build?
 
-As listed in `bootstrap.conf` file:
-
- * sources from GNU project:
-   - gcc 2.95.3
-   - binutils 2.9.1
-   - bison 1.35
-   - gawk 1.3.8
- * Amiga specific sources & binaries:
-   - libnix 2.1
-   - libm 5.4
-   - AmigaOS NDK 3.9
-   - sfdc 1.4
-   - libamiga-bin
- * VBCC related sources & binaries:
-   - vbcc 0.9b
-   - vasm 1.5c
-   - vlink 0.14a
-   - vbcc m68k-amigaos target files
-
-### How to build?
-
-**Note:** *Well… you should have basic understanding of unix console environment, really.*
+Follow steps listed below:
 
 1. Download sources (use `fetch.sh` script in `archives` directory).
 2. Run `bootstrap.sh` script (with `--prefix` option to specify where to install the toolchain).
@@ -66,13 +59,3 @@ As listed in `bootstrap.conf` file:
 
 **Note:** *If the build process fails, please write me an e-mail.  I'll try to help out. Don't forget to put into e-mail as much data about your environment as possible!*
 
-### Tested on
-
-Following platforms were tested:
-
- * Cygwin 1.7.18 (gcc 4.5.3)
- * Ubuntu 12.04 LTS 32-bit (gcc 4.6.3)
- * Ubuntu 12.04 LTS 64-bit (gcc 4.6.3) *requires gcc-multilib*
- * MacOS X 10.7.5 (MacPorts - gcc 4.7.3)
- 
-But I do as much as possible to make the toolchain portable among Un*x-like environments.

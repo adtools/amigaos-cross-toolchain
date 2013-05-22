@@ -9,8 +9,6 @@ readonly HOST_DIR="${TOP_DIR}/host"
 readonly STAMP="${TOP_DIR}/stamps"
 readonly MAKE="make -j$(getconf NPROCESSORS_CONF)"
 
-source "${TOP_DIR}/bootstrap.conf"
-
 function prepare_target {
   mkdir -p "${STAMP}" "${BUILD_DIR}" "${PREFIX}"
 
@@ -490,6 +488,8 @@ function build_ixemul {
 }
 
 function build {
+  source "${TOP_DIR}/bootstrap.conf"
+
   # On 64-bit architecture GNU Assembler crashes writing out an object, due to
   # (probably) miscalculated structure sizes.  There could be some other bugs
   # lurking there in 64-bit mode, but I have little incentive chasing them.
@@ -538,6 +538,7 @@ function build {
 
 function main {
   PREFIX="${TOP_DIR}/target"
+  VERSION="2"
 
   local action="build"
 
@@ -548,6 +549,9 @@ function main {
         ;;
       --clean)
         action="clean"
+        ;;
+      --version=*)
+        VERSION=${1#*=}
         ;;
       *)
         echo "Unknown option: $1"

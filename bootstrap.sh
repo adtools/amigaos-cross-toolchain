@@ -7,6 +7,7 @@ readonly SOURCES="${TOP_DIR}/sources"
 readonly BUILD_DIR="${TOP_DIR}/build"
 readonly HOST_DIR="${TOP_DIR}/host"
 readonly STAMP="${TOP_DIR}/stamps"
+readonly MAKE="make -j$(getconf NPROCESSORS_CONF)"
 
 source "${TOP_DIR}/bootstrap.conf"
 
@@ -105,8 +106,6 @@ function unpack_sources {
     unpack_clean "${GMP}" "${GMP_SRC}"
     unpack_clean "${MPC}" "${MPC_SRC}"
     unpack_clean "${MPFR}" "${MPFR_SRC}"
-    unpack_clean "${ISL}" "${ISL_SRC}"
-    unpack_clean "${CLOOG}" "${CLOOG_SRC}"
   fi
 
   unpack_clean "${SFDC}" "${SFDC_SRC}"
@@ -178,7 +177,7 @@ function build_tools {
   pushd "${GAWK}"
   "${SOURCES}/${GAWK}/configure" \
     --prefix="${HOST_DIR}"
-  make && make install
+  ${MAKE} && make install
   popd
 
   if compare_version "${GCC_VER}" "le" "3.4.6"; then
@@ -186,7 +185,7 @@ function build_tools {
     pushd "${BISON}"
     "${SOURCES}/${BISON}/configure" \
       --prefix="${HOST_DIR}"
-    make && make install
+    ${MAKE} && make install
     popd
   fi
 
@@ -195,7 +194,7 @@ function build_tools {
     pushd "${GMP}"
     "${SOURCES}/${GMP}/configure" \
       --prefix="${HOST_DIR}"
-    make && make install
+    ${MAKE} && make install
     popd
 
     mkdir_empty "${MPFR}"
@@ -203,7 +202,7 @@ function build_tools {
     "${SOURCES}/${MPFR}/configure" \
       --prefix="${HOST_DIR}" \
       --with-gmp="${HOST_DIR}"
-    make && make install
+    ${MAKE} && make install
     popd
 
     mkdir_empty "${MPC}"
@@ -212,24 +211,7 @@ function build_tools {
       --prefix="${HOST_DIR}" \
       --with-gmp="${HOST_DIR}" \
       --with-mpfr="${HOST_DIR}"
-    make && make install
-    popd
-
-    mkdir_empty "${ISL}"
-    pushd "${ISL}"
-    "${SOURCES}/${ISL}/configure" \
-      --prefix="${HOST_DIR}"
-    make && make install
-    popd
-
-    mkdir_empty "${CLOOG}"
-    pushd "${CLOOG}"
-    "${SOURCES}/${CLOOG}/configure" \
-      --prefix="${HOST_DIR}" \
-      --with-isl=system \
-      --with-gmp-prefix="${HOST_DIR}" \
-      --with-isl-prefix="${HOST_DIR}"
-    make && make install
+    ${MAKE} && make install
     popd
   fi
 

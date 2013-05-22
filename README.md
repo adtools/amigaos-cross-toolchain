@@ -27,9 +27,11 @@ GCC compiler for AmigaOS 3.x
 
 #### Installed in your system
 
- * GNU gcc 4.x
+ * GNU autoconf
  * GNU flex 2.5.x
+ * GNU gcc 4.x
  * GNU make 3.x
+ * GNU texinfo 4.x
  * lha
  * perl 5.10
 
@@ -69,7 +71,8 @@ As listed in `bootstrap.conf` file:
 Following platforms were tested:
 
  * Cygwin 1.7.18 (gcc 4.5.3)
- * Ubuntu 10.04 32-bit (gcc 4.4.3)
+ * Ubuntu 12.04 LTS 32-bit (gcc 4.6.3)
+ * Ubuntu 12.04 LTS 64-bit (gcc 4.6.3) *requires gcc-multilib*
  * MacOS X 10.7.5 (MacPorts - gcc 4.7.3)
  
 But I do as much as possible to make the toolchain portable among Un*x-like environments.

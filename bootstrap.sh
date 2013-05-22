@@ -512,7 +512,8 @@ function build {
     # thinking that they're being compiled on IA-32 architecture.
     CC="${CC} ${ARCH:-}"
     CXX="${CXX} ${ARCH:-}"
-    GCC_CONFIGURE_OPTS+=("--host=i686-linux-gnu")
+    GCC_CONFIGURE_OPTS+=("--host=i686-linux-gnu" \
+                         "--build=i686-linux-gnu")
   else
     # GCC 4.x requires some extra dependencies to be supplied.
     GCC_CONFIGURE_OPTS+=("--with-gmp=${HOST_DIR}" \

@@ -191,7 +191,8 @@ function build_tools {
     mkdir_empty "${GMP}"
     pushd "${GMP}"
     "${SOURCES}/${GMP}/configure" \
-      --prefix="${HOST_DIR}"
+      --prefix="${HOST_DIR}" \
+      --disable-shared
     ${MAKE} && make install
     popd
 
@@ -199,6 +200,7 @@ function build_tools {
     pushd "${MPFR}"
     "${SOURCES}/${MPFR}/configure" \
       --prefix="${HOST_DIR}" \
+      --disable-shared \
       --with-gmp="${HOST_DIR}"
     ${MAKE} && make install
     popd
@@ -207,6 +209,7 @@ function build_tools {
     pushd "${MPC}"
     "${SOURCES}/${MPC}/configure" \
       --prefix="${HOST_DIR}" \
+      --disable-shared \
       --with-gmp="${HOST_DIR}" \
       --with-mpfr="${HOST_DIR}"
     ${MAKE} && make install
@@ -326,7 +329,7 @@ function build_binutils {
   pushd "${BUILD_DIR}"
   mkdir_empty "${BINUTILS}"
   cd "${BINUTILS}"
-  "${SOURCES}/${BINUTILS}/configure" \
+  CC="${CC} ${ARCH:-}" "${SOURCES}/${BINUTILS}/configure" \
     --prefix="${PREFIX}" \
     --host="i686-linux-gnu" \
     --target="m68k-amigaos"
@@ -494,31 +497,44 @@ function build {
   # (probably) miscalculated structure sizes.  There could be some other bugs
   # lurking there in 64-bit mode, but I have little incentive chasing them.
   # Just compile everything in 32-bit mode and forget about the issues.
-  CFLAGS=""
-
   if [ "$(uname -m)" == "x86_64" ]; then
-    CFLAGS="-m32"
+    ARCH="-m32"
   fi
+
+  # Make sure we always choose known compiler (from the distro) and not one
+  # in user's path that could shadow the original one.
+  CC="$(which gcc)"
+  CXX="$(which g++)"
 
   # Define extra options for gcc's configure script.
   if [ "${VERSION}" != "4" ]; then
     # Older gcc compilers (i.e. 2.95.3 and 3.4.6) have to be tricked into
     # thinking that they're being compiled on IA-32 architecture.
+    CC="${CC} ${ARCH:-}"
+    CXX="${CXX} ${ARCH:-}"
     GCC_CONFIGURE_OPTS+=("--host=i686-linux-gnu")
   else
     # GCC 4.x requires some extra dependencies to be supplied.
     GCC_CONFIGURE_OPTS+=("--with-gmp=${HOST_DIR}" \
                          "--with-mpfr=${HOST_DIR}" \
-                         "--with-mpc=${HOST_DIR}")
+                         "--with-mpc=${HOST_DIR}" \
+                         "--disable-shared")
   fi
 
   # Take over the path -- to preserve hermetic build. 
   export PATH="/opt/local/bin:/usr/local/bin:/usr/bin:/bin"
+  export CC CXX
 
-  # Make sure we always choose known compiler (from the distro) and not one
-  # in user's path that could shadow the original one.
-  export CC="$(which gcc) ${CFLAGS}"
-  export CXX="$(which g++) ${CFLAGS}"
+  readonly FLAGS_FOR_TARGET=( \
+      "MAKEINFO=makeinfo" \
+      "CFLAGS_FOR_TARGET=-noixemul" \
+      "AR_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-ar" \
+      "AS_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-as" \
+      "LD_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-ld" \
+      "NM_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-nm" \
+      "OBJCOPY_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-objcopy" \
+      "OBJDUMP_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-objdump" \
+      "RANLIB_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-ranlib")
 
   prepare_target
   unpack_sources
@@ -560,30 +576,23 @@ function main {
       --prefix=*)
         PREFIX=${1#*=}
         ;;
-      --clean)
-        action="clean"
-        ;;
       --version=*)
         VERSION=${1#*=}
         ;;
-      *)
+      --*)
         echo "Unknown option: $1"
         exit 1
+        ;;
+      *)
+        break
         ;;
     esac
     shift
   done
 
-  readonly FLAGS_FOR_TARGET=( \
-      "MAKEINFO=makeinfo" \
-      "CFLAGS_FOR_TARGET=-noixemul" \
-      "AR_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-ar" \
-      "AS_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-as" \
-      "LD_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-ld" \
-      "NM_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-nm" \
-      "OBJCOPY_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-objcopy" \
-      "OBJDUMP_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-objdump" \
-      "RANLIB_FOR_TARGET=${PREFIX}/bin/m68k-amigaos-ranlib")
+  if [ -n "${1:-}" ]; then
+    action="$1"
+  fi
 
   case "${action}" in
     "build")
@@ -595,7 +604,7 @@ function main {
       done
       ;;
     *)
-      echo "action '${action}' not supported!"
+      echo "Unknown action '${action}'!"
       exit 1
       ;;
   esac

@@ -346,9 +346,9 @@ function build_gcc {
   "${SOURCES}/${GCC}/configure" \
     --prefix="${PREFIX}" \
     --target="m68k-amigaos" \
-    --host="i686-linux-gnu" \
     --enable-languages=c \
-    --with-headers="${SOURCES}/${IXEMUL}/include"
+    --with-headers="${SOURCES}/${IXEMUL}/include" \
+    ${GCC_CONFIGURE_OPTS[*]}
   make all ${FLAGS_FOR_TARGET[*]}
   make install ${FLAGS_FOR_TARGET[*]}
   popd
@@ -366,10 +366,10 @@ function build_gpp {
   cd "${GPP}"
   "${SOURCES}/${GCC}/configure" \
     --prefix="${PREFIX}" \
-    --host="i686-linux-gnu" \
     --target="m68k-amigaos" \
     --enable-languages=c++ \
-    --with-headers="${SOURCES}/${IXEMUL}/include"
+    --with-headers="${SOURCES}/${IXEMUL}/include" \
+    ${GCC_CONFIGURE_OPTS[*]}
   make all ${FLAGS_FOR_TARGET[*]}
   make install ${FLAGS_FOR_TARGET[*]}
   popd
@@ -494,10 +494,22 @@ function build {
   # (probably) miscalculated structure sizes.  There could be some other bugs
   # lurking there in 64-bit mode, but I have little incentive chasing them.
   # Just compile everything in 32-bit mode and forget about the issues.
+  CFLAGS=""
+
   if [ "$(uname -m)" == "x86_64" ]; then
     CFLAGS="-m32"
+  fi
+
+  # Define extra options for gcc's configure script.
+  if [ "${VERSION}" != "4" ]; then
+    # Older gcc compilers (i.e. 2.95.3 and 3.4.6) have to be tricked into
+    # thinking that they're being compiled on IA-32 architecture.
+    GCC_CONFIGURE_OPTS+=("--host=i686-linux-gnu")
   else
-    CFLAGS=""
+    # GCC 4.x requires some extra dependencies to be supplied.
+    GCC_CONFIGURE_OPTS+=("--with-gmp=${HOST_DIR}" \
+                         "--with-mpfr=${HOST_DIR}" \
+                         "--with-mpc=${HOST_DIR}")
   fi
 
   # Take over the path -- to preserve hermetic build. 
@@ -506,6 +518,7 @@ function build {
   # Make sure we always choose known compiler (from the distro) and not one
   # in user's path that could shadow the original one.
   export CC="$(which gcc) ${CFLAGS}"
+  export CXX="$(which g++) ${CFLAGS}"
 
   prepare_target
   unpack_sources

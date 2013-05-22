@@ -68,7 +68,8 @@ As listed in `bootstrap.conf` file:
 
 Following platforms were tested:
 
+ * Cygwin 1.7.18 (gcc 4.5.3)
  * Ubuntu 10.04 32-bit (gcc 4.4.3)
- * MacOS X 10.7.5 (MacPorts gcc47 4.7.3_0)
+ * MacOS X 10.7.5 (MacPorts - gcc 4.7.3)
  
 But I do as much as possible to make the toolchain portable among Un*x-like environments.

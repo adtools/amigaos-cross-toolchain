@@ -1,0 +1,89 @@
+--- binutils-2.14/gas/app.c	2003-05-02 19:06:16.000000000 +0200
++++ binutils-2.14-patched/gas/app.c	2013-05-22 16:18:19.000000000 +0200
+@@ -351,6 +345,8 @@
+   char *fromend;
+   int fromlen;
+   register int ch, ch2 = 0;
++  /* Character that started the string we're working on.  */
++  static char quotechar;
+ 
+   /*State 0: beginning of normal line
+ 	  1: After first whitespace on line (flush more white)
+@@ -536,11 +538,8 @@
+ 	    for (s = from; s < fromend; s++)
+ 	      {
+ 		ch = *s;
+-		/* This condition must be changed if the type of any
+-		   other character can be LEX_IS_STRINGQUOTE.  */
+ 		if (ch == '\\'
+-		    || ch == '"'
+-		    || ch == '\''
++		    || ch == quotechar
+ 		    || ch == '\n')
+ 		  break;
+ 	      }
+@@ -558,12 +557,12 @@
+ 	  ch = GET ();
+ 	  if (ch == EOF)
+ 	    {
+-	      as_warn (_("end of file in string; inserted '\"'"));
++	      as_warn (_("end of file in string; '%c' inserted"), quotechar);
+ 	      state = old_state;
+ 	      UNGET ('\n');
+-	      PUT ('"');
++	      PUT (quotechar);
+ 	    }
+-	  else if (lex[ch] == LEX_IS_STRINGQUOTE)
++	  else if (ch == quotechar)
+ 	    {
+ 	      state = old_state;
+ 	      PUT (ch);
+@@ -603,8 +602,8 @@
+ 	      continue;
+ 
+ 	    case EOF:
+-	      as_warn (_("end of file in string; '\"' inserted"));
+-	      PUT ('"');
++	      as_warn (_("end of file in string; '%c' inserted"), quotechar);
++	      PUT (quotechar);
+ 	      continue;
+ 
+ 	    case '"':
+@@ -638,10 +637,9 @@
+ 
+ 	case 7:
+ 	  ch = GET ();
++	  quotechar = ch;
+ 	  state = 5;
+ 	  old_state = 8;
+-	  if (ch == EOF)
+-	    goto fromeof;
+ 	  PUT (ch);
+ 	  continue;
+ 
+@@ -952,6 +973,7 @@
+ 	  break;
+ 
+ 	case LEX_IS_STRINGQUOTE:
++	  quotechar = ch;
+ 	  if (state == 10)
+ 	    {
+ 	      /* Preserve the whitespace in foo "bar".  */
+@@ -1279,6 +1301,8 @@
+ 			case 1: *to++ = *from++;
+ 			}
+ 		    }
++		  if (to >= toend)
++		    goto tofull;
+ 		  ch = GET ();
+ 		}
+ 	    }
+@@ -1297,7 +1321,7 @@
+ 	    }
+ 	  else if (state == 9)
+ 	    {
+-	      if (lex[ch] != LEX_IS_SYMBOL_COMPONENT)
++	      if (!IS_SYMBOL_COMPONENT (ch))
+ 		state = 3;
+ 	    }
+ 	  else if (state == 10)

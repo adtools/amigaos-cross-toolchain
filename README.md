@@ -23,12 +23,6 @@ GCC compiler for AmigaOS/m68k
 
 **Note:** *Patches are welcome!*
 
-### Documentation
-
-Texinfo documents converted into HTML:
-
- * [libnix](http://cahirwpz.users.sourceforge.net/libnix/index.html)
-
 ### Downloads
 
 There are no downloads provided for the time being. I do as much as possible to make the toolchain portable among Un\*x-like environments. Following platforms were tested and the toolchain is known to work for them:
@@ -38,6 +32,17 @@ There are no downloads provided for the time being. I do as much as possible to 
  * Ubuntu 12.04 LTS 64-bit (gcc 4.6.3) *requires gcc-multilib*
  * MacOS X 10.7.5 (MacPorts - gcc 4.7.3)
  
+### Documentation
+
+Documentation from Free Software Fundation:
+ * [gcc 2.95.3](http://gcc.gnu.org/onlinedocs/gcc-2.95.3/gcc.html)
+ * [gcc 3.4.6](http://gcc.gnu.org/onlinedocs/gcc-3.4.6/gcc/)
+ * [binutils](http://sourceware.org/binutils/docs/)
+
+Texinfo documents from GeekGadgets converted into HTML:
+
+ * [libnix - a static library for GCC on the amiga](http://cahirwpz.users.sourceforge.net/libnix/index.html)
+ * [AmigaOS-only features of GCC](http://cahirwpz.users.sourceforge.net/gcc-amigaos/index.html)
 
 ### Compiling
 

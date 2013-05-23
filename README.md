@@ -23,6 +23,12 @@ GCC compiler for AmigaOS/m68k
 
 **Note:** *Patches are welcome!*
 
+### Documentation
+
+Texinfo documents converted into HTML:
+
+ * [libnix](http://cahirwpz.users.sourceforge.net/libnix/index.html)
+
 ### Downloads
 
 There are no downloads provided for the time being. I do as much as possible to make the toolchain portable among Un\*x-like environments. Following platforms were tested and the toolchain is known to work for them:

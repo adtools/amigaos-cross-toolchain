@@ -1,5 +1,7 @@
 from collections import namedtuple
+import os
 import struct
+from util import hexdump
 
 
 class Header(namedtuple('Header', ('mid', 'magic', 'text', 'data', 'bss',
@@ -99,3 +101,90 @@ class SymbolInfo(namedtuple('SymbolInfo', ('strx', 'type', 'other', 'desc',
     return '{3:08x} {5} {0:<5} {2:04x} {1:02x} {6:02x} {4}'.format(
       self.type_str, self.other, self.desc, self.value, symbol,
       visibility, self.type)
+
+
+class Aout(object):
+  def __init__(self):
+    self._path = None
+    self._header = None
+    self._text = ''
+    self._data = ''
+    self._str_map = {}
+    self._str_table = []
+    self._symbols = []
+    self._text_relocs = []
+    self._data_relocs = []
+
+  def addString(self, offset, text):
+    self._str_map[offset] = text
+    self._str_table.append(text)
+
+  def read(self, path):
+    self._path = path
+
+    with open(path) as data:
+      print 'Reading {0} of size {1} bytes.'.format(
+        repr(path), os.stat(path)[6])
+
+      self._header = Header.decode(data.read(32))
+
+      self._text = data.read(self._header.text)
+      self._data = data.read(self._header.data)
+      text_reloc = data.read(self._header.trsize)
+      data_reloc = data.read(self._header.drsize)
+      symbols = data.read(self._header.syms)
+      str_size = struct.unpack('>I', data.read(4))[0]
+      strings = data.read()
+
+      if str_size != len(strings):
+        print 'Warning: wrong size of string table!'
+
+      s = 0
+      while True:
+        e = strings.find('\0', s)
+        if e == -1:
+          self.addString(s + 4, strings[s:])
+          break
+        else:
+          self.addString(s + 4, strings[s:e])
+        s = e + 1
+
+      for i in range(0, len(symbols), 12):
+        self._symbols.append(SymbolInfo.decode(symbols[i:i + 12]))
+
+      for i in range(0, len(text_reloc), 8):
+        self._text_relocs.append(RelocInfo.decode(text_reloc[i:i + 8]))
+
+      for i in range(0, len(data_reloc), 8):
+        self._data_relocs.append(RelocInfo.decode(data_reloc[i:i + 8]))
+
+  def dump(self):
+    print self._header
+    print ''
+
+    if self._text:
+      print 'Text:'
+      hexdump(self._text)
+      print ''
+
+    if self._data:
+      print 'Data:'
+      hexdump(self._data)
+      print ''
+
+    print 'Symbols:'
+    for symbol in self._symbols:
+      print ' ', symbol.as_string(self._str_map)
+    print ''
+
+    if self._text_relocs:
+      print 'Text relocations:'
+      for reloc in self._text_relocs:
+        print ' ', reloc.as_string(self._str_table)
+      print ''
+
+    if self._data_relocs:
+      print 'Data relocations:'
+      for reloc in self._text_relocs:
+        print ' ', reloc.as_string(self._str_table)
+      print ''

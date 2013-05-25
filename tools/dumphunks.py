@@ -1,10 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7 -B
 
 from collections import namedtuple, defaultdict
 import inspect
 import struct
 import sys
 import textwrap
+from objtools import util
 
 
 class HunkMap(object):
@@ -318,17 +319,7 @@ if __name__ == '__main__':
                                   initial_indent=prefix,
                                   subsequent_indent=' ' * len(prefix))
           elif isinstance(hunk.data, str):
-            hexch = ['%.2x' % ord(c) for c in hunk.data]
-            ascii = []
-            for c in hunk.data:
-              if ord(c) >= 32 and ord(c) < 127:
-                ascii.append(c)
-              else:
-                ascii.append('.')
-            for i in range(0, len(hexch), 16):
-              print '  {0} |{1}|'.format(
-                ' '.join(hexch[i:i + 16]).ljust(47, ' '),
-                ''.join(ascii[i:i + 16]))
+            util.hexdump(hunk.data)
           elif isinstance(hunk.data, list):
             namelen = max(len(name) for name, _ in hunk.data) + 1
             for name, offset in hunk.data:

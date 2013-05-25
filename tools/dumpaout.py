@@ -40,24 +40,34 @@ if __name__ == '__main__':
         s = e + 1
 
       print header
+      print ''
 
-      print "Text:"
-      util.hexdump(text_seg)
+      if text_seg:
+        print 'Text:'
+        util.hexdump(text_seg)
+        print ''
 
-      print "Data:"
-      util.hexdump(data_seg)
+      if data_seg:
+        print 'Data:'
+        util.hexdump(data_seg)
+        print ''
 
-      print "Symbols:"
+      print 'Symbols:'
       for i in range(0, len(symbols), 12):
         symbol = aout.SymbolInfo.decode(symbols[i:i + 12])
         print ' ', symbol.as_string(str_map)
+      print ''
 
-      print "Text relocations:"
-      for i in range(0, len(text_reloc), 8):
-        reloc = aout.RelocInfo.decode(text_reloc[i:i + 8])
-        print ' ', reloc.as_string(str_table)
+      if text_reloc:
+        print 'Text relocations:'
+        for i in range(0, len(text_reloc), 8):
+          reloc = aout.RelocInfo.decode(text_reloc[i:i + 8])
+          print ' ', reloc.as_string(str_table)
+        print ''
 
-      print "Data relocations:"
-      for i in range(0, len(data_reloc), 8):
-        reloc = aout.RelocInfo.decode(data_reloc[i:i + 8])
-        print ' ', reloc.as_string(str_table)
+      if data_reloc:
+        print 'Data relocations:'
+        for i in range(0, len(data_reloc), 8):
+          reloc = aout.RelocInfo.decode(data_reloc[i:i + 8])
+          print ' ', reloc.as_string(str_table)
+        print ''

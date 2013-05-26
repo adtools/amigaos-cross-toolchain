@@ -1,4 +1,6 @@
 from collections import namedtuple
+import os
+import struct
 
 
 HunkMap = {
@@ -24,9 +26,7 @@ HunkMap = {
   'HUNK_INDEX': 1019,
   'HUNK_RELOC32SHORT': 1020,
   'HUNK_RELRELOC32': 1021,
-  'HUNK_ABSRELOC16': 1022,
-  'HUNK_PPC_CODE': 1257,
-  'HUNK_RELRELOC26': 1260
+  'HUNK_ABSRELOC16': 1022
 }
 
 HunkExtMap = {
@@ -44,8 +44,7 @@ HunkExtMap = {
   'EXT_RELREF32': 136,    # 32 bit PC-relative reference to symbol
   'EXT_RELCOMMON': 137,   # 32 bit PC-relative reference to COMMON block
   'EXT_ABSREF16': 138,    # 16 bit absolute reference to symbol
-  'EXT_ABSREF8': 139,     # 8 bit absolute reference to symbol
-  'EXT_RELREF26': 229
+  'EXT_ABSREF8': 139      # 8 bit absolute reference to symbol
 }
 
 # Any hunks that have the HUNKB_ADVISORY bit set will be ignored if they
@@ -92,7 +91,7 @@ def GetHunkFlags(number):
   return flags
 
 
-class Hunk(namedtuple('Hunk', 'name data flags')):
+class Hunk(namedtuple('Hunk', 'name kind data flags')):
   def __repr__(self):
     if self.data:
       if self.flags:
@@ -105,3 +104,34 @@ class Hunk(namedtuple('Hunk', 'name data flags')):
 
 
 Header = namedtuple('Header', 'residents hunks first last specifiers')
+
+
+class HunkFile(object):
+  def __init__(self):
+    self._file = None
+
+  def open(self, path, mode='r'):
+    self._file = open(path, mode)
+
+  def close(self):
+    self._file.close()
+
+  def readLong(self):
+    return struct.unpack_from('>I', self._file.read(4))[0]
+
+  def readWord(self):
+    return struct.unpack_from('>H', self._file.read(2))[0]
+
+  def readInt(self):
+    return struct.unpack_from('>i', self._file.read(4))[0]
+
+  def readBytes(self, n=None):
+    if n is None:
+      n = self.readLong() * 4
+    return self._file.read(n)
+
+  def readString(self, n=None):
+    return self.readBytes(n).strip('\0')
+
+  def skip(self, n):
+    self._file.seek(n, os.SEEK_CUR)

@@ -3365,44 +3365,56 @@ amiga_generic_stat_arch_elt (abfd, buf)
   return 0;
 }
 
-/* We don't have core files.  */
-#define	amiga_core_file_failing_command _bfd_dummy_core_file_failing_command
-#define	amiga_core_file_failing_signal _bfd_dummy_core_file_failing_signal
-#define	amiga_core_file_matches_executable_p _bfd_dummy_core_file_matches_executable_p
+/* Entry points through BFD_JUMP_TABLE_GENERIC */
+#define amiga_close_and_cleanup              _bfd_generic_close_and_cleanup
+#define amiga_bfd_free_cached_info	     _bfd_generic_bfd_free_cached_info
+#undef  amiga_new_section_hook
+#undef  amiga_get_section_contents
+#define amiga_get_section_contents_in_window _bfd_generic_get_section_contents_in_window
+
+/* Entry points through BFD_JUMP_TABLE_COPY */
+#undef  amiga_bfd_copy_private_bfd_data
+#define amiga_bfd_merge_private_bfd_data    _bfd_generic_bfd_merge_private_bfd_data
+#undef  amiga_bfd_copy_private_section_data
+#define amiga_bfd_copy_private_symbol_data  _bfd_generic_bfd_copy_private_symbol_data
+#define amiga_bfd_set_private_flags	    _bfd_generic_bfd_set_private_flags
+#define amiga_bfd_print_private_bfd_data    _bfd_generic_bfd_print_private_bfd_data
 
 /* Entry points through BFD_JUMP_TABLE_ARCHIVE */
-/* #define	amiga_slurp_armap		bfd_slurp_amiga_armap */
-#define	amiga_slurp_extended_name_table	_bfd_slurp_extended_name_table
+#undef  amiga_slurp_armap
+#define	amiga_slurp_extended_name_table	    _bfd_slurp_extended_name_table
 #define amiga_construct_extended_name_table _bfd_archive_bsd_construct_extended_name_table
-/* #define	amiga_truncate_arname		bfd_gnu_truncate_arname */
-/* #define	amiga_write_armap		amiga_write_armap */
-/* #define	amiga_read_ar_hdr		_bfd_generic_read_ar_hdr */
-/*
- * #define	amiga_openr_next_archived_file
- * bfd_generic_openr_next_archived_file
- */
-
-#define amiga_get_elt_at_index		_bfd_generic_get_elt_at_index
-/* #define amiga_generic_stat_arch_elt	bfd_generic_stat_arch_elt */
-#define amiga_update_armap_timestamp	_bfd_archive_bsd_update_armap_timestamp
+#undef  amiga_truncate_arname
+#undef  amiga_write_armap
+#undef  amiga_read_ar_hdr
+#undef  amiga_openr_next_archived_file
+#define amiga_get_elt_at_index		    _bfd_generic_get_elt_at_index
+#undef  amiga_generic_stat_arch_elt
+#define amiga_update_armap_timestamp	    _bfd_archive_bsd_update_armap_timestamp
 
 /* Entry points through BFD_JUMP_TABLE_SYMBOLS */
-#undef amiga_get_symtab_upper_bound	/* defined above */
-#undef amiga_get_symtab		/* defined above */
-#undef amiga_make_empty_symbol	/* defined above */
-#undef amiga_print_symbol	/* defined above */
-#undef amiga_get_symbol_info	/* defined above */
-#define amiga_bfd_is_local_label	bfd_generic_is_local_label
+#undef  amiga_get_symtab_upper_bound
+#undef  amiga_get_symtab
+#undef  amiga_make_empty_symbol
+#undef  amiga_print_symbol
+#undef  amiga_get_symbol_info
+#define amiga_bfd_is_local_label_name	bfd_generic_is_local_label_name
 #define amiga_get_lineno		(struct lineno_cache_entry *(*)())bfd_nullvoidptr
-#undef amiga_find_nearest_line	/* defined above */
+#undef  amiga_find_nearest_line
 #define amiga_bfd_make_debug_symbol	(asymbol * (*)(bfd *, void *, unsigned long)) bfd_nullvoidptr
 #define amiga_read_minisymbols		_bfd_generic_read_minisymbols
 #define amiga_minisymbol_to_symbol	_bfd_generic_minisymbol_to_symbol
 
-#define amiga_bfd_debug_info_start		bfd_void
-#define amiga_bfd_debug_info_end		bfd_void
-#define amiga_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
-#define amiga_bfd_is_local_label_name bfd_generic_is_local_label_name
+/* Entry points through BFD_JUMP_TABLE_RELOCS */
+#undef  amiga_get_reloc_upper_bound
+#undef  amiga_canonicalize_reloc
+#undef  amiga_bfd_reloc_type_lookup
+
+/* Entry points through BFD_JUMP_TABLE_WRITE */
+#undef  amiga_set_arch_mach
+#undef  amiga_set_section_contents
+
+/* Entry points through BFD_JUMP_TABLE_LINK */
 
 /*
  * NOTE: We use a special get_relocated_section_contents both in amiga AND in
@@ -3414,55 +3426,41 @@ extern bfd_byte *get_relocated_section_contents (bfd *,
 						 struct bfd_link_order *,
 						 bfd_byte *, boolean,
 						 asymbol **);
-#define amiga_bfd_get_relocated_section_contents get_relocated_section_contents
-#define amiga_bfd_relax_section                   bfd_generic_relax_section
 
-#define amiga_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
-#define amiga_bfd_link_add_symbols _bfd_generic_link_add_symbols
 extern boolean amiga_final_link (bfd *, struct bfd_link_info *);
-#define amiga_bfd_final_link amiga_final_link
 
-/* Entry points through BFD_JUMP_TABLE_GENERIC */
-#define amiga_close_and_cleanup         _bfd_generic_close_and_cleanup
-#define amiga_bfd_free_cached_info	_bfd_generic_bfd_free_cached_info
-/* amiga_new_section_hook defined above */
-/* amiga_get_section_hook defined above */
-#define amiga_get_section_contents_in_window _bfd_generic_get_section_contents_in_window
+#undef  amiga_sizeof_headers
+#define amiga_bfd_get_relocated_section_contents get_relocated_section_contents
+#define amiga_bfd_relax_section                  bfd_generic_relax_section
+#define amiga_bfd_link_hash_table_create         _bfd_generic_link_hash_table_create
+#define amiga_bfd_link_add_symbols               _bfd_generic_link_add_symbols
+#define amiga_bfd_final_link                     amiga_final_link
+#define amiga_bfd_link_split_section             _bfd_generic_link_split_section
 
-/* Entry points through BFD_JUMP_TABLE_COPY */
-#define amiga_bfd_merge_private_bfd_data _bfd_generic_bfd_merge_private_bfd_data
-/*
- * #define amiga_bfd_copy_private_section_data
- * _bfd_generic_bfd_copy_private_section_data
- */
-#define amiga_bfd_copy_private_symbol_data _bfd_generic_bfd_copy_private_symbol_data
-#define amiga_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
-#define amiga_bfd_print_private_flags _bfd_generic_bfd_print_private_flags
-#define amiga_bfd_print_private_bfd_data _bfd_generic_bfd_print_private_bfd_data
-
-#define amiga_bfd_link_split_section  _bfd_generic_link_split_section
-
-#if defined (amiga)
 /* So that the JUMP_TABLE() macro below can work.  */
+#ifdef amiga
 #undef amiga
 #endif
 
 const bfd_target amiga_vec = {
   "amiga",			/* name */
   bfd_target_amiga_flavour,
-  true,				/* data byte order is big */
-  true,				/* header byte order is big */
-  HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS | WP_TEXT,	/* object flags */
+  BFD_ENDIAN_BIG,		/* data byte order is big */
+  BFD_ENDIAN_BIG,		/* header byte order is big */
+  /* object flags */
+  (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS |
+   WP_TEXT),
   /* section flags */
-  SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA,
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA),
   '_',				/* symbol leading char */
   ' ',				/* ar_pad_char */
-  15,				/* ar_max_namelen *//* (15 for UNIX
-				 * compatibility) */
+  15,				/* ar_max_namelen (15 for UNIX compatibility) */
+  /* data */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64, bfd_getb32, bfd_getb_signed_32,
-  bfd_putb32, bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */
+  bfd_putb32, bfd_getb16, bfd_getb_signed_16, bfd_putb16,
+  /* hdrs */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64, bfd_getb32, bfd_getb_signed_32,
-  bfd_putb32, bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* hdrs */
+  bfd_putb32, bfd_getb16, bfd_getb_signed_16, bfd_putb16,
   {
    /* bfd_check_format */
    _bfd_dummy_target,
@@ -3480,7 +3478,8 @@ const bfd_target amiga_vec = {
    bfd_false,
    amiga_write_object_contents,
    amiga_write_archive_contents,
-   bfd_false},
+   bfd_false
+  },
   BFD_JUMP_TABLE_GENERIC (amiga),
   BFD_JUMP_TABLE_COPY (amiga),
   BFD_JUMP_TABLE_CORE (_bfd_nocore),
@@ -3491,12 +3490,4 @@ const bfd_target amiga_vec = {
   BFD_JUMP_TABLE_LINK (amiga),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
   (PTR) 0
-#if 0
-    /* fixme: no longer in use?  */
-    /*
-     * How applications can find out about amiga relocation types (see
-     * documentation on reloc types).
-     */
-    amiga_reloc_type_lookup
-#endif
 };

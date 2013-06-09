@@ -44,6 +44,10 @@ Texinfo documents from GeekGadgets converted into HTML:
  * [libnix - a static library for GCC on the amiga](http://cahirwpz.users.sourceforge.net/libnix/index.html)
  * [AmigaOS-only features of GCC](http://cahirwpz.users.sourceforge.net/gcc-amigaos/index.html)
 
+AmigaOS specific documents:
+
+ * [Amiga Developer Docs](http://amigadev.elowar.com)
+
 ### Compiling
 
 *Firstly… you should have basic understanding of Un\*x console environment, really* ;-)

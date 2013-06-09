@@ -67,15 +67,23 @@ class RelocInfo(namedtuple('RelocInfo', ('address', 'symbolnum', 'pcrel',
 
 class SymbolInfo(namedtuple('SymbolInfo', ('strx', 'type', 'other', 'desc',
                                            'value'))):
+  # http://sourceware.org/gdb/current/onlinedocs/stabs/Stab-Types.html
   type_map = [
     ('UNDF', 0x00), ('EXT', 0x01), ('ABS', 0x02), ('TEXT', 0x04),
     ('DATA', 0x06), ('BSS', 0x08), ('INDR', 0x0a), ('SIZE', 0x0c),
-    ('COMM', 0x12), ('FN', 0x1e), ('WARN', 0x1e), ('TYPE', 0x1e), ('FN', 0x1f),
+    ('COMM', 0x12), ('SETA', 0x14), ('SETT', 0x16), ('SETD', 0x18),
+    ('SETB', 0x1a), ('SETV', 0x1c), ('WARNING', 0x1e), ('FN', 0x1f),
     ('GSYM', 0x20), ('FNAME', 0x22), ('FUN', 0x24), ('STSYM', 0x26),
-    ('LCSYM', 0x28), ('RSYM', 0x40), ('SLINE', 0x44), ('SSYM', 0x60),
-    ('SO', 0x64), ('LSYM', 0x80), ('SOL', 0x84), ('PSYM', 0xa0),
-    ('ENTRY', 0xa4), ('LBRAC', 0xc0), ('STAB', 0xe0), ('RBRAC', 0xe0),
-    ('BCOMM', 0xe2), ('ECOMM', 0xe4), ('ECOML', 0xe8), ('LENG', 0xfe)]
+    ('LCSYM', 0x28), ('MAIN', 0x2a), ('ROSYM', 0x2c), ('PC', 0x30),
+    ('NSYMS', 0x32), ('NOMAP', 0x34), ('MAC_DEFINE', 0x36), ('OBJ', 0x38),
+    ('MAC_UNDEF', 0x3a), ('OPT', 0x3c), ('RSYM', 0x40), ('SLINE', 0x44),
+    ('DSLINE', 0x46), ('BSLINE', 0x48), ('FLINE', 0x4c), ('EHDECL', 0x50),
+    ('CATCH', 0x54), ('SSYM', 0x60), ('ENDM', 0x62), ('SO', 0x64),
+    ('LSYM', 0x80), ('BINCL', 0x82), ('SOL', 0x84), ('PSYM', 0xa0),
+    ('EINCL', 0xa2), ('ENTRY', 0xa4), ('LBRAC', 0xc0), ('EXCL', 0xc2),
+    ('SCOPE', 0xc4), ('RBRAC', 0xe0), ('BCOMM', 0xe2), ('ECOMM', 0xe4),
+    ('ECOML', 0xe8), ('WITH', 0xea), ('NBTEXT', 0xf0), ('NBDATA', 0xf2),
+    ('NBBSS', 0xf4), ('NBSTS', 0xf6), ('NBLCS', 0xf8)]
 
   @classmethod
   def decode(cls, data):

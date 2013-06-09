@@ -5,7 +5,23 @@ import socket
 import sys
 import select
 import threading
+import tempfile
+import subprocess
 import struct
+
+
+def make_srec(addr, code):
+  header = 'S00600004844521B'
+  terminate = 'S9030000FC'
+  addr = '%.8x' % addr
+  code = code.encode('hex').upper()
+  length = '%.2x' % (len(code.decode('hex')) + 5)
+  srec = length + addr + code
+
+  bytesum = sum(ord(i) for i in srec.decode('hex'))
+  cksum = "%.2X" % (~bytesum & 0xFF)
+
+  return '\n'.join([header, 'S3' + srec + cksum, terminate])
 
 
 class SimpleAmigaDebuggerConnection(object):
@@ -276,6 +292,18 @@ class SimpleAmigaDebuggerFrontEnd(cmd.Cmd):
     ptr, size = self.parse_args(args, 'ptr', 'long')
     data = self.sad.read_array(ptr, size)
     print data.encode('hex')
+
+  def do_dis(self, args):
+    """ disassemble """
+    ptr, size = self.parse_args(args, 'ptr', 'long')
+    data = self.sad.read_array(ptr, size)
+
+    with tempfile.NamedTemporaryFile() as srec:
+      srec.write(make_srec(ptr, data))
+      srec.flush()
+      output = subprocess.check_output(
+        ['m68k-amigaos-objdump', '-b', 'srec', '-m', '68020', '-D', srec.name])
+      print '\n'.join(output.split('\n')[7:-1])
 
   def do_reset(self, _):
     """ reset """

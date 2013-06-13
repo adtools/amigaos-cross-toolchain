@@ -139,17 +139,27 @@ class HunkDebug(Hunk):
   # magic-number=0x10b symtabsize strtabsize symtabdata
   # [length=symtabsize] strtabdata [length=strtabsize] [pad bytes]
 
-  def __init__(self, data=''):
+  def __init__(self, fmt='?', data=''):
     Hunk.__init__(self, 'HUNK_DEBUG')
+    self.fmt = fmt
     self.data = data
 
   @classmethod
   def parse(cls, hf):
     hf.readHunk('HUNK_DEBUG')
-    return cls(hf.readBytes())
+    length = hf.readLong() * 4
+
+    with hf.rollback():
+      fmt = hf.readLong()
+
+    if fmt == 0x10b:
+      hf.skip(4)
+      return cls('GNU stubs', hf.readBytes(length - 4))
+
+    return cls('?', hf.readBytes(length))
 
   def dump(self):
-    print self.type
+    print '{0} (format: {1!r})'.format(self.type, self.fmt)
     util.hexdump(self.data)
 
 
@@ -361,11 +371,11 @@ class HunkIndex(Hunk):
       e = strdata.find('\0', s, strsize)
 
       if e == -1:
-        names[s + 1] = strdata[s:]
+        names[s] = strdata[s:]
         break
 
       if e > s:
-        names[s + 1] = strdata[s:e]
+        names[s] = strdata[s:e]
 
       s = e + 1
 
@@ -452,7 +462,7 @@ class HunkFile(file):
   def readBytes(self, n=None):
     if n is None:
       n = self.readLong() * 4
-    return self.read(n).strip('\0')
+    return self.read(n)
 
   def readString(self, n=None):
     return self.readBytes(n).strip('\0')

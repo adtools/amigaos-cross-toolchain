@@ -6,6 +6,7 @@ from collections import defaultdict, namedtuple
 from contextlib import contextmanager
 
 import util
+from aout import StringTable, SymbolInfo
 
 
 HunkMap = {
@@ -135,10 +136,6 @@ class HunkBinary(Hunk):
 
 
 class HunkDebug(Hunk):
-  # HUNK_DEBUG:
-  # magic-number=0x10b symtabsize strtabsize symtabdata
-  # [length=symtabsize] strtabdata [length=strtabsize] [pad bytes]
-
   def __init__(self, fmt='?', data=''):
     Hunk.__init__(self, 'HUNK_DEBUG')
     self.fmt = fmt
@@ -153,14 +150,39 @@ class HunkDebug(Hunk):
       fmt = hf.readLong()
 
     if fmt == 0x10b:
+      # magic-number: 0x10b
+      # symtabsize strtabsize
+      # symtabdata [length=symtabsize]
+      # strtabdata [length=strtabsize]
+      # [pad bytes]
       hf.skip(4)
-      return cls('GNU stubs', hf.readBytes(length - 4))
+      symtabsize = hf.readLong()
+      strtabsize = hf.readLong()
+      symtab = hf.read(symtabsize)
+      hf.skip(4)
+      strtab = hf.read(strtabsize)
 
-    return cls('?', hf.readBytes(length))
+      symbols = []
+      for i in range(0, symtabsize, 12):
+        symbols.append(SymbolInfo.decode(symtab[i:i + 12]))
+
+      strings = StringTable.decode(strtab)
+
+      if strtabsize & 3:
+        hf.skip(4 - strtabsize & 3)
+
+      return cls('GNU stubs', (symbols, strings))
+
+    return cls('?', hf.read(length))
 
   def dump(self):
     print '{0} (format: {1!r})'.format(self.type, self.fmt)
-    util.hexdump(self.data)
+
+    if self.fmt is '?':
+      util.hexdump(self.data)
+    else:
+      for symbol in self.data[0]:
+        print ' ', symbol.as_string(self.data[1])
 
 
 class HunkOverlay(Hunk):
@@ -362,7 +384,7 @@ class HunkIndex(Hunk):
     last = hf.tell() + length
 
     strsize = hf.readWord()
-    strdata = hf.readBytes(strsize)
+    strdata = hf.read(strsize)
     names = {}
 
     s = 0
@@ -459,13 +481,15 @@ class HunkFile(file):
   def readInt(self):
     return struct.unpack_from('>i', self.read(4))[0]
 
-  def readBytes(self, n=None):
-    if n is None:
-      n = self.readLong() * 4
-    return self.read(n)
+  def readBytes(self):
+    return self.read(self.readLong() * 4)
 
   def readString(self, n=None):
-    return self.readBytes(n).strip('\0')
+    if n:
+      s = self.read(n)
+    else:
+      s = self.readBytes()
+    return s.strip('\0')
 
   def readSymbol(self, length):
     symbol = self.readString(length)

@@ -133,19 +133,22 @@ class StringTable(Sequence):
     return item in self._table
 
   def addString(self, offset, text):
-    self._table.append(text)
     self._map[offset] = len(self._table)
+    self._table.append(text)
 
-  def read(self, strings):
+  @classmethod
+  def decode(cls, data):
+    strings = cls()
     s = 0
     while True:
-      e = strings.find('\0', s)
+      e = data.find('\0', s)
       if e == -1:
-        self.addString(s + 4, strings[s:])
+        strings.addString(s + 4, data[s:])
         break
       else:
-        self.addString(s + 4, strings[s:e])
+        strings.addString(s + 4, data[s:e])
       s = e + 1
+    return strings
 
   def offsetToIndex(self, offset):
     return self._map.get(offset, -1)
@@ -160,7 +163,7 @@ class Aout(object):
     self._symbols = []
     self._text_relocs = []
     self._data_relocs = []
-    self._strings = StringTable()
+    self._strings = None
 
   def read(self, path):
     self._path = path
@@ -182,7 +185,7 @@ class Aout(object):
       if str_size != len(strings):
         print 'Warning: wrong size of string table!'
 
-      self._strings.read(strings)
+      self._strings = StringTable.decode(strings)
 
       for i in range(0, len(symbols), 12):
         self._symbols.append(SymbolInfo.decode(symbols[i:i + 12]))

@@ -11,4 +11,4 @@ def hexdump(data):
   for i in range(0, len(hexch), 16):
     hexstr = ' '.join(hexch[i:i + 16])
     asciistr = ''.join(ascii[i:i + 16])
-    print '  {0} |{1}|'.format(hexstr.ljust(47, ' '), asciistr)
+    print '  {2:04} | {0} |{1}|'.format(hexstr.ljust(47, ' '), asciistr, i)

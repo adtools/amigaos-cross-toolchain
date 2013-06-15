@@ -112,6 +112,10 @@ class HunkStr(Hunk):
     return cls(type_, hf.readString())
 
   def dump(self):
+    if self.type == 'HUNK_UNIT':
+      print '-' * 80
+      print ''
+
     print self.type
     print '  ' + repr(self.name)
 
@@ -147,9 +151,10 @@ class HunkDebug(Hunk):
     length = hf.readLong() * 4
 
     with hf.rollback():
-      fmt = hf.readLong()
+      fmt1 = hf.readLong()
+      fmt2 = hf.readString(4)
 
-    if fmt == 0x10b:
+    if fmt1 == 0x10b:
       # magic-number: 0x10b
       # symtabsize strtabsize
       # symtabdata [length=symtabsize]
@@ -171,18 +176,21 @@ class HunkDebug(Hunk):
       if strtabsize & 3:
         hf.skip(4 - strtabsize & 3)
 
-      return cls('GNU stubs', (symbols, strings))
+      return cls('GNU', (symbols, strings))
+    elif fmt2 == 'OPTS':
+      hf.skip(8)
+      return cls('SAS/C opts', hf.read(length - 8))
 
     return cls('?', hf.read(length))
 
   def dump(self):
     print '{0} (format: {1!r})'.format(self.type, self.fmt)
 
-    if self.fmt is '?':
-      util.hexdump(self.data)
-    else:
+    if self.fmt is 'GNU':
       for symbol in self.data[0]:
         print ' ', symbol.as_string(self.data[1])
+    else:
+      util.hexdump(self.data)
 
 
 class HunkOverlay(Hunk):
@@ -248,7 +256,7 @@ class HunkReloc(Hunk):
     print self.type
     for k, nums in self.relocs.items():
       prefix = '  %d: ' % k
-      print textwrap.fill('[' + ', '.join(str(n) for n in nums) + ']',
+      print textwrap.fill('[' + ', '.join(str(n) for n in sorted(nums)) + ']',
                           width=68, initial_indent=prefix,
                           subsequent_indent=' ' * (len(prefix) + 1))
 
@@ -365,10 +373,11 @@ class HunkExt(Hunk):
       print ' ', name
       sl = max(len(s.name) for s in symbols)
       for symbol, size, value in symbols:
-        if value:
-          print '   ', symbol.ljust(sl, ' '), '=', value
+        print '   ', symbol.ljust(sl, ' '),
+        if value is not None:
+          print '=', sorted(value) if isinstance(value, list) else value
         else:
-          print '   ', symbol.ljust(sl, ' '), ':', size
+          print ':', repr(size)
 
 
 class HunkIndex(Hunk):
@@ -588,6 +597,7 @@ HunkClassMap = {
 def HunkParser(path):
   with HunkFile(path) as hf:
     hunks = []
+    units = 0
 
     while not hf.eof():
       with hf.rollback():
@@ -597,6 +607,11 @@ def HunkParser(path):
 
       if type_ is 'HUNK_HEADER':
         hf.type = 'executable'
+
+      if type_ is 'HUNK_UNIT':
+        units += 1
+        if units > 1:
+          hf.type = 'library'
 
       hunk = HunkClassMap.get(type_, None)
 

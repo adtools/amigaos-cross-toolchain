@@ -1,5 +1,5 @@
 CC = gcc -m32
-CFLAGS = -g -O2 -Wall -I../target/include
+CFLAGS = -g -O2 -Wall -I../target/os-include
 
 BINS = GccFindHit hunk2aout
 

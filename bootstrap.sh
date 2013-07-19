@@ -238,6 +238,8 @@ vasmm68k_mot -I${PREFIX}/os-include "\$@"
 EOF
   popd
 
+  chmod a+x "${PREFIX}/bin/vasm"
+
   touch "${STAMP}/build-vasm"
 }
 

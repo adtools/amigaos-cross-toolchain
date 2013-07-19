@@ -3,7 +3,8 @@
 *.tar.bz2
 *~
 *.o
-adtools/
+.DS_Store
+archives/*/
 sources/
 stamps/
 build/

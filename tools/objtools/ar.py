@@ -2,15 +2,27 @@ import logging
 import os
 import struct
 
+from cStringIO import StringIO
 from collections import namedtuple
+
+
+log = logging.getLogger(__name__)
 
 
 class ArEntry(namedtuple('ArEntry',
                          'name modtime owner group mode data')):
   @classmethod
-  def decode(cls, ar):
+  def decode(cls, fh):
+    data = fh.read(60)
+
+    if len(data) != 60:
+      raise ValueError('Not a valid ar archive header!')
+
     name, modtime, owner, group, mode, length, magic = \
-        struct.unpack('16s12s6s6s8s10s2s', ar.read(60))
+        struct.unpack('16s12s6s6s8s10s2s', data)
+
+    if magic != '`\n':
+      raise ValueError('Not a valid ar archive header!')
 
     length = int(length.strip())
     modtime = int(modtime.strip() or '0')
@@ -20,16 +32,18 @@ class ArEntry(namedtuple('ArEntry',
 
     if name.startswith('#1/'):
       name_length = int(name[3:])
-      name = ar.read(name_length).strip('\0')
+      name = fh.read(name_length).strip('\0')
     else:
       name_length = 0
       name = name.strip()
 
-    data = ar.read(length - name_length)
+    data = fh.read(length - name_length)
+
+    log.debug('entry: file %r, size %d,', name, len(data))
 
     # next block starts at even boundary
     if length & 1:
-      ar.seek(1, os.SEEK_CUR)
+      fh.seek(1, os.SEEK_CUR)
 
     return cls(name, modtime, owner, group, mode, data)
 
@@ -37,19 +51,21 @@ class ArEntry(namedtuple('ArEntry',
 def ReadFile(path):
   entries = []
 
-  with open(path) as ar:
-    if ar.read(8) != '!<arch>\n':
+  with open(path) as fh:
+    data = StringIO(fh.read())
+
+    if data.read(8) != '!<arch>\n':
       raise ValueError('%s is not an ar archive' % path)
 
-    ar_size = os.stat(path).st_size
+    size = os.path.getsize(path)
 
-    logging.debug('Reading ar archive %r of size %d bytes.', path, ar_size)
+    log.debug('Reading ar archive %r of size %d bytes.', path, size)
 
-    while ar.tell() < ar_size:
+    while data.tell() < size:
       # Some archives have version information attached at the end of file,
       # that confuses ArEntry parser, so just skip it.
       try:
-        entries.append(ArEntry.decode(ar))
+        entries.append(ArEntry.decode(data))
       except struct.error:
         break
 

@@ -1,8 +1,14 @@
-from collections import namedtuple, Sequence
 import logging
 import os
 import struct
+
+from cStringIO import StringIO
+from collections import namedtuple, Sequence
+
 from util import hexdump
+
+
+log = logging.getLogger(__name__)
 
 
 class Header(namedtuple('Header', ('mid', 'magic', 'text', 'data', 'bss',
@@ -12,7 +18,9 @@ class Header(namedtuple('Header', ('mid', 'magic', 'text', 'data', 'bss',
              'HP300': 300, 'HPUX': 0x20C, 'HPUX800': 0x20B}
 
   @classmethod
-  def decode(cls, data):
+  def decode(cls, fh):
+    data = fh.read(32)
+
     if len(data) != 32:
       raise ValueError('Not a valid a.out header!')
 
@@ -172,11 +180,12 @@ class Aout(object):
   def read(self, path):
     self._path = path
 
-    with open(path) as data:
-      logging.debug('Reading %r of size %d bytes.',
-                    path, os.stat(path).st_size)
+    with open(path) as fh:
+      log.debug('Reading %r of size %d bytes.', path, os.path.getsize(path))
 
-      self._header = Header.decode(data.read(32))
+      data = StringIO(fh.read())
+
+      self._header = Header.decode(data)
 
       self._text = data.read(self._header.text)
       self._data = data.read(self._header.data)
@@ -187,7 +196,7 @@ class Aout(object):
       strings = data.read()
 
       if str_size != len(strings):
-        logging.warn('Wrong size of string table!')
+        log.warn('Wrong size of string table!')
 
       self._strings = StringTable.decode(strings)
 

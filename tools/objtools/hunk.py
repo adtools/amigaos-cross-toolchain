@@ -10,6 +10,9 @@ import util
 from aout import StringTable, SymbolInfo
 
 
+log = logging.getLogger(__name__)
+
+
 HunkMap = {
   'HUNK_UNIT': 999,
   'HUNK_NAME': 1000,
@@ -475,7 +478,7 @@ class HunkFile(file):
   def __init__(self, *args, **kwargs):
     file.__init__(self, *args, **kwargs)
 
-    self.size = os.stat(self.name).st_size
+    self.size = os.path.getsize(self.name)
     self.type = 'object'
 
   @contextmanager
@@ -624,7 +627,7 @@ def ReadFile(path):
       try:
         hunks.append(hunk.parse(hf))
       except ValueError:
-        logging.error('Parse error at position 0x%x.', hf.tell())
+        log.error('Parse error at position 0x%x.', hf.tell())
         util.hexdump(hf.read())
 
     return hunks

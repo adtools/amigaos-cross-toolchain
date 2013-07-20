@@ -1,3 +1,4 @@
+import logging
 import os
 import struct
 import textwrap
@@ -35,6 +36,8 @@ HunkMap = {
   'HUNK_ABSRELOC16': 1022
 }
 
+HunkMapRev = dict((v, k) for k, v in HunkMap.items())
+
 HunkExtMap = {
   'EXT_SYMB': 0,          # symbol table
   'EXT_DEF': 1,           # relocatable definition
@@ -52,6 +55,8 @@ HunkExtMap = {
   'EXT_ABSREF16': 138,    # 16 bit absolute reference to symbol
   'EXT_ABSREF8': 139      # 8 bit absolute reference to symbol
 }
+
+HunkExtMapRev = dict((v, k) for k, v in HunkExtMap.items())
 
 # Any hunks that have the HUNKB_ADVISORY bit set will be ignored if they
 # aren't understood.  When ignored, they're treated like HUNK_DEBUG hunks.
@@ -80,11 +85,10 @@ class Hunk(object):
   def getType(number):
     number &= 0x1fffffff
 
-    for name, value in HunkMap.items():
-      if value == number:
-        return name
-
-    raise ValueError('Unknown Hunk: %d' % number)
+    try:
+      return HunkMapRev[number]
+    except KeyError:
+      raise ValueError('Unknown Hunk: %d' % number)
 
   @staticmethod
   def getFlags(number):
@@ -324,11 +328,10 @@ class HunkExt(Hunk):
 
   @staticmethod
   def getType(number):
-    for name, value in HunkExtMap.items():
-      if value == number:
-        return name
-
-    raise ValueError('Unknown HunkExt: %d' % number)
+    try:
+      return HunkExtMapRev[number]
+    except KeyError:
+      raise ValueError('Unknown HunkExt: %d' % number)
 
   @classmethod
   def parse(cls, hf):
@@ -594,7 +597,7 @@ HunkClassMap = {
 }
 
 
-def HunkParser(path):
+def ReadFile(path):
   with HunkFile(path) as hf:
     hunks = []
     units = 0
@@ -621,7 +624,7 @@ def HunkParser(path):
       try:
         hunks.append(hunk.parse(hf))
       except ValueError:
-        print 'Parse error at position 0x%x.' % hf.tell()
+        logging.error('Parse error at position 0x%x.', hf.tell())
         util.hexdump(hf.read())
 
     return hunks

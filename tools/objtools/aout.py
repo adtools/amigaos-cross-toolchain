@@ -1,4 +1,5 @@
 from collections import namedtuple, Sequence
+import logging
 import os
 import struct
 from util import hexdump
@@ -12,6 +13,9 @@ class Header(namedtuple('Header', ('mid', 'magic', 'text', 'data', 'bss',
 
   @classmethod
   def decode(cls, data):
+    if len(data) != 32:
+      raise ValueError('Not a valid a.out header!')
+
     mid, magic, text, data, bss, syms, entry, trsize, drsize = \
         struct.unpack('>HHIIIIIII', data)
 
@@ -169,8 +173,8 @@ class Aout(object):
     self._path = path
 
     with open(path) as data:
-      print 'Reading {0} of size {1} bytes.'.format(
-        repr(path), os.stat(path)[6])
+      logging.debug('Reading %r of size %d bytes.',
+                    path, os.stat(path).st_size)
 
       self._header = Header.decode(data.read(32))
 
@@ -183,7 +187,7 @@ class Aout(object):
       strings = data.read()
 
       if str_size != len(strings):
-        print 'Warning: wrong size of string table!'
+        logging.warn('Wrong size of string table!')
 
       self._strings = StringTable.decode(strings)
 
@@ -226,3 +230,9 @@ class Aout(object):
       for reloc in self._text_relocs:
         print ' ', reloc.as_string(self._strings)
       print ''
+
+
+def ReadFile(path):
+  aout = Aout()
+  aout.read(path)
+  return aout

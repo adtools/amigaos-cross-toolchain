@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7 -B
 
 import sys
-from objtools.hunk import HunkParser
+from objtools import hunk
 
 
 if __name__ == '__main__':
@@ -9,6 +9,6 @@ if __name__ == '__main__':
     print 'Parsing "%s".' % path
     print ''
 
-    for hunk in HunkParser(path):
-      hunk.dump()
+    for h in hunk.ReadFile(path):
+      h.dump()
       print ''

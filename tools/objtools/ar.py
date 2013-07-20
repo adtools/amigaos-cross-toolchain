@@ -1,3 +1,4 @@
+import logging
 import os
 import struct
 
@@ -12,7 +13,7 @@ class ArEntry(namedtuple('ArEntry',
         struct.unpack('16s12s6s6s8s10s2s', ar.read(60))
 
     length = int(length.strip())
-    modtime = int(modtime.strip())
+    modtime = int(modtime.strip() or '0')
     owner = int(owner.strip() or '0')
     group = int(group.strip() or '0')
     mode = mode.strip() or '100644'
@@ -38,11 +39,18 @@ def ReadFile(path):
 
   with open(path) as ar:
     if ar.read(8) != '!<arch>\n':
-      raise RuntimeError('%s is not an ar archive', path)
+      raise ValueError('%s is not an ar archive' % path)
 
     ar_size = os.stat(path).st_size
 
+    logging.debug('Reading ar archive %r of size %d bytes.', path, ar_size)
+
     while ar.tell() < ar_size:
-      entries.append(ArEntry.decode(ar))
+      # Some archives have version information attached at the end of file,
+      # that confuses ArEntry parser, so just skip it.
+      try:
+        entries.append(ArEntry.decode(ar))
+      except struct.error:
+        break
 
   return entries

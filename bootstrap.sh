@@ -111,6 +111,9 @@ function unpack_sources {
   for file in $(ls -1d sfdc*); do
     [ -f "${file}" ] && rm "${file}"
   done
+  pushd "${SFDC}"
+  apply_patches "${SFDC}"
+  popd
 
   unpack_clean "${NDK}" "${NDK_SRC}"
   rm -rf ndk_* *.info

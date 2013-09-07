@@ -1,0 +1,11 @@
+--- sfdc-1.4/SFDCompile.pod	2005-09-24 16:49:49.000000000 +0200
++++ sfdc-1.4/SFDCompile.pod	2013-08-30 15:49:31.000000000 +0200
+@@ -326,7 +326,7 @@
+ =head1 NOTES
+ 
+ Had I seen F<cvinclude.pl> before I started writing this program, I
+-might still have been using fd/clib files. Or maybe not.
++might still have been using fd/clib files. Or maybe not.
+ 
+ =head1 AUTHOR
+ 

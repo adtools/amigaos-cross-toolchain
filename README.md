@@ -29,12 +29,14 @@ There are no downloads provided for the time being. I do as much as possible to 
 
  * Cygwin 1.7.18 (gcc 4.5.3)
  * Ubuntu 12.04 LTS 32-bit (gcc 4.6.3)
- * Ubuntu 12.04 LTS 64-bit (gcc 4.6.3) *requires gcc-multilib*
+ * Ubuntu 12.04 LTS 64-bit (gcc 4.6.3) *Requires gcc-multilib package!*
  * MacOS X 10.7.5 (MacPorts - gcc 4.7.3)
+ * MacOS X 10.8.4 (Homebrew - gcc 4.2.1 from XCode) *Thanks go to Argasek!*
  
 ### Documentation
 
 Documentation from Free Software Fundation:
+
  * [gcc 2.95.3](http://gcc.gnu.org/onlinedocs/gcc-2.95.3/gcc.html)
  * [gcc 3.4.6](http://gcc.gnu.org/onlinedocs/gcc-3.4.6/gcc/)
  * [binutils](http://sourceware.org/binutils/docs/)
@@ -64,7 +66,11 @@ You have to have following packages installed in your system:
  * lha
  * perl 5.10
 
+*For MacOSX users*: you'll likely need to have [MacPorts](http://www.macports.org) or [Homebrew](http://brew.sh) installed in order to build the toolchain.
+
 #### How to build?
+
+**Warning:** *Building with `sudo` is not recommended. I'm not responsible for any damage in your system.*
 
 Follow steps listed below:
 
@@ -78,7 +84,7 @@ Follow steps listed below:
     `cd archives`   
     `./fetch.sh`
    
-3. Run `bootstrap.sh` script (with `--prefix` option to specify where to install the toolchain).
+3. Run `bootstrap.sh` script (with `--prefix` option to specify where to install the toolchain). Note, that the destination directory must be writeable by the user. 
 
     `cd ..`   
     `./bootstrap.sh --prefix=/opt/m68k-amigaos build`

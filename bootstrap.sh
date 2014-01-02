@@ -107,6 +107,10 @@ function unpack_sources {
   fi
 
   unpack_clean "${FD2SFD}" "${FD2SFD_SRC}"
+  pushd "${FD2SFD}"
+  apply_patches "${FD2SFD}"
+  popd
+
   unpack_clean "${SFDC}" "${SFDC_SRC}"
   pushd "${SFDC}"
   apply_patches "${SFDC}"
@@ -394,18 +398,18 @@ function process_ndk {
   [ -f "${STAMP}/process-ndk" ] && return 0
 
   pushd "${BUILD_DIR}"
-	rm -rf "${SFDC}"
-	cp -a "${SOURCES}/${SFDC}" "${SFDC}"
-  cd "${SFDC}"
+  rm -rf "${FD2SFD}"
+  cp -a "${SOURCES}/${FD2SFD}" "${FD2SFD}"
+  cd "${FD2SFD}"
   ./configure \
     --prefix="${PREFIX}"
   make && make install
   popd
 
   pushd "${BUILD_DIR}"
-  rm -rf "${FD2SFD}"
-  cp -a "${SOURCES}/${FD2SFD}" "${FD2SFD}"
-  cd "${FD2SFD}"
+	rm -rf "${SFDC}"
+	cp -a "${SOURCES}/${SFDC}" "${SFDC}"
+  cd "${SFDC}"
   ./configure \
     --prefix="${PREFIX}"
   make && make install

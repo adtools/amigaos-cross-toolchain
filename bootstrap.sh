@@ -143,6 +143,7 @@ function unpack_sources {
   tar -xzf "${ARCHIVES}/${LIBAMIGA_SRC}"
   popd
 
+  unpack_clean "${TEXINFO}" "${TEXINFO_SRC}"
   unpack_clean "${BISON}" "${BISON_SRC}"
   unpack_clean "${GAWK}" "${GAWK_SRC}"
 
@@ -173,6 +174,13 @@ function build_tools {
   mkdir_empty "${HOST_DIR}"
 
   pushd "${BUILD_DIR}"
+
+  mkdir_empty "${TEXINFO}"
+  pushd "${TEXINFO}"
+  "${SOURCES}/${TEXINFO}/configure" \
+    --prefix="${HOST_DIR}"
+  ${MAKE} && make install
+  popd
 
   mkdir_empty "${GAWK}"
   pushd "${GAWK}"

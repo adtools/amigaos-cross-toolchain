@@ -9,6 +9,18 @@ function download {
   fi
 }
 
+function download_and_extract {
+  local -r url="$1"
+  local -r file="${2:-$(basename "${url}")}"
+  local -r arc="$(basename "${url}")"
+
+  if [ ! -f "${file}" ]; then
+    wget -O "${arc}" "${url}"
+    lha x -i "${arc}" "${file}"
+    rm -f "${arc}"
+  fi
+}
+
 download "ftp://ftp.gnu.org/gnu/gawk/gawk-3.1.8.tar.gz"
 download "ftp://ftp.gnu.org/gnu/bison/bison-1.35.tar.gz"
 download "ftp://ftp.gnu.org/gnu/texinfo/texinfo-4.13.tar.gz"
@@ -25,9 +37,12 @@ download \
   "http://sourceforge.net/projects/libnix/files/latest/download" \
   "libnix-2.1.tar.gz"
 download "http://www.haage-partner.de/download/AmigaOS/NDK39.lha"
-download \
+download_and_extract \
   "http://aminet.net/dev/gcc/sfdc.lha" \
-  "sfdc-1.4.lha"
+  "sfdc-1.4.tar.gz"
+download_and_extract \
+  "http://aminet.net/dev/misc/fd2sfd.lha" \
+  "fd2sfd-1.0.tar.gz"
 download \
   "http://ftp.back2roots.org/geekgadgets/amiga/m68k/snapshots/990529/bin/libamiga-bin.tgz" \
   "libamiga-bin.tar.gz"

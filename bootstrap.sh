@@ -106,11 +106,8 @@ function unpack_sources {
     unpack_clean "${MPFR}" "${MPFR_SRC}"
   fi
 
+  unpack_clean "${FD2SFD}" "${FD2SFD_SRC}"
   unpack_clean "${SFDC}" "${SFDC_SRC}"
-  tar -xzf "${SFDC}.tar.gz"
-  for file in $(ls -1d sfdc*); do
-    [ -f "${file}" ] && rm "${file}"
-  done
   pushd "${SFDC}"
   apply_patches "${SFDC}"
   popd
@@ -400,6 +397,15 @@ function process_ndk {
 	rm -rf "${SFDC}"
 	cp -a "${SOURCES}/${SFDC}" "${SFDC}"
   cd "${SFDC}"
+  ./configure \
+    --prefix="${PREFIX}"
+  make && make install
+  popd
+
+  pushd "${BUILD_DIR}"
+  rm -rf "${FD2SFD}"
+  cp -a "${SOURCES}/${FD2SFD}" "${FD2SFD}"
+  cd "${FD2SFD}"
   ./configure \
     --prefix="${PREFIX}"
   make && make install

@@ -7,7 +7,7 @@ GCC compiler for AmigaOS/m68k
 
 ### Overview
 
-**m68k-amigaos-toolchain** provides you a shell script that builds M68k AmigaOS 3.x) toolchain in your Un\*x-like environment. Build process should produce following set of tools that targets m68k-amigaos platform:
+**m68k-amigaos-toolchain** provides you a shell script that builds M68k AmigaOS 3.x) toolchain in your Unix-like environment. Build process should produce following set of tools that targets m68k-amigaos platform:
 
  * gcc 2.95.3
  * g++ 2.95.3
@@ -25,7 +25,7 @@ GCC compiler for AmigaOS/m68k
 
 ### Downloads
 
-There are no downloads provided for the time being. I do as much as possible to make the toolchain portable among Un\*x-like environments. Following platforms were tested and the toolchain is known to work for them:
+There are no downloads provided for the time being. I do as much as possible to make the toolchain portable among Unix-like environments. Following platforms were tested and the toolchain is known to work for them:
 
  * Cygwin 1.7.18 (gcc 4.5.3)
  * Ubuntu 12.04 LTS 32-bit (gcc 4.6.3)
@@ -53,7 +53,7 @@ AmigaOS specific documents:
 
 ### Compiling
 
-*Firstly… you should have basic understanding of Un\*x console environment, really* ;-)
+*Firstly… you should have basic understanding of Unix console environment, really* ;-)
 
 #### Prerequisites
 

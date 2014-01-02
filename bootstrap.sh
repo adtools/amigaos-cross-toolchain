@@ -431,6 +431,8 @@ function process_ndk {
   popd
 
   pushd "${PREFIX}/os-lib"
+  cp -av "${SOURCES}/${NDK}/Include/fd" .
+  cp -av "${SOURCES}/${NDK}/Include/sfd" .
   cp -av "${SOURCES}/${NDK}/Include/linker_libs/"* .
   popd
 

@@ -24,16 +24,7 @@ function list {
 
 function install_sdk {
   local name=$1
-  local sdk="${TOP_DIR}/sdk/${name}.sdk"
-
-  if [ ! -f "${sdk}" ]; then
-    echo "Unknown SDK - '${name}' !"
-    echo ""
-    list
-    exit 1
-  fi
-
-  echo "Installing '${name}'..."
+  local sdk=$2
 
   local url=`sed -ne "s/Url: //p" ${sdk}`
   local tmp=`mktemp -d -t "${name}"`
@@ -121,13 +112,14 @@ function install_sdk {
         ;;
       *)
         echo "${path} ???"
+        exit 1
         ;;
     esac
   done
 
   popd
 
-  echo "rm -rf ${tmp}"
+  rm -vrf "${tmp}"
 }
 
 function main {
@@ -151,22 +143,24 @@ function main {
     shift
   done
 
-  if [ -n "${1:-}" ]; then
-    action="$1"
+  if [[ "$@" == "" ]]; then
+    echo "Usage: $0 sdk1 sdk2 ..."
+    echo ""
+    list
+    exit 1
   fi
 
-  case "${action}" in
-    "list")
-      list
-      ;;
-    "install")
-      install_sdk "$2"
-      ;;
-    *)
-      echo "Please specify valid action: 'list' or 'install'!"
+  for name in $@; do
+    sdk="${TOP_DIR}/sdk/${name}.sdk"
+
+    if [ ! -f "${sdk}" ]; then
+      echo "Unknown SDK - '${name}' !"
       exit 1
-      ;;
-  esac
+    fi
+
+    echo "Installing '${name}'..."
+    install_sdk "${name}" "${sdk}"
+  done
 }
 
 main "$@"

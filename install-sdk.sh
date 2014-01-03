@@ -50,11 +50,15 @@ function install_sdk {
         "=")
           file=${line[2]}
           path=${line[0]}
+          new_path=$(dirname ${path})/${file}
+          mv -v ${path} ${new_path}
+          path=${new_path}
           ;;
         ":")
           case ${line[0]} in
             "fd2sfd")
               sfd="$(basename ${line[2]%%.fd}.sfd)"
+              echo "${line[2]} ${line[3]} -> ${sfd}"
               fd2sfd -o ${sfd} ${line[2]} ${line[3]}
               mkdir -p "${PREFIX}/os-lib/sfd"
               cp -v ${sfd} "${PREFIX}/os-lib/sfd/${sfd}"

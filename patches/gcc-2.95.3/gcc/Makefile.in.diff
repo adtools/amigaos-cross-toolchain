@@ -31,19 +31,6 @@
  # Set this to `collect2' to enable use of collect2.
  USE_COLLECT2 = @will_use_collect2@
  # If we might be using collect2, then this variable will be set to
-@@ -403,6 +418,12 @@
- # so don't override it here.
- USE_COLLECT2 = collect2$(exeext)
- 
-+### begin-GG-local: dynamic libraries
-+# List of extra object files that should be compiled and linked with
-+# collect2.
-+EXTRA_COLLECT2_OBJS =
-+### end-GG-local
-+
- # List of extra C and assembler files to add to libgcc1.a.
- # Assembler files should have names ending in `.asm'.
- LIB1FUNCS_EXTRA = 
 @@ -516,6 +537,11 @@
  # "t" or nothing, for building multilibbed versions of, say, crtbegin.o.
  T =

@@ -1,36 +1,10 @@
 --- gcc-2.95.3/gcc/configure	2001-03-16 15:09:04.000000000 +0100
 +++ gcc-2.95.3/gcc/configure	2012-08-04 11:53:28.000000000 +0200
-@@ -2558,6 +2558,12 @@
- 
-   sparc_address_test ();
- 
-+#ifdef __amigaos__
-+  /* Force this test to succeed for AmigaOS, which has a fairly good
-+     vfork() emulation, but doesn't support fork() at all.  -fnf */
-+  exit (0);
-+#endif
-+
-   child = vfork ();
- 
-   if (child == 0) {
-@@ -2628,6 +2634,11 @@
- #define vfork fork
- EOF
- 
-+else
-+  cat >> confdefs.h <<\EOF
-+#define HAVE_VFORK 1
-+EOF
-+
- fi
- 
- 
-@@ -4341,6 +4352,14 @@
+@@ -4341,6 +4352,13 @@
  		thread_file='vxworks'
  		float_format=m68k
  		;;
 +	m68k-*-amigaos*)
-+		xm_file=m68k/xm-amigaos.h
 +		tm_file=m68k/amigaos.h
 +		tmake_file=m68k/t-amigaos
 +		xmake_file=m68k/x-amigaos
@@ -40,22 +14,3 @@
  	m68k-*-aout*)
  		tmake_file=m68k/t-m68kbare
  		tm_file="m68k/m68k-aout.h libgloss.h"
-@@ -4446,7 +4465,6 @@
- 		extra_headers=math-68881.h
- 		float_format=m68k
- 		;;
--
- 	m88k-dg-dgux*)
- 		case $machine in
- 		  m88k-dg-dguxbcs*)
-@@ -8692,7 +8710,9 @@
- : ${CONFIG_STATUS=./config.status}
- 
- echo creating $CONFIG_STATUS
--rm -f $CONFIG_STATUS
-+# Some systems, like AmigaOS, won't allow you to remove a script that is
-+# being executed, so just move it out of the way instead.
-+if test -f $CONFIG_STATUS; then mv $CONFIG_STATUS $CONFIG_STATUS.old; else true; fi
- cat > $CONFIG_STATUS <<EOF
- #! /bin/sh
- # Generated automatically by configure.

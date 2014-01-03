@@ -613,37 +613,3 @@ do									\
     DONE;								\
   }									\
 while (0)
-
-/* begin-GG-local: dynamic libraries */
-
-/* This macro is used to check if all collect2 facilities should be used.
-   We need a few special ones, like stripping after linking.  */
-
-#define DO_COLLECTING (do_collecting || amigaos_do_collecting())
-
-/* This macro is called in collect2 for every GCC argument name.
-   ARG is a part of commandline (without '\0' at the end).  */
-
-#define COLLECT2_GCC_OPTIONS_HOOK(ARG) amigaos_gccopts_hook(ARG)
-
-/* This macro is called in collect2 for every ld's "-l" or "*.o" or "*.a"
-   argument.  ARG is a complete argument, with '\0' at the end.  */
-
-#define COLLECT2_LIBNAME_HOOK(ARG) amigaos_libname_hook(ARG)
-
-/* This macro is called at collect2 exit, to clean everything up.  */
-
-#define COLLECT2_EXTRA_CLEANUP amigaos_collect2_cleanup
-
-/* This macro is called just before the first linker invocation.
-   LD1_ARGV is "char** argv", which will be passed to "ld".  STRIP is an
-   *address* of "strip_flag" variable.  */
-
-#define COLLECT2_PRELINK_HOOK(LD1_ARGV, STRIP) \
-amigaos_prelink_hook((LD1_ARGV), (STRIP))
-
-/* This macro is called just after the first linker invocation, in place of
-   "nm" and "ldd".  OUTPUT_FILE is the executable's filename.  */
-
-#define COLLECT2_POSTLINK_HOOK(OUTPUT_FILE) amigaos_postlink_hook(OUTPUT_FILE)
-/* end-GG-local */

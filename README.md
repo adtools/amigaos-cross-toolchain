@@ -100,7 +100,7 @@ Follow steps listed below:
 5. *(optional)* Install additional SDKs (e.g. AHI, CyberGraphX, Magic User Interface, etc.):
 
     ```
-# export PATH=/opt/m68k-amigaos/bin
+# export PATH=/opt/m68k-amigaos/bin:$PATH
 # ./install.sh --prefix=/opt/m68k-amigaos ahi cgx mui
 ```
 

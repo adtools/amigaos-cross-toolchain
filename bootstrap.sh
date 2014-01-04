@@ -176,13 +176,6 @@ function build_tools {
 
   pushd "${BUILD_DIR}"
 
-  mkdir_empty "${TEXINFO}"
-  pushd "${TEXINFO}"
-  "${SOURCES}/${TEXINFO}/configure" \
-    --prefix="${HOST_DIR}"
-  ${MAKE} && make install
-  popd
-
   mkdir_empty "${GAWK}"
   pushd "${GAWK}"
   "${SOURCES}/${GAWK}/configure" \
@@ -198,6 +191,13 @@ function build_tools {
     ${MAKE} && make install
     popd
   fi
+
+  mkdir_empty "${TEXINFO}"
+  pushd "${TEXINFO}"
+  "${SOURCES}/${TEXINFO}/configure" \
+    --prefix="${HOST_DIR}"
+  ${MAKE} && make install
+  popd
 
   if compare_version "${GCC_VER}" "ge" "4.0.0"; then
     mkdir_empty "${GMP}"
@@ -469,6 +469,7 @@ function build_libnix {
     MAKEINFO=:
   [ -f "${PREFIX}/guide" ] && rm -f "${PREFIX}/guide"
   make install MAKEINFO=:
+  install -v -m 644 "${SOURCES}/${LIBNIX}/sources/headers/stabs.h" "${PREFIX}/m68k-amigaos/sys-include"
   popd
 
   touch "${STAMP}/build-libnix"
@@ -564,10 +565,10 @@ function build {
 
   prepare_target
   unpack_sources
-  build_tools
 
   export PATH="${HOST_DIR}/bin:${PATH}"
 
+  build_tools
   build_vasm
   build_vlink
   build_vbcc

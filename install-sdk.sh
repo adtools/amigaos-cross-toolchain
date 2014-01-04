@@ -22,9 +22,20 @@ function list {
   done
 }
 
+function add_stubs {
+  local src="$1"
+  local libdir="$2"
+  local obj="${src%.c}.o"
+
+  echo "${obj} -> ${PREFIX}/lib/${libdir}/libstubs.a"
+  m68k-amigaos-gcc "${CFLAGS}" -noixemul -c -o "${obj}" "${src}" && \
+    m68k-amigaos-ar rs "${PREFIX}/lib/${libdir}/libstubs.a" "${obj}"
+  rm -f "${obj}"
+}
+
 function install_sdk {
-  local name=$1
-  local sdk=$2
+  local name="$1"
+  local sdk="$2"
 
   local url=`sed -ne "s/Url: //p" ${sdk}`
   local tmp=`mktemp -d -t "${name}"`
@@ -63,12 +74,36 @@ function install_sdk {
               mkdir -p "${PREFIX}/os-include/inline"
               mkdir -p "${PREFIX}/os-include/lvo"
 
-              sfdc --target=m68k-amigaos --mode=proto \
+              echo "${path} -> ${PREFIX}/os-include/proto/${base}.h"
+              sfdc --quiet --target=m68k-amigaos --mode=proto \
                 --output="${PREFIX}/os-include/proto/${base}.h" ${path}
-              sfdc --target=m68k-amigaos --mode=macros \
+
+              echo "${path} -> ${PREFIX}/os-include/inline/${base}.h"
+              sfdc --quiet --target=m68k-amigaos --mode=macros \
                 --output="${PREFIX}/os-include/inline/${base}.h" ${path}
-              sfdc --target=m68k-amigaos --mode=lvo \
+
+              echo "${path} -> ${PREFIX}/os-include/lvo/${base}.i"
+              sfdc --quiet --target=m68k-amigaos --mode=lvo \
                 --output="${PREFIX}/os-include/lvo/${base}.i" ${path}
+
+              echo "${path} -> ${base}.c"
+              sfdc --quiet --target=m68k-amigaos --mode=autoopen \
+                --output="${base}.c" ${path}
+
+              CFLAGS="-Wall -O3 -fomit-frame-pointer"
+              add_stubs "${base}.c" "libnix"
+              CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel -DSMALL_DATA"
+              add_stubs "${base}.c" "libb/libnix"
+              CFLAGS="-Wall -O3 -fomit-frame-pointer -m68020"
+              add_stubs "${base}.c" "libm020/libnix"
+              CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel -DSMALL_DATA -m68020"
+              add_stubs "${base}.c" "libb/libm020/libnix"
+              CFLAGS="-Wall -O3 -fomit-frame-pointer -m68020 -m68881"
+              add_stubs "${base}.c" "libm020/libm881/libnix"
+              CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel -DSMALL_DATA -m68020 -m68881"
+              add_stubs "${base}.c" "libb/libm020/libm881/libnix"
+              CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel32 -DSMALL_DATA -m68020"
+              add_stubs "${base}.c" "libb32/libm020/libnix"
               ;;
             *)
               echo "Unknown preprocessor: '${line}'"
@@ -119,7 +154,7 @@ function install_sdk {
 
   popd
 
-  rm -vrf "${tmp}"
+  rm -rf "${tmp}"
 }
 
 function main {

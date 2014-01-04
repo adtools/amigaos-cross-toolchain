@@ -76,25 +76,33 @@ Follow steps listed below:
 
 1. Fetch *m68k-amigaos-toolchain* project to your local drive:  
 
-    `git clone git://github.com/cahirwpz/m68k-amigaos-toolchain.git`   
-    `cd m68k-amigaos-toolchain`
+    ```
+# git clone git://github.com/cahirwpz/m68k-amigaos-toolchain.git
+# cd m68k-amigaos-toolchain
+```
 
 2. Download sources (use `fetch.sh` script in `archives` directory):   
 
-    `cd archives`   
-    `./fetch.sh`
+    ```
+# cd archives   
+# ./fetch.sh
+```
    
 3. Run `bootstrap.sh` script (with `--prefix` option to specify where to install the toolchain). Note, that the destination directory must be writeable by the user. 
 
-    `cd ..`   
-    `./bootstrap.sh --prefix=/opt/m68k-amigaos build`
+    ```
+# cd ..
+# ./bootstrap.sh --prefix=/opt/m68k-amigaos build
+```
 
 4. Wait for the result :-)
 
 5. *(optional)* Install additional SDKs (e.g. AHI, CyberGraphX, Magic User Interface, etc.):
 
-    `export PATH=/opt/m68k-amigaos/bin`
-    `./install.sh --prefix=/opt/m68k-amigaos ahi cgx mui`
+    ```
+# export PATH=/opt/m68k-amigaos/bin
+# ./install.sh --prefix=/opt/m68k-amigaos ahi cgx mui
+```
 
 **Note:** *If the build process fails, please write me an e-mail.  I'll try to help out. Don't forget to put into e-mail as much data about your environment as possible!*
 

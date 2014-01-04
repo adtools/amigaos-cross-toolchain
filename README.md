@@ -70,7 +70,7 @@ You have to have following packages installed in your system:
 
 #### How to build?
 
-**Warning:** *Building with `sudo` is not recommended. I'm not responsible for any damage in your system.*
+**Warning:** *Building with `sudo` is not recommended. I'm not responsible for any damage to your system.*
 
 Follow steps listed below:
 
@@ -88,7 +88,7 @@ Follow steps listed below:
 # ./fetch.sh
 ```
    
-3. Run `bootstrap.sh` script (with `--prefix` option to specify where to install the toolchain). Note, that the destination directory must be writeable by the user. 
+3. Run `bootstrap.sh` script (with `--prefix` option to specify where to install the toolchain). Note, that the destination directory must be writable by the user. 
 
     ```
 # cd ..

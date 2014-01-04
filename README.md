@@ -91,5 +91,10 @@ Follow steps listed below:
 
 4. Wait for the result :-)
 
+5. *(optional)* Install additional SDKs (e.g. AHI, CyberGraphX, Magic User Interface, etc.):
+
+    `export PATH=/opt/m68k-amigaos/bin`
+    `./install.sh --prefix=/opt/m68k-amigaos ahi cgx mui`
+
 **Note:** *If the build process fails, please write me an e-mail.  I'll try to help out. Don't forget to put into e-mail as much data about your environment as possible!*
 

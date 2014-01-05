@@ -77,3 +77,4 @@ MUI/Developer/FD/muimaster_lib.fd
 fd2sfd : MUI/Developer/FD/muimaster_lib.fd MUI/Developer/C/Include/clib/muimaster_protos.h
 sfdc : muimaster_lib.sfd
 stubs : muimaster_lib.sfd
+lib : muimaster_lib.sfd

@@ -33,6 +33,17 @@ function add_stubs {
   rm -f "${obj}"
 }
 
+function add_lib {
+  local src="$1"
+  local lib="$2"
+  local obj="${src%.a}.o"
+
+  echo "${src} -> ${PREFIX}/lib/${lib}"
+  m68k-amigaos-gcc "${CFLAGS}" -noixemul -c -o "${obj}" "${src}" && \
+    m68k-amigaos-ar rcs "${PREFIX}/lib/${lib}" "${obj}"
+  rm -f "${obj}"
+}
+
 function install_sdk {
   local name="$1"
   local sdk="$2"
@@ -88,8 +99,8 @@ function install_sdk {
               ;;
             "stubs")
               path=${line[2]}
-              name=$(basename ${path})
-              file="${name%_lib.sfd}.c"
+              filepart=$(basename ${path})
+              file="${filepart%_lib.sfd}.c"
 
               echo "${path} -> ${file}"
               sfdc --quiet --target=m68k-amigaos --mode=autoopen \
@@ -109,6 +120,31 @@ function install_sdk {
               add_stubs "${file}" "libb/libm020/libm881/libnix"
               CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel32 -DSMALL_DATA -m68020"
               add_stubs "${file}" "libb32/libm020/libnix"
+              ;;
+            "lib")
+              path=${line[2]}
+              filepart=$(basename ${path})
+              file="${filepart%_lib.sfd}.c"
+              lib="lib${name}.a"
+
+              echo "${path} -> ${file}"
+              sfdc --quiet --target=m68k-amigaos --mode=stubs \
+                --output="${file}" ${path}
+
+              CFLAGS="-Wall -O3 -fomit-frame-pointer"
+              add_lib "${file}" "${lib}"
+              CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel -DSMALL_DATA"
+              add_lib "${file}" "libb/${lib}"
+              CFLAGS="-Wall -O3 -fomit-frame-pointer -m68020"
+              add_lib "${file}" "libm020/${lib}"
+              CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel -DSMALL_DATA -m68020"
+              add_lib "${file}" "libb/libm020/${lib}"
+              CFLAGS="-Wall -O3 -fomit-frame-pointer -m68020 -m68881"
+              add_lib "${file}" "libm020/libm881/${lib}"
+              CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel -DSMALL_DATA -m68020 -m68881"
+              add_lib "${file}" "libb/libm020/libm881/${lib}"
+              CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel32 -DSMALL_DATA -m68020"
+              add_lib "${file}" "libb32/libm020/${lib}"
               ;;
             *)
               echo "Unknown preprocessor: '${line}'"

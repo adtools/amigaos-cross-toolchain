@@ -85,25 +85,30 @@ function install_sdk {
               echo "${path} -> ${PREFIX}/os-include/lvo/${base}.i"
               sfdc --quiet --target=m68k-amigaos --mode=lvo \
                 --output="${PREFIX}/os-include/lvo/${base}.i" ${path}
+              ;;
+            "stubs")
+              path=${line[2]}
+              name=$(basename ${path})
+              file="${name%_lib.sfd}.c"
 
-              echo "${path} -> ${base}.c"
+              echo "${path} -> ${file}"
               sfdc --quiet --target=m68k-amigaos --mode=autoopen \
-                --output="${base}.c" ${path}
+                --output="${file}" ${path}
 
               CFLAGS="-Wall -O3 -fomit-frame-pointer"
-              add_stubs "${base}.c" "libnix"
+              add_stubs "${file}" "libnix"
               CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel -DSMALL_DATA"
-              add_stubs "${base}.c" "libb/libnix"
+              add_stubs "${file}" "libb/libnix"
               CFLAGS="-Wall -O3 -fomit-frame-pointer -m68020"
-              add_stubs "${base}.c" "libm020/libnix"
+              add_stubs "${file}" "libm020/libnix"
               CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel -DSMALL_DATA -m68020"
-              add_stubs "${base}.c" "libb/libm020/libnix"
+              add_stubs "${file}" "libb/libm020/libnix"
               CFLAGS="-Wall -O3 -fomit-frame-pointer -m68020 -m68881"
-              add_stubs "${base}.c" "libm020/libm881/libnix"
+              add_stubs "${file}" "libm020/libm881/libnix"
               CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel -DSMALL_DATA -m68020 -m68881"
-              add_stubs "${base}.c" "libb/libm020/libm881/libnix"
+              add_stubs "${file}" "libb/libm020/libm881/libnix"
               CFLAGS="-Wall -O3 -fomit-frame-pointer -fbaserel32 -DSMALL_DATA -m68020"
-              add_stubs "${base}.c" "libb32/libm020/libnix"
+              add_stubs "${file}" "libb32/libm020/libnix"
               ;;
             *)
               echo "Unknown preprocessor: '${line}'"

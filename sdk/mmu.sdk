@@ -66,3 +66,8 @@ sfdc : 68060_lib.sfd
 sfdc : 680x0_lib.sfd
 sfdc : disassembler_lib.sfd
 sfdc : mmu_lib.sfd
+stubs : 68040_lib.sfd
+stubs : 68060_lib.sfd
+stubs : 680x0_lib.sfd
+stubs : disassembler_lib.sfd
+stubs : mmu_lib.sfd

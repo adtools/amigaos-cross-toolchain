@@ -10,3 +10,4 @@ Warp3D_Devel/Include/fd/Warp3D.fd = Warp3D_lib.fd
 Warp3D_Devel/Include/Warp3D/Warp3D.h
 fd2sfd : Warp3D_Devel/Include/fd/Warp3D_lib.fd Warp3D_Devel/Include/clib/Warp3D_protos.h
 sfdc : Warp3D_lib.sfd
+stubs : Warp3D_lib.sfd

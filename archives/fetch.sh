@@ -5,7 +5,7 @@ function download {
   local -r file="${2:-$(basename "${url}")}"
 
   if [ ! -f "${file}" ]; then
-    wget -O "${file}" "${url}"
+    wget --no-check-certificate -O "${file}" "${url}"
   fi
 }
 
@@ -15,8 +15,8 @@ function download_and_extract {
   local -r arc="$(basename "${url}")"
 
   if [ ! -f "${file}" ]; then
-    wget -O "${arc}" "${url}"
-    lha x -i "${arc}" "${file}"
+    wget --no-check-certificate -O "${arc}" "${url}"
+    lha -xi "${arc}" "${file}"
     rm -f "${arc}"
   fi
 }

@@ -1,13 +1,13 @@
-GCC compiler for AmigaOS/m68k
+AmigaOS/m68k targeted cross compilers and assembler
 ===
 
 **Author:** [Krystian Bacławski](mailto:krystian.baclawski@gmail.com)
 
-**Short description:** m68k-amigaos gcc / binutils toolchain build script.
+**Short description:** m68k-amigaos gcc / binutils / vbcc / vasm toolchain build script.
 
 ### Overview
 
-**m68k-amigaos-toolchain** provides you a shell script that builds M68k AmigaOS 3.x) toolchain in your Unix-like environment. Build process should produce following set of tools that targets m68k-amigaos platform:
+**m68k-amigaos-toolchain** project provides an easy way to build m68k AmigaOS 3.x target toolchain in a Unix-like environment. Build process should produce following set of tools:
 
  * gcc 2.95.3
  * g++ 2.95.3
@@ -15,11 +15,11 @@ GCC compiler for AmigaOS/m68k
  * binutils 2.9.1 (assembler, linker, etc.)
  * libnix 2.1 (standard ANSI/C library replacement for AmigaOS)
  * libm 5.4 (provides math library implementation for non-FPU Amigas)
- * AmigaOS headers & libraries (for AmigaOS 3.9)
+ * AmigaOS headers & libraries & autodocs (for AmigaOS 3.9)
  * ixemul.library 48.2
  * vbcc 0.9b + vclib
- * vasm 1.5c
- * vlink 0.14a
+ * vasm 1.6b
+ * vlink 0.14c
 
 **Note:** *Patches are welcome!*
 
@@ -61,11 +61,11 @@ You have to have following packages installed in your system:
 
  * GNU autoconf
  * GNU flex 2.5.x
- * GNU gcc 4.x *32-bit version!*
+ * GNU gcc 4.x **32-bit version!**
  * GNU make 3.x
  * lha
  * perl 5.10
- * libncurses5-dev *32-bit version!*
+ * libncurses5-dev **32-bit version!**
 
 *For MacOSX users*: you'll likely need to have [MacPorts](http://www.macports.org) or [Homebrew](http://brew.sh) installed in order to build the toolchain.
 

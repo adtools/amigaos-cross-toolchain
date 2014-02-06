@@ -15,7 +15,7 @@ function prepare_target {
   [ -f "${STAMP}/prepare-target" ] && return 0
 
   pushd "${PREFIX}"
-  mkdir -p "bin" "etc" "lib" "m68k-amigaos"
+  mkdir -p "bin" "doc" "etc" "lib" "m68k-amigaos"
   mkdir -p "os-include/lvo" "os-lib" "vbcc-include" "vbcc-lib"
   ln -sf "../os-include" "m68k-amigaos/include"
   ln -sf "../lib" "m68k-amigaos/lib"
@@ -437,6 +437,10 @@ function process_ndk {
   cp -av "${SOURCES}/${NDK}/Include/fd" .
   cp -av "${SOURCES}/${NDK}/Include/sfd" .
   cp -av "${SOURCES}/${NDK}/Include/linker_libs/"* .
+  popd
+
+  pushd "${PREFIX}/doc"
+  cp -av "${SOURCES}/${NDK}/documentation/autodocs/"* .
   popd
 
   touch "${STAMP}/process-ndk"

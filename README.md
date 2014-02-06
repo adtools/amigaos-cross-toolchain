@@ -61,10 +61,11 @@ You have to have following packages installed in your system:
 
  * GNU autoconf
  * GNU flex 2.5.x
- * GNU gcc 4.x
+ * GNU gcc 4.x *32-bit version!*
  * GNU make 3.x
  * lha
  * perl 5.10
+ * libncurses5-dev *32-bit version!*
 
 *For MacOSX users*: you'll likely need to have [MacPorts](http://www.macports.org) or [Homebrew](http://brew.sh) installed in order to build the toolchain.
 

@@ -18,8 +18,10 @@ $diff -durq "$1.orig" "$1" | while read -a line; do
     "Only")
       file="${line[2]%:}/${line[3]}"
       dir="../patches/${line[2]%:}"
-      mkdir -p "${dir}"
-      cp -v "${file}" "${dir}/"
+      if ! [[ "${file}" =~ ~$ ]]; then
+        mkdir -p "${dir}"
+        cp -v "${file}" "${dir}/"
+      fi
       ;;
     *)
       ;;

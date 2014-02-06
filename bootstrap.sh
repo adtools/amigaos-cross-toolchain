@@ -7,7 +7,7 @@ readonly SOURCES="${TOP_DIR}/sources"
 readonly BUILD_DIR="${TOP_DIR}/build"
 readonly HOST_DIR="${TOP_DIR}/host"
 readonly STAMP="${TOP_DIR}/stamps"
-readonly MAKE="make -j$(getconf NPROCESSORS_CONF)"
+readonly MAKE="make -j$(getconf _NPROCESSORS_CONF)"
 
 function prepare_target {
   mkdir -p "${STAMP}" "${BUILD_DIR}" "${PREFIX}"
@@ -50,15 +50,18 @@ function unpack_clean {
   while (( "$#" > 1 )); do
     shift
 
-    if grep "\.tar\.gz$" <<<"$1"; then
-      cmd="tar -xzf"
-    elif grep "\.tar.bz2$" <<<"$1"; then
-      cmd="tar -xjf"
-    elif grep "\.lha$" <<<"$1"; then
-      cmd="lha -xgq"
-    else
-      cmd="false"
-    fi
+    case "$1" in
+      *.tar.gz)
+        cmd="tar -xzf";;
+      *.tar.bz2)
+        cmd="tar -xjf";;
+      *.lha)
+        cmd="lha -xq";;
+      *.zip)
+        cmd="unzip";;
+      *)
+        cmd="false";;
+    esac
 
     ${cmd} "${ARCHIVES}/$1"
   done
@@ -117,7 +120,7 @@ function unpack_sources {
   popd
 
   unpack_clean "${NDK}" "${NDK_SRC}"
-  rm -rf ndk_* *.info
+  rm -f *.info
   pushd "${NDK}"
   mkdir Include/include_h/inline
   copy_non_diff "${NDK}"

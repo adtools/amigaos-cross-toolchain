@@ -10,7 +10,7 @@
 
 long __nocommandline = 1;
 
-BOOL PrintMMUInfo() {
+static BOOL PrintMMUInfo() {
   PutStr("MMU: ");
 
   switch (GetMMUType()) {

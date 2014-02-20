@@ -68,7 +68,7 @@ function unpack_clean {
 }
 
 function compare_version {
-  python - "$1" "$2" "$3" <<EOF
+  python2.7 - "$1" "$2" "$3" <<EOF
 from distutils.version import StrictVersion
 import sys
 

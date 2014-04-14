@@ -9,4 +9,16 @@
 +
  /* Build an argument vector from a string.  Allocates memory using
     malloc.  Use freeargv to free the vector.  */
+
+@@ -111,12 +111,7 @@
+ 
+ /* Exit, calling all the functions registered with xatexit.  */
+ 
+-#ifndef __GNUC__
+-extern void xexit PARAMS ((int status));
+-#else
+-typedef void libiberty_voidfn PARAMS ((int status));
+-__volatile__ libiberty_voidfn xexit;
+-#endif
++extern void xexit PARAMS ((int status));
  

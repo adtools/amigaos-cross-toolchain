@@ -150,6 +150,7 @@ function unpack_sources {
   unpack_clean "${TEXINFO}" "${TEXINFO_SRC}"
   unpack_clean "${BISON}" "${BISON_SRC}"
   unpack_clean "${GAWK}" "${GAWK_SRC}"
+  unpack_clean "${M4}" "${M4_SRC}"
 
   unpack_clean "${VASM}" "${VASM_SRC}"
   mv "vasm" "${VASM}"
@@ -178,6 +179,14 @@ function build_tools {
   mkdir_empty "${HOST_DIR}"
 
   pushd "${BUILD_DIR}"
+
+  mkdir_empty "${M4}"
+  pushd "${M4}"
+  "${SOURCES}/${M4}/configure" \
+    --prefix="${HOST_DIR}"
+  ${MAKE} && make install
+  ln -s m4 "${HOST_DIR}/bin/gm4"
+  popd
 
   mkdir_empty "${GAWK}"
   pushd "${GAWK}"

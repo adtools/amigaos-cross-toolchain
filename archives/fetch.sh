@@ -21,6 +21,7 @@ function download_and_extract {
   fi
 }
 
+download "ftp://ftp.gnu.org/gnu/m4/m4-1.4.17.tar.gz"
 download "ftp://ftp.gnu.org/gnu/gawk/gawk-3.1.8.tar.gz"
 download "ftp://ftp.gnu.org/gnu/bison/bison-1.35.tar.gz"
 download "ftp://ftp.gnu.org/gnu/texinfo/texinfo-4.13.tar.gz"

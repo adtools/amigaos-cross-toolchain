@@ -429,7 +429,7 @@ function process_ndk {
     sfdc --target=m68k-amigaos --mode=macros \
       --output="inline/${base}.h" $file
     sfdc --target=m68k-amigaos --mode=lvo \
-      --output="lvo/${base}.i" $file
+      --output="lvo/${base}_lib.i" $file
   done
   popd
 

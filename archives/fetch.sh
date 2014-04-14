@@ -34,8 +34,8 @@ download "ftp://ftp.gnu.org/gnu/binutils/binutils-2.9.1.tar.gz"
 download "ftp://ftp.gnu.org/gnu/binutils/binutils-2.14.tar.gz"
 
 download \
-  "http://sourceforge.net/projects/libnix/files/latest/download" \
-  "libnix-2.1.tar.gz"
+  "http://github.com/cahirwpz/libnix/archive/master.zip" \
+  "libnix-2.2.zip"
 download "http://www.haage-partner.de/download/AmigaOS/NDK39.lha"
 download_and_extract \
   "http://aminet.net/dev/gcc/sfdc.lha" \

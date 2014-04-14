@@ -135,7 +135,7 @@ function unpack_sources {
   popd
 
   unpack_clean "${LIBNIX}" "${LIBNIX_SRC}"
-  mv "libnix" "${LIBNIX}"
+  mv "libnix-master" "${LIBNIX}"
   chmod a+x "${LIBNIX}/mkinstalldirs"
 
   unpack_clean "${LIBM}" "${LIBM_SRC}"

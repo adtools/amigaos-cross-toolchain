@@ -424,7 +424,7 @@ function process_ndk {
   cd "${SFDC}"
   ./configure \
     --prefix="${PREFIX}"
-  make && make install
+  make && make install || exit 1
   popd
 
   pushd "${PREFIX}/os-include"
@@ -449,7 +449,7 @@ function process_ndk {
   popd
 
   pushd "${PREFIX}/doc"
-  cp -av "${SOURCES}/${NDK}/documentation/autodocs/"* .
+  cp -av "${SOURCES}/${NDK}/Documentation/Autodocs/"* .
   popd
 
   touch "${STAMP}/process-ndk"

@@ -543,10 +543,13 @@ function build {
     ARCH="-m32"
   fi
 
+  # Take over the path -- to preserve hermetic build. 
+  export PATH="/usr/bin:/bin:/usr/local/bin:/opt/local/bin"
+
   # Make sure we always choose known compiler (from the distro) and not one
   # in user's path that could shadow the original one.
-  CC="$(which gcc)"
-  CXX="$(which g++)"
+  CC="$(which gcc) -std=gnu89"
+  CXX="$(which g++) -std=gnu++98"
 
   # Define extra options for gcc's configure script.
   if [ "${VERSION}" != "4" ]; then
@@ -564,8 +567,6 @@ function build {
                          "--disable-shared")
   fi
 
-  # Take over the path -- to preserve hermetic build. 
-  export PATH="/opt/local/bin:/usr/local/bin:/usr/bin:/bin"
   export CC CXX
 
   readonly FLAGS_FOR_TARGET=( \

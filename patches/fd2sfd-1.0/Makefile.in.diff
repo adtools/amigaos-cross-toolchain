@@ -1,7 +1,15 @@
---- fd2sfd-1.0/Makefile.in.orig	2014-01-02 21:21:41.000000000 +0100
-+++ fd2sfd-1.0/Makefile.in	2014-01-02 21:23:12.000000000 +0100
-@@ -45,45 +45,6 @@
- 	  $(INSTALL_DATA) -D $(srcdir)/cross/share/$${f} $(fd2sfddir)/$${f}; \
+--- fd2sfd-1.0/Makefile.in.orig	2003-07-31 08:10:19.000000000 +0200
++++ fd2sfd-1.0/Makefile.in	2014-05-25 20:46:57.000000000 +0200
+@@ -40,50 +40,12 @@
+ 
+ 	# Install tools
+ 	$(INSTALL_PROGRAM) $(EXECUTABLE) $(bindir)
+-	$(INSTALL_PROGRAM) cross/bin/gg-fix-includes $(bindir)
++	$(INSTALL_DATA) cross/bin/gg-fix-includes $(bindir)
+ 	for f in `cd $(srcdir)/cross/share/ && find * -type f`; do \
+-	  $(INSTALL_DATA) -D $(srcdir)/cross/share/$${f} $(fd2sfddir)/$${f}; \
++	  mkdir -p `dirname $(fd2sfddir)/$${f}`; \
++	  $(INSTALL_DATA) $(srcdir)/cross/share/$${f} `dirname $(fd2sfddir)/$${f}`; \
  	done
  
 -	# Install example file structure for FDs

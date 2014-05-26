@@ -184,7 +184,8 @@ function build_tools {
   pushd "${M4}"
   "${SOURCES}/${M4}/configure" \
     --prefix="${HOST_DIR}"
-  ${MAKE} && make install
+  ${MAKE}
+  make install
   ln -s m4 "${HOST_DIR}/bin/gm4"
   popd
 
@@ -192,7 +193,8 @@ function build_tools {
   pushd "${GAWK}"
   "${SOURCES}/${GAWK}/configure" \
     --prefix="${HOST_DIR}"
-  ${MAKE} && make install
+  ${MAKE}
+  make install
   popd
 
   if compare_version "${GCC_VER}" "le" "3.4.6"; then
@@ -200,7 +202,8 @@ function build_tools {
     pushd "${BISON}"
     "${SOURCES}/${BISON}/configure" \
       --prefix="${HOST_DIR}"
-    ${MAKE} && make install
+    ${MAKE}
+    make install
     popd
   fi
 
@@ -208,7 +211,8 @@ function build_tools {
   pushd "${TEXINFO}"
   "${SOURCES}/${TEXINFO}/configure" \
     --prefix="${HOST_DIR}"
-  ${MAKE} && make install
+  ${MAKE}
+  make install
   popd
 
   if compare_version "${GCC_VER}" "ge" "4.0.0"; then
@@ -217,7 +221,8 @@ function build_tools {
     "${SOURCES}/${GMP}/configure" \
       --prefix="${HOST_DIR}" \
       --disable-shared
-    ${MAKE} && make install
+    ${MAKE}
+    make install
     popd
 
     mkdir_empty "${MPFR}"
@@ -226,7 +231,8 @@ function build_tools {
       --prefix="${HOST_DIR}" \
       --disable-shared \
       --with-gmp="${HOST_DIR}"
-    ${MAKE} && make install
+    ${MAKE}
+    make install
     popd
 
     mkdir_empty "${MPC}"
@@ -236,7 +242,8 @@ function build_tools {
       --disable-shared \
       --with-gmp="${HOST_DIR}" \
       --with-mpfr="${HOST_DIR}"
-    ${MAKE} && make install
+    ${MAKE}
+    make install
     popd
   fi
 
@@ -415,7 +422,8 @@ function process_ndk {
   cd "${FD2SFD}"
   ./configure \
     --prefix="${PREFIX}"
-  make && make install
+  make
+  make install
   popd
 
   pushd "${BUILD_DIR}"
@@ -424,7 +432,8 @@ function process_ndk {
   cd "${SFDC}"
   ./configure \
     --prefix="${PREFIX}"
-  make && make install || exit 1
+  make
+  make install
   popd
 
   pushd "${PREFIX}/os-include"
@@ -505,7 +514,8 @@ function build_libm {
     --prefix="${PREFIX}" \
     --host="i686-linux-gnu" \
     --build="m68k-amigaos"
-  make && make install
+  make
+  make install
   popd
 
   touch "${STAMP}/build-libm"

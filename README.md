@@ -28,11 +28,9 @@ AmigaOS/m68k targeted cross compilers and assembler
 There are no downloads provided for the time being. I do as much as possible to make the toolchain portable among Unix-like environments. Following platforms were tested and the toolchain is known to work for them:
 
  * Cygwin 1.7.18 (gcc 4.5.3)
- * Ubuntu 12.04 LTS 32-bit (gcc 4.6.3)
- * Ubuntu 12.04 LTS 64-bit (gcc 4.6.3) *Requires gcc-multilib package!*
- * MacOS X 10.7.5 (MacPorts - gcc 4.7.3)
- * MacOS X 10.8.4 (Homebrew - gcc 4.2.1 from XCode) *Thanks go to Argasek!*
- * MaxOS X 10.9.1 (MacPorts - gcc 4.8.2)
+ * Ubuntu 14.04 LTS 32-bit (gcc 4.8.2)
+ * Ubuntu 14.04 LTS 64-bit (gcc 4.8.2) *Requires gcc-multilib package, and i386 libraries!*
+ * MacOS X 10.9.3 (MacPorts - Apple's clang-503.0.40)
  
 ### Documentation
 

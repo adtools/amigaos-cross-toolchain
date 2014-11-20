@@ -67,23 +67,6 @@ function unpack_clean {
   done
 }
 
-function compare_version {
-  python2.7 - "$1" "$2" "$3" <<EOF
-from distutils.version import StrictVersion
-import sys
-
-cmp = lambda x, y: StrictVersion(x).__cmp__(y)
-
-op = {"lt": [-1],    "gt": [1],
-      "le": [-1, 0], "ge": [1, 0],
-      "eq": [0],     "ne": [-1, 1]}
-
-res = cmp(sys.argv[1], sys.argv[3]) in op[sys.argv[2]]
-
-sys.exit(int(not res))
-EOF
-}
-
 function unpack_sources {
   [ -f "${STAMP}/unpack-sources" ] && return 0
 
@@ -103,7 +86,7 @@ function unpack_sources {
   apply_patches "${GCC}"
   popd
 
-  if compare_version "${GCC_VER}" "ge" "4.0.0"; then
+  if ((${VERSION} == 4)); then
     unpack_clean "${GMP}" "${GMP_SRC}"
     unpack_clean "${MPC}" "${MPC_SRC}"
     unpack_clean "${MPFR}" "${MPFR_SRC}"
@@ -198,7 +181,7 @@ function build_tools {
   make install
   popd
 
-  if compare_version "${GCC_VER}" "le" "3.4.6"; then
+  if ((${VERSION} < 4)); then
     mkdir_empty "${FLEX}"
     pushd "${FLEX}"
     "${SOURCES}/${FLEX}/configure" \
@@ -224,7 +207,7 @@ function build_tools {
   make install
   popd
 
-  if compare_version "${GCC_VER}" "ge" "4.0.0"; then
+  if ((${VERSION} == 4)); then
     mkdir_empty "${GMP}"
     pushd "${GMP}"
     "${SOURCES}/${GMP}/configure" \

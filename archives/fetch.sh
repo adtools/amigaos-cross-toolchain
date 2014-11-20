@@ -35,6 +35,10 @@ download "ftp://ftp.gnu.org/gnu/binutils/binutils-2.9.1.tar.gz"
 download "ftp://ftp.gnu.org/gnu/binutils/binutils-2.14.tar.gz"
 
 download \
+  "http://sourceforge.net/projects/flex/files/flex/2.5.4.a/flex-2.5.4a.tar.gz/download" \
+  "flex-2.5.4.tar.gz"
+
+download \
   "http://github.com/cahirwpz/libnix/archive/master.zip" \
   "libnix-2.2.zip"
 download "http://www.haage-partner.de/download/AmigaOS/NDK39.lha"

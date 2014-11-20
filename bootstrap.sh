@@ -148,6 +148,7 @@ function unpack_sources {
   popd
 
   unpack_clean "${TEXINFO}" "${TEXINFO_SRC}"
+  unpack_clean "${FLEX}" "${FLEX_SRC}"
   unpack_clean "${BISON}" "${BISON_SRC}"
   unpack_clean "${GAWK}" "${GAWK_SRC}"
   unpack_clean "${M4}" "${M4_SRC}"
@@ -198,6 +199,14 @@ function build_tools {
   popd
 
   if compare_version "${GCC_VER}" "le" "3.4.6"; then
+    mkdir_empty "${FLEX}"
+    pushd "${FLEX}"
+    "${SOURCES}/${FLEX}/configure" \
+      --prefix="${HOST_DIR}"
+    ${MAKE}
+    make install
+    popd
+
     mkdir_empty "${BISON}"
     pushd "${BISON}"
     "${SOURCES}/${BISON}/configure" \

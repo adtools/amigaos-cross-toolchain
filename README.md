@@ -58,7 +58,6 @@ AmigaOS specific documents:
 You have to have following packages installed in your system:
 
  * GNU autoconf
- * GNU flex 2.5.x
  * GNU gcc 4.x **32-bit version!**
  * GNU make 3.x
  * lha

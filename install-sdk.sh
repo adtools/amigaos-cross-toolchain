@@ -7,7 +7,7 @@ function download {
   local -r file="${2:-$(basename "${url}")}"
 
   if [ ! -f "${file}" ]; then
-    wget -O "${file}" "${url}"
+    wget -O "${file}" "${url}" || exit 1
   fi
 }
 

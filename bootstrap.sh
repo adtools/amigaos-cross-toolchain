@@ -141,6 +141,9 @@ function unpack_sources {
 
   unpack_clean "${VLINK}" "${VLINK_SRC}"
   mv "vlink" "${VLINK}"
+  pushd "${VLINK}"
+  mkdir objects
+  popd
 
   unpack_clean "${VBCC}" "${VBCC_SRC}"
   mv "vbcc" "${VBCC}"
@@ -288,7 +291,7 @@ function build_vbcc {
   cp -a "${SOURCES}/${VBCC}" .
   cd "${VBCC}"
   mkdir "bin"
-  make TARGET="m68k" CC+="-DETCDIR=\\\"${PREFIX}/etc/\\\"" <<EOF
+  make TARGET="m68k" ETCDIR="\\\"${PREFIX}/etc/\\\"" <<EOF
 y
 y
 signed char

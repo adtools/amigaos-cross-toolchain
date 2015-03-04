@@ -4,7 +4,7 @@
  
  # used to create vbcc, vc and ucpp
 -CC = gcc -std=c9x -g -DHAVE_AOS4 #-DHAVE_ECPP -DHAVE_MISRA
-+CC = gcc -std=c9x -O2 -fomit-frame-pointer #-DHAVE_ECPP -DHAVE_MISRA
++CC = gcc -std=c9x -O2 -fomit-frame-pointer -DHAVE_AOS4 -DETCDIR="$(ETCDIR)" #-DHAVE_ECPP -DHAVE_MISRA
  LDFLAGS = -lm
  
  # native version; used to create dtgen

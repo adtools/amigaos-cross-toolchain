@@ -14,17 +14,23 @@ from logging import debug, info, error
 from glob import glob
 
 URLS = \
-  ["ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.2.tar.bz2",
-   "ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.1.tar.gz",
-   "ftp://ftp.gnu.org/gnu/mpfr/mpfr-3.1.2.tar.bz2",
+  ["ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2",
+   "ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz",
+   "ftp://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2",
+   "http://isl.gforge.inria.fr/isl-0.12.2.tar.bz2",
+   "http://www.bastoul.net/cloog/pages/download/cloog-0.18.4.tar.gz",
    "https://soulsphere.org/projects/lhasa/lhasa-0.3.0.tar.gz",
    ("http://hyperion-entertainment.biz/index.php/downloads" +
     "?view=download&amp;format=raw&amp;file=69", "SDK_53.24.lha"),
    ("svn://svn.code.sf.net/p/adtools/code/trunk/binutils", "binutils-2.18"),
    ("svn://svn.code.sf.net/p/adtools/code/trunk/gcc", "gcc-4.2.4"),
+   ("svn://svn.code.sf.net/p/adtools/code/branches/binutils/2.23.2",
+    "binutils-2.23.2"),
+   ("svn://svn.code.sf.net/p/adtools/code/branches/gcc/4.9.x", "gcc-4.9.1"),
    ("https://github.com/adtools/sfdc/archive/master.zip", "sfdc-master.zip"),
    ("http://clib2.cvs.sourceforge.net/viewvc/clib2/?view=tar", "clib2.tar.gz")]
 
+VARS = {}
 TARGET_DIR = ""
 MAKE_OPTS = []
 TOP_DIR = ""
@@ -35,6 +41,10 @@ PATCHES = ""
 SOURCE_DIR = ""
 BUILD_DIR = ""
 HOST_DIR = ""
+
+
+def mkver(strver):
+  return tuple(int(x) for x in strver.split('.'))
 
 
 def relpath(name):
@@ -261,7 +271,9 @@ def doit():
   environ['CXX'] = check_output(['which', 'g++']).strip()
   environ['LANG'] = 'C'
   environ['TERM'] = 'xterm'
-  environ['PATH'] = path.join(HOST_DIR, 'bin') + ":" + environ['PATH']
+  environ['PATH'] = ":".join([path.join(TARGET_DIR, 'bin'),
+                              path.join(HOST_DIR, 'bin'),
+                              environ['PATH']])
 
   prepare_source('lhasa-0.3.0.tar.gz',
                  copy=path.join(BUILD_DIR, 'lhasa-0.3.0'))
@@ -271,55 +283,93 @@ def doit():
   build("lhasa-0.3.0")
   install("lhasa-0.3.0")
 
-  prepare_source("gmp-5.1.2.tar.bz2")
-  configure("gmp-5.1.2",
-            "--disable-shared",
-            "--prefix=" + HOST_DIR)
-  build("gmp-5.1.2")
-  install("gmp-5.1.2")
+  gmp = VARS['gmp']
+  prepare_source(gmp + '.tar.bz2')
+  configure(gmp,
+            '--disable-shared',
+            '--prefix=' + HOST_DIR)
+  build(gmp)
+  install(gmp)
 
-  prepare_source("mpfr-3.1.2.tar.bz2")
-  configure("mpfr-3.1.2",
-            "--disable-shared",
-            "--prefix=" + HOST_DIR,
-            "--with-gmp=" + HOST_DIR)
-  build("mpfr-3.1.2")
-  install("mpfr-3.1.2")
+  mpfr = VARS['mpfr']
+  prepare_source(mpfr + '.tar.bz2')
+  configure(mpfr,
+            '--disable-shared',
+            '--prefix=' + HOST_DIR,
+            '--with-gmp=' + HOST_DIR)
+  build(mpfr)
+  install(mpfr)
 
-  prepare_source("mpc-1.0.1.tar.gz")
-  configure("mpc-1.0.1",
-            "--disable-shared",
-            "--prefix=" + HOST_DIR,
-            "--with-gmp=" + HOST_DIR,
-            "--with-mpfr=" + HOST_DIR)
-  build("mpc-1.0.1")
-  install("mpc-1.0.1")
+  mpc = VARS['mpc']
+  prepare_source(mpc + '.tar.gz')
+  configure(mpc,
+            '--disable-shared',
+            '--prefix=' + HOST_DIR,
+            '--with-gmp=' + HOST_DIR,
+            '--with-mpfr=' + HOST_DIR)
+  build(mpc)
+  install(mpc)
 
-  prepare_source("binutils-2.18")
-  with env(CFLAGS='-Wno-error'):
-    configure("binutils-2.18",
-              "--prefix=" + TARGET_DIR,
-              "--target=ppc-amigaos")
-    build("binutils-2.18")
-    install("binutils-2.18")
+  isl = VARS['isl']
+  prepare_source(isl + '.tar.bz2')
+  configure(isl,
+            '--disable-shared',
+            '--prefix=' + HOST_DIR,
+            '--with-gmp-prefix=' + HOST_DIR)
+  build(isl)
+  install(isl)
+
+  cloog = VARS['cloog']
+  prepare_source(cloog + '.tar.gz')
+  configure(cloog,
+            '--disable-shared',
+            '--prefix=' + HOST_DIR,
+            '--with-isl=system',
+            '--with-gmp-prefix=' + HOST_DIR,
+            '--with-isl-prefix=' + HOST_DIR)
+  build(cloog)
+  install(cloog)
+
+  binutils = VARS['binutils']
+  binutils_env = {}
+  if VARS['binutils-ver'] == (2, 18):
+    binutils_env.update(CFLAGS='-Wno-error')
+  elif VARS['binutils-ver'] == (2, 23, 2):
+    binutils_env.update(CFLAGS='-Wno-error')
+
+  prepare_source(binutils)
+  with env(**binutils_env):
+    configure(binutils,
+              '--prefix=' + TARGET_DIR,
+              '--target=ppc-amigaos')
+    build(binutils)
+    install(binutils)
 
   prepare_sdk()
 
-  environ['PATH'] = path.join(TARGET_DIR, 'bin') + ":" + environ['PATH']
+  gcc = VARS['gcc']
+  gcc_env = {}
+  if VARS['gcc-ver'] == (4, 2, 4):
+    gcc_env.update(CFLAGS='-std=gnu89 -m32')
 
-  prepare_source('gcc-4.2.4')
-  with env(CFLAGS='-std=gnu89 -m32'):
-    configure('gcc-4.2.4',
+  prepare_source(gcc)
+  with env(**gcc_env):
+    configure(gcc,
               '--with-bugurl="http://sf.net/p/adtools"',
               '--target=ppc-amigaos',
+              '--with-gmp=' + HOST_DIR,
+              '--with-mpfr=' + HOST_DIR,
+              '--with-mpc=' + HOST_DIR,
+              '--with-isl=' + HOST_DIR,
+              '--with-cloog=' + HOST_DIR,
               '--prefix=' + TARGET_DIR,
               '--enable-languages=c,c++',
               '--enable-haifa',
               '--enable-sjlj-exceptions'
               '--disable-libstdcxx-pch'
               '--disable-tls')
-    build("gcc-4.2.4")
-    install("gcc-4.2.4")
+    build(gcc)
+    install(gcc)
 
 
 def clean():
@@ -334,9 +384,25 @@ if __name__ == "__main__":
   parser = ArgumentParser(description='Build cross toolchain.')
   parser.add_argument('action', choices=['fetch', 'doit', 'clean'],
                       help='perform action')
+  parser.add_argument('--binutils', choices=['2.18', '2.23.2'], default='2.18',
+                      help='desired binutils version')
+  parser.add_argument('--gcc', choices=['4.2.4', '4.9.1'], default='4.2.4',
+                      help='desired gcc version')
   parser.add_argument('--prefix', type=str, default=None,
                       help='installation directory')
   args = parser.parse_args()
+
+  VARS = {
+    'gmp': 'gmp-5.1.3',
+    'mpfr': 'mpfr-3.1.3',
+    'mpc': 'mpc-1.0.3',
+    'isl': 'isl-0.12.2',
+    'cloog': 'cloog-0.18.4',
+    'binutils': 'binutils-' + args.binutils,
+    'gcc': 'gcc-' + args.gcc,
+    'binutils-ver': mkver(args.binutils),
+    'gcc-ver': mkver(args.gcc)
+  }
 
   TOP_DIR = path.abspath('.')
 

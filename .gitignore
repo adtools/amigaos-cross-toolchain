@@ -1,9 +1,11 @@
 *.lha
 *.tar.gz
 *.tar.bz2
+*.zip
 *~
 *.o
 .DS_Store
+.ropeproject
 archives/*/
 sources/
 stamps/

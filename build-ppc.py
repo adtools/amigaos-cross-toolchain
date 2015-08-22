@@ -2,11 +2,12 @@
 
 # Build cross toolchain for AmigaOS 4.x / PowerPC target.
 
-from subprocess import check_call, CalledProcessError
-from os import getcwd, chdir, environ, path
+from os import getcwd, environ, path
 from contextlib import contextmanager
 from argparse import ArgumentParser
+from glob import glob
 import distutils.spawn
+import subprocess
 import shutil
 import os
 import logging
@@ -15,7 +16,6 @@ import urllib2
 import tarfile
 import zipfile
 import sys
-from glob import glob
 from logging import debug, info, error
 
 URLS = \
@@ -51,20 +51,35 @@ VARS = {
   'host': path.join('{top}', 'host'),
   'target': path.join('{top}', 'target'),
   'archives': path.join('{top}', 'archives/ppc'),
-  'make_opts': ''
 }
 
 
+def fill_in(value):
+  if type(value) == str:
+    return value.format(**VARS)
+  return value
+
+
+def fill_in_args(fn):
+  def wrapper(*args, **kwargs):
+    args = list(fill_in(arg) for arg in args)
+    kwargs = dict((key, fill_in(value)) for key, value in kwargs.items())
+    return fn(*args, **kwargs)
+  return wrapper
+
+
+chdir = fill_in_args(os.chdir)
+path.exists = fill_in_args(path.exists)
+path.join = fill_in_args(path.join)
+
+
+@fill_in_args
 def panic(*args):
   error(*args)
   sys.exit(1)
 
 
-def find_executable(name):
-  return (distutils.spawn.find_executable(name) or
-          panic('Executable "%s" not found!', name))
-
-
+@fill_in_args
 def cmpver(op, v1, v2):
   assert op in ['eq', 'lt', 'gt']
 
@@ -93,12 +108,28 @@ def cmpver(op, v1, v2):
           (op == 'gt' and res > 0))
 
 
+@fill_in_args
 def relpath(name):
   if not path.isabs(name):
     name = path.abspath(name)
-  return path.relpath(name, VARS['top'])
+  return path.relpath(name, fill_in('{top}'))
 
 
+@fill_in_args
+def find_executable(name):
+  return (distutils.spawn.find_executable(name) or
+          panic('Executable "%s" not found!', name))
+
+
+@fill_in_args
+def touch(name):
+  try:
+    os.utime(name, None)
+  except:
+    open(name, 'a').close()
+
+
+@fill_in_args
 def rmtree(*names):
   for name in names:
     if path.exists(name):
@@ -106,35 +137,41 @@ def rmtree(*names):
       shutil.rmtree(name)
 
 
+@fill_in_args
 def makedirs(*names):
   for name in names:
     debug('makedir "%s"', relpath(name))
     os.makedirs(name)
 
 
+@fill_in_args
 def copytree(src, dst, **kwargs):
   debug('copytree "%s" to "%s"', relpath(src), relpath(dst))
   shutil.copytree(src, dst, **kwargs)
 
 
+@fill_in_args
 def rename(src, dst):
   debug('rename "%s" to "%s"', relpath(src), relpath(dst))
   os.rename(src, dst)
 
 
+@fill_in_args
 def symlink(src, name):
   debug('symlink "%s" from "%s"', src, relpath(name))
   os.symlink(src, name)
 
 
+@fill_in_args
 def execute(*cmd):
   debug('execute "%s"', " ".join(cmd))
   try:
-    check_call(cmd)
-  except CalledProcessError as ex:
+    subprocess.check_call(cmd)
+  except subprocess.CalledProcessError as ex:
     panic('command "%s" failed with %d', " ".join(list(ex.cmd)), ex.returncode)
 
 
+@fill_in_args
 def download(url, name):
   u = urllib2.urlopen(url)
   meta = u.info()
@@ -157,6 +194,7 @@ def download(url, name):
   print ""
 
 
+@fill_in_args
 def unarc(name):
   info('extract files from "%s"' % relpath(name))
 
@@ -197,7 +235,7 @@ def env(**kwargs):
     for key, value in kwargs.items():
       debug('changing environment variable "%s" to "%s"', key, value)
       old = environ.get(key, None)
-      environ[key] = value
+      environ[key] = fill_in(value)
       backup[key] = old
     yield
   finally:
@@ -214,12 +252,12 @@ def check_stamp(fn):
     name = fn.func_name.replace('_', '-')
     if len(args) > 0:
       name = name + "-" + str(args[0])
-    stamp = path.join(VARS['stamps'], name)
-    if not path.exists(VARS['stamps']):
-      makedirs(VARS['stamps'])
+    stamp = path.join('{stamps}', name)
+    if not path.exists('{stamps}'):
+      makedirs('{stamps}')
     if not path.exists(stamp):
       fn(*args, **kwargs)
-      check_call(['touch', stamp])
+      touch(stamp)
     else:
       info('already done "%s"', name)
 
@@ -243,16 +281,16 @@ def fetch(name, url):
 @check_stamp
 def source(name, copy=None):
   try:
-    src = glob(path.join(VARS['archives'], name) + '*')[0]
+    src = glob(path.join('{archives}', name) + '*')[0]
   except IndexError:
     panic('Missing source for "%s".', src)
 
-  dst = path.join(VARS['sources'], name)
+  dst = path.join('{sources}', name)
   rmtree(dst)
 
   info('preparing source "%s"', name)
 
-  with cwd(VARS['sources']):
+  with cwd('{sources}'):
     if path.isdir(src):
       copytree(src, dst, ignore=shutil.ignore_patterns('.svn'))
     else:
@@ -267,24 +305,24 @@ def source(name, copy=None):
 def configure(name, *confopts):
   info('configuring "%s"', name)
 
-  with cwd(path.join(VARS['build'], name)):
+  with cwd(path.join('{build}', name)):
     execute('find', '.', '-name', 'config.cache', '-delete', '-print')
-    execute(path.join(VARS['sources'], name, 'configure'), *confopts)
+    execute(path.join('{sources}', name, 'configure'), *confopts)
 
 
 @check_stamp
 def build(name, *confopts):
   info('building "%s"', name)
 
-  with cwd(path.join(VARS['build'], name)):
-    execute('make', *VARS['make_opts'])
+  with cwd(path.join('{build}', name)):
+    execute('make')
 
 
 @check_stamp
 def install(name, *confopts):
   info('installing "%s"', name)
 
-  with cwd(path.join(VARS['build'], name)):
+  with cwd(path.join('{build}', name)):
     execute('make', 'install')
 
 
@@ -296,16 +334,16 @@ def prepare_sdk():
   clib2 = ''
   newlib = ''
 
-  with cwd(VARS['sources']):
+  with cwd('{sources}'):
     for arc in ['base.lha', 'clib2-*.lha', 'newlib-*.lha']:
       info('extracting "%s"' % arc)
-      execute('lha', '-xifq', path.join(VARS['archives'], 'SDK_53.24.lha'),
+      execute('lha', '-xifq', path.join('{archives}', 'SDK_53.24.lha'),
               path.join('SDK_Install', arc))
-    base = path.join(VARS['sources'], glob('base*.lha')[0])
-    clib2 = path.join(VARS['sources'], glob('clib2*.lha')[0])
-    newlib = path.join(VARS['sources'], glob('newlib*.lha')[0])
+    base = path.join('{sources}', glob('base*.lha')[0])
+    clib2 = path.join('{sources}', glob('clib2*.lha')[0])
+    newlib = path.join('{sources}', glob('newlib*.lha')[0])
 
-  with cwd(path.join(VARS['target'], 'ppc-amigaos/SDK')):
+  with cwd(path.join('{target}', 'ppc-amigaos/SDK')):
     execute('lha', '-xf', clib2, 'clib2/*')
     execute('lha', '-xf', newlib, 'newlib/*')
     execute('lha', '-xf', base, 'Include/*')
@@ -334,11 +372,11 @@ def doit():
   find_executable('make')
   find_executable('svn')
 
-  environ['PATH'] = ":".join([path.join(VARS['target'], 'bin'),
-                              path.join(VARS['host'], 'bin'),
+  environ['PATH'] = ":".join([path.join('{target}', 'bin'),
+                              path.join('{host}', 'bin'),
                               environ['PATH']])
 
-  with cwd(VARS['archives']):
+  with cwd('{archives}'):
     for url in URLS:
       if type(url) == tuple:
         url, name = url[0], url[1]
@@ -347,10 +385,10 @@ def doit():
       fetch(name, url)
 
   lha = VARS['lha']
-  source(lha, copy=path.join(VARS['build'], lha))
+  source(lha, copy=path.join('{build}', lha))
   configure(lha,
             '--disable-shared',
-            '--prefix=' + VARS['host'])
+            '--prefix={host}')
   build(lha)
   install(lha)
 
@@ -358,7 +396,7 @@ def doit():
   source(gmp)
   configure(gmp,
             '--disable-shared',
-            '--prefix=' + VARS['host'])
+            '--prefix={host}')
   build(gmp)
   install(gmp)
 
@@ -366,8 +404,8 @@ def doit():
   source(mpfr)
   configure(mpfr,
             '--disable-shared',
-            '--prefix=' + VARS['host'],
-            '--with-gmp=' + VARS['host'])
+            '--prefix={host}',
+            '--with-gmp={host}')
   build(mpfr)
   install(mpfr)
 
@@ -375,9 +413,9 @@ def doit():
   source(mpc)
   configure(mpc,
             '--disable-shared',
-            '--prefix=' + VARS['host'],
-            '--with-gmp=' + VARS['host'],
-            '--with-mpfr=' + VARS['host'])
+            '--prefix={host}',
+            '--with-gmp={host}',
+            '--with-mpfr={host}')
   build(mpc)
   install(mpc)
 
@@ -385,8 +423,8 @@ def doit():
   source(isl)
   configure(isl,
             '--disable-shared',
-            '--prefix=' + VARS['host'],
-            '--with-gmp-prefix=' + VARS['host'])
+            '--prefix={host}',
+            '--with-gmp-prefix={host}')
   build(isl)
   install(isl)
 
@@ -394,24 +432,24 @@ def doit():
   source(cloog)
   configure(cloog,
             '--disable-shared',
-            '--prefix=' + VARS['host'],
+            '--prefix={host}',
             '--with-isl=system',
-            '--with-gmp-prefix=' + VARS['host'],
-            '--with-isl-prefix=' + VARS['host'])
+            '--with-gmp-prefix={host}',
+            '--with-isl-prefix={host}')
   build(cloog)
   install(cloog)
 
   binutils = VARS['binutils']
   binutils_env = {}
-  if cmpver('eq', VARS['binutils_ver'], '2.18'):
+  if cmpver('eq', '{binutils_ver}', '2.18'):
     binutils_env.update(CFLAGS='-Wno-error')
-  elif cmpver('eq', VARS['binutils_ver'], '2.23.2'):
+  elif cmpver('eq', '{binutils_ver}', '2.23.2'):
     binutils_env.update(CFLAGS='-Wno-error')
 
   source(binutils)
   with env(**binutils_env):
     configure(binutils,
-              '--prefix=' + VARS['target'],
+              '--prefix={target}',
               '--target=ppc-amigaos')
     build(binutils)
     install(binutils)
@@ -420,7 +458,7 @@ def doit():
 
   gcc = VARS['gcc']
   gcc_env = {}
-  if cmpver('eq', VARS['gcc_ver'], '4.2.4'):
+  if cmpver('eq', '{gcc_ver}', '4.2.4'):
     cflags = ['-std=gnu89']
     if platform.machine() == 'x86_64':
       cflags.append('-m32')
@@ -431,10 +469,10 @@ def doit():
     configure(gcc,
               '--with-bugurl="http://sf.net/p/adtools"',
               '--target=ppc-amigaos',
-              '--with-gmp=' + VARS['host'],
-              '--with-mpfr=' + VARS['host'],
-              '--with-cloog=' + VARS['host'],
-              '--prefix=' + VARS['target'],
+              '--with-gmp={host}',
+              '--with-mpfr={host}',
+              '--with-cloog={host}',
+              '--prefix={target}',
               '--enable-languages=c,c++',
               '--enable-haifa',
               '--enable-sjlj-exceptions'
@@ -445,10 +483,10 @@ def doit():
 
 
 def clean():
-  rmtree(VARS['stamps'])
-  rmtree(VARS['sources'])
-  rmtree(VARS['host'])
-  rmtree(VARS['build'])
+  rmtree('{stamps}')
+  rmtree('{sources}')
+  rmtree('{host}')
+  rmtree('{build}')
 
 
 if __name__ == "__main__":
@@ -481,15 +519,9 @@ if __name__ == "__main__":
     VARS['target'] = args.prefix
 
   for key, value in VARS.items():
-    if type(value) == str:
-      VARS[key] = value.format(**VARS)
+    VARS[key] = fill_in(value)
 
-  """
-  VARS['make_opts'] = (
-    '-j' + check_output(['getconf', '_NPROCESSORS_CONF']).strip())
-  """
-
-  if not path.exists(VARS['target']):
-    makedirs(VARS['target'])
+  if not path.exists('{target}'):
+    makedirs('{target}')
 
   eval(args.action + "()")

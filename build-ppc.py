@@ -2,13 +2,15 @@
 
 # Build cross toolchain for AmigaOS 4.x / PowerPC target.
 
-from subprocess import check_call, check_output, CalledProcessError
+from subprocess import check_call, CalledProcessError
 from os import getcwd, chdir, environ, path
 from contextlib import contextmanager
 from argparse import ArgumentParser
+import distutils.spawn
 import shutil
 import os
 import logging
+import platform
 import urllib2
 import tarfile
 import zipfile
@@ -56,6 +58,11 @@ VARS = {
 def panic(*args):
   error(*args)
   sys.exit(1)
+
+
+def find_executable(name):
+  return (distutils.spawn.find_executable(name) or
+          panic('Executable "%s" not found!', name))
 
 
 def cmpver(op, v1, v2):
@@ -220,48 +227,17 @@ def check_stamp(fn):
 
 
 @check_stamp
-def fetch():
-  with cwd(VARS['archives']):
-    for url in URLS:
-      if type(url) == tuple:
-        url, name = url[0], url[1]
-      else:
-        name = path.basename(url)
-
-      if url.startswith('http') or url.startswith('ftp'):
-        if not path.exists(name):
-          download(url, name)
-        else:
-          info('File "%s" already downloaded.', name)
-      elif url.startswith('svn'):
-        if not path.exists(name):
-          execute('svn', 'checkout', url, name)
-        else:
-          execute('svn', 'update', name)
-
-
-@check_stamp
-def prepare_sdk():
-  info('preparing SDK')
-
-  base = ''
-  clib2 = ''
-  newlib = ''
-
-  with cwd(VARS['sources']):
-    for arc in ['base.lha', 'clib2-*.lha', 'newlib-*.lha']:
-      info('extracting "%s"' % arc)
-      execute('lha', '-xifq', path.join(VARS['archives'], 'SDK_53.24.lha'),
-              path.join('SDK_Install', arc))
-    base = path.join(VARS['sources'], glob('base*.lha')[0])
-    clib2 = path.join(VARS['sources'], glob('clib2*.lha')[0])
-    newlib = path.join(VARS['sources'], glob('newlib*.lha')[0])
-
-  with cwd(path.join(VARS['target'], 'ppc-amigaos/SDK')):
-    execute('lha', '-xf', clib2, 'clib2/*')
-    execute('lha', '-xf', newlib, 'newlib/*')
-    execute('lha', '-xf', base, 'Include/*')
-    rename('Include', 'include')
+def fetch(name, url):
+  if url.startswith('http') or url.startswith('ftp'):
+    if not path.exists(name):
+      download(url, name)
+    else:
+      info('File "%s" already downloaded.', name)
+  elif url.startswith('svn'):
+    if not path.exists(name):
+      execute('svn', 'checkout', url, name)
+    else:
+      execute('svn', 'update', name)
 
 
 @check_stamp
@@ -312,21 +288,63 @@ def install(name, *confopts):
     execute('make', 'install')
 
 
+@check_stamp
+def prepare_sdk():
+  info('preparing SDK')
+
+  base = ''
+  clib2 = ''
+  newlib = ''
+
+  with cwd(VARS['sources']):
+    for arc in ['base.lha', 'clib2-*.lha', 'newlib-*.lha']:
+      info('extracting "%s"' % arc)
+      execute('lha', '-xifq', path.join(VARS['archives'], 'SDK_53.24.lha'),
+              path.join('SDK_Install', arc))
+    base = path.join(VARS['sources'], glob('base*.lha')[0])
+    clib2 = path.join(VARS['sources'], glob('clib2*.lha')[0])
+    newlib = path.join(VARS['sources'], glob('newlib*.lha')[0])
+
+  with cwd(path.join(VARS['target'], 'ppc-amigaos/SDK')):
+    execute('lha', '-xf', clib2, 'clib2/*')
+    execute('lha', '-xf', newlib, 'newlib/*')
+    execute('lha', '-xf', base, 'Include/*')
+    rename('Include', 'include')
+
+
 def doit():
   for var in environ.keys():
     if var not in ['_', 'LOGNAME', 'HOME', 'SHELL', 'TMPDIR', 'PWD']:
       del environ[var]
 
   environ['PATH'] = '/usr/bin:/bin'
-  environ['CC'] = check_output(['which', 'gcc']).strip()
-  environ['CXX'] = check_output(['which', 'g++']).strip()
   environ['LANG'] = 'C'
   environ['TERM'] = 'xterm'
+
+  if platform.system() == 'Darwin':
+    cc, cxx = 'clang', 'clang++'
+  else:
+    cc, cxx = 'gcc', 'g++'
+
+  environ['CC'] = find_executable(cc)
+  environ['CXX'] = find_executable(cxx)
+
+  find_executable('bison')
+  find_executable('flex')
+  find_executable('make')
+  find_executable('svn')
+
   environ['PATH'] = ":".join([path.join(VARS['target'], 'bin'),
                               path.join(VARS['host'], 'bin'),
                               environ['PATH']])
 
-  fetch()
+  with cwd(VARS['archives']):
+    for url in URLS:
+      if type(url) == tuple:
+        url, name = url[0], url[1]
+      else:
+        name = path.basename(url)
+      fetch(name, url)
 
   lha = VARS['lha']
   source(lha, copy=path.join(VARS['build'], lha))
@@ -403,7 +421,10 @@ def doit():
   gcc = VARS['gcc']
   gcc_env = {}
   if cmpver('eq', VARS['gcc_ver'], '4.2.4'):
-    gcc_env.update(CFLAGS='-std=gnu89 -m32')
+    cflags = ['-std=gnu89']
+    if platform.machine() == 'x86_64':
+      cflags.append('-m32')
+    gcc_env.update(CFLAGS=' '.join(cflags))
 
   source(gcc)
   with env(**gcc_env):
@@ -443,6 +464,12 @@ if __name__ == "__main__":
   parser.add_argument('--prefix', type=str, default=None,
                       help='installation directory')
   args = parser.parse_args()
+
+  if platform.system() not in ['Darwin', 'Linux', 'Windows']:
+    panic('Build on %s not supported!', platform.system())
+
+  if platform.machine() not in ['i386', 'i686', 'x86_64']:
+    panic('Build on %s architecture not supported!', platform.machine())
 
   VARS.update({
     'top': path.abspath('.'),

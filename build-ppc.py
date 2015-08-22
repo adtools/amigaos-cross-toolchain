@@ -1,4 +1,4 @@
-#!/usr/bin/env python -B
+#!/usr/bin/python -B
 
 # Build cross toolchain for AmigaOS 4.x / PowerPC target.
 
@@ -13,6 +13,7 @@ URLS = \
   ['ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2',
    'ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz',
    'ftp://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2',
+   'ftp://ftp.gnu.org/gnu/texinfo/texinfo-4.12.tar.gz',
    'http://isl.gforge.inria.fr/isl-0.12.2.tar.bz2',
    'http://www.bastoul.net/cloog/pages/download/cloog-0.18.4.tar.gz',
    'http://soulsphere.org/projects/lhasa/lhasa-0.3.0.tar.gz',
@@ -22,9 +23,7 @@ URLS = \
    ('svn://svn.code.sf.net/p/adtools/code/trunk/gcc', 'gcc-4.2.4'),
    ('svn://svn.code.sf.net/p/adtools/code/branches/binutils/2.23.2',
     'binutils-2.23.2'),
-   ('svn://svn.code.sf.net/p/adtools/code/branches/gcc/4.9.x', 'gcc-4.9.1'),
-   ('http://github.com/adtools/sfdc/archive/master.zip', 'sfdc-master.zip'),
-   ('http://clib2.cvs.sourceforge.net/viewvc/clib2/?view=tar', 'clib2.tar.gz')]
+   ('svn://svn.code.sf.net/p/adtools/code/branches/gcc/4.9.x', 'gcc-4.9.1')]
 
 
 from common import * # NOQA
@@ -94,6 +93,12 @@ def doit():
             '--prefix={host}')
   build('{lha}')
   install('{lha}')
+
+  source('{texinfo}')
+  configure('{texinfo}',
+            '--prefix={host}')
+  build('{texinfo}')
+  install('{texinfo}')
 
   source('{gmp}')
   configure('{gmp}',
@@ -215,6 +220,7 @@ if __name__ == "__main__":
          mpc='mpc-1.0.3',
          isl='isl-0.12.2',
          cloog='cloog-0.18.4',
+         texinfo='texinfo-4.12',
          binutils='binutils-{binutils_ver}',
          gcc='gcc-{gcc_ver}',
          patches=path.join('{top}', 'patches'),

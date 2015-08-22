@@ -16,7 +16,11 @@ import zipfile
 
 
 VARS = {}
-setvar = VARS.update
+
+
+def setvar(**kwargs):
+  for key, item in kwargs.items():
+    VARS[key] = item.format(**VARS)
 
 
 def fill_in(value):

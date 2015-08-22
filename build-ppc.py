@@ -9,9 +9,12 @@ from argparse import ArgumentParser
 import shutil
 import os
 import logging
-from sys import exit
-from logging import debug, info, error
+import urllib2
+import tarfile
+import zipfile
+import sys
 from glob import glob
+from logging import debug, info, error
 
 URLS = \
   ["ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2",
@@ -19,7 +22,7 @@ URLS = \
    "ftp://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2",
    "http://isl.gforge.inria.fr/isl-0.12.2.tar.bz2",
    "http://www.bastoul.net/cloog/pages/download/cloog-0.18.4.tar.gz",
-   "https://soulsphere.org/projects/lhasa/lhasa-0.3.0.tar.gz",
+   "http://soulsphere.org/projects/lhasa/lhasa-0.3.0.tar.gz",
    ("http://hyperion-entertainment.biz/index.php/downloads" +
     "?view=download&amp;format=raw&amp;file=69", "SDK_53.24.lha"),
    ("svn://svn.code.sf.net/p/adtools/code/trunk/binutils", "binutils-2.18"),
@@ -27,7 +30,7 @@ URLS = \
    ("svn://svn.code.sf.net/p/adtools/code/branches/binutils/2.23.2",
     "binutils-2.23.2"),
    ("svn://svn.code.sf.net/p/adtools/code/branches/gcc/4.9.x", "gcc-4.9.1"),
-   ("https://github.com/adtools/sfdc/archive/master.zip", "sfdc-master.zip"),
+   ("http://github.com/adtools/sfdc/archive/master.zip", "sfdc-master.zip"),
    ("http://clib2.cvs.sourceforge.net/viewvc/clib2/?view=tar", "clib2.tar.gz")]
 
 VARS = {}
@@ -41,6 +44,11 @@ PATCHES = ""
 SOURCE_DIR = ""
 BUILD_DIR = ""
 HOST_DIR = ""
+
+
+def panic(*args):
+  error(*args)
+  sys.exit(1)
 
 
 def mkver(strver):
@@ -86,8 +94,49 @@ def execute(*cmd):
   try:
     check_call(cmd)
   except CalledProcessError as ex:
-    error('command "%s" failed with %d', " ".join(list(ex.cmd)), ex.returncode)
-    exit()
+    panic('command "%s" failed with %d', " ".join(list(ex.cmd)), ex.returncode)
+
+
+def download(url, name):
+  u = urllib2.urlopen(url)
+  meta = u.info()
+  size = int(meta.getheaders('Content-Length')[0])
+  info('download: %s (size: %d)' % (name, size))
+
+  with open(name, 'wb') as f:
+    done = 0
+    block = 8192
+    while True:
+      buf = u.read(block)
+      if not buf:
+        break
+      done += len(buf)
+      f.write(buf)
+      status = r"%10d  [%3.2f%%]" % (done, done * 100. / size)
+      status = status + chr(8) * (len(status) + 1)
+      print status,
+
+  print ""
+
+
+def unarc(name):
+  info('extract files from "%s"' % relpath(name))
+
+  if name.endswith('.lha'):
+    execute('lha', '-xq', name)
+  else:
+    if name.endswith('.tar.gz') or name.endswith('.tar.bz2'):
+      module = tarfile
+    elif name.endswith('.zip'):
+      module = zipfile
+    else:
+      raise RuntimeError('Unrecognized archive: "%s"', name)
+
+    arc = module.open(name, 'r')
+    for item in arc:
+      debug('extract "%s"' % item.name)
+      arc.extract(item)
+    arc.close()
 
 
 @contextmanager
@@ -147,27 +196,16 @@ def fetch():
       else:
         name = path.basename(url)
 
-      if url.startswith("http") or url.startswith("ftp"):
+      if url.startswith('http') or url.startswith('ftp'):
         if not path.exists(name):
-          execute("wget", "--no-check-certificate", "-O", name, url)
+          download(url, name)
         else:
-          info("File '%s' already downloaded.", name)
-      elif url.startswith("svn"):
+          info('File "%s" already downloaded.', name)
+      elif url.startswith('svn'):
         if not path.exists(name):
-          execute("svn", "checkout", url, name)
+          execute('svn', 'checkout', url, name)
         else:
-          execute("svn", "update", name)
-
-
-@check_stamp
-def prepare_target():
-  info('preparing "%s"', relpath(TARGET_DIR))
-
-  rmtree(TARGET_DIR)
-  with cwd(TARGET_DIR):
-    makedirs('bin', 'doc', 'etc', 'lib', 'ppc-amigaos')
-    symlink('../os-include', 'ppc-amigaos/include')
-    symlink('../lib', 'ppc-amigaos/lib')
+          execute('svn', 'update', name)
 
 
 @check_stamp
@@ -196,40 +234,21 @@ def prepare_sdk():
 
 @check_stamp
 def prepare_source(name, copy=None):
-  src = path.join(ARCHIVES, name)
-  dst = name
+  try:
+    src = glob(path.join(ARCHIVES, name) + '*')[0]
+  except IndexError:
+    panic('Missing source for "%s".', src)
 
-  if src.endswith('.tar.gz'):
-    fmt = 'tar.gz'
-  elif src.endswith('.tar.bz2'):
-    fmt = 'tar.bz2'
-  elif src.endswith('.lha'):
-    fmt = 'lha'
-  elif src.endswith('.zip'):
-    fmt = 'zip'
-  elif path.isdir(src):
-    fmt = 'dir'
-  else:
-    raise RuntimeError('Unrecognized source: %s', src)
-
-  if fmt != 'dir':
-    name = name.rstrip('.' + fmt)
   dst = path.join(SOURCE_DIR, name)
   rmtree(dst)
 
   info('preparing source "%s"', name)
 
   with cwd(SOURCE_DIR):
-    if fmt == 'tar.gz':
-      execute('tar', '-xzf', src)
-    elif fmt == 'tar.bz2':
-      execute('tar', '-xjf', src)
-    elif fmt == 'lha':
-      execute('lha', '-xq', src)
-    elif fmt == 'zip':
-      execute('unzip', src)
-    elif fmt == 'dir':
+    if path.isdir(src):
       copytree(src, dst, ignore=shutil.ignore_patterns('.svn'))
+    else:
+      unarc(src)
 
     if copy is not None:
       rmtree(copy)
@@ -250,7 +269,7 @@ def build(name, *confopts):
   info('building "%s"', name)
 
   with cwd(path.join(BUILD_DIR, name)):
-    execute("make", *MAKE_OPTS)
+    execute('make', *MAKE_OPTS)
 
 
 @check_stamp
@@ -258,7 +277,7 @@ def install(name, *confopts):
   info('installing "%s"', name)
 
   with cwd(path.join(BUILD_DIR, name)):
-    execute("make", "install")
+    execute('make', 'install')
 
 
 def doit():
@@ -275,16 +294,17 @@ def doit():
                               path.join(HOST_DIR, 'bin'),
                               environ['PATH']])
 
-  prepare_source('lhasa-0.3.0.tar.gz',
-                 copy=path.join(BUILD_DIR, 'lhasa-0.3.0'))
-  configure("lhasa-0.3.0",
-            "--disable-shared",
-            "--prefix=" + HOST_DIR)
-  build("lhasa-0.3.0")
-  install("lhasa-0.3.0")
+  lha = VARS['lha']
+  prepare_source(lha,
+                 copy=path.join(BUILD_DIR, lha))
+  configure(lha,
+            '--disable-shared',
+            '--prefix=' + HOST_DIR)
+  build(lha)
+  install(lha)
 
   gmp = VARS['gmp']
-  prepare_source(gmp + '.tar.bz2')
+  prepare_source(gmp)
   configure(gmp,
             '--disable-shared',
             '--prefix=' + HOST_DIR)
@@ -292,7 +312,7 @@ def doit():
   install(gmp)
 
   mpfr = VARS['mpfr']
-  prepare_source(mpfr + '.tar.bz2')
+  prepare_source(mpfr)
   configure(mpfr,
             '--disable-shared',
             '--prefix=' + HOST_DIR,
@@ -301,7 +321,7 @@ def doit():
   install(mpfr)
 
   mpc = VARS['mpc']
-  prepare_source(mpc + '.tar.gz')
+  prepare_source(mpc)
   configure(mpc,
             '--disable-shared',
             '--prefix=' + HOST_DIR,
@@ -311,7 +331,7 @@ def doit():
   install(mpc)
 
   isl = VARS['isl']
-  prepare_source(isl + '.tar.bz2')
+  prepare_source(isl)
   configure(isl,
             '--disable-shared',
             '--prefix=' + HOST_DIR,
@@ -320,7 +340,7 @@ def doit():
   install(isl)
 
   cloog = VARS['cloog']
-  prepare_source(cloog + '.tar.gz')
+  prepare_source(cloog)
   configure(cloog,
             '--disable-shared',
             '--prefix=' + HOST_DIR,
@@ -393,6 +413,7 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   VARS = {
+    'lha': 'lhasa-0.3.0',
     'gmp': 'gmp-5.1.3',
     'mpfr': 'mpfr-3.1.3',
     'mpc': 'mpc-1.0.3',

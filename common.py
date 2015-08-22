@@ -16,11 +16,10 @@ import zipfile
 
 
 VARS = {}
+setvar = VARS.update
 
 
 def fill_in(value):
-  global VARS
-
   if type(value) == str:
     return value.format(**VARS)
   return value
@@ -249,7 +248,7 @@ def check_stamp(fn):
   def wrapper(*args, **kwargs):
     name = fn.func_name.replace('_', '-')
     if len(args) > 0:
-      name = name + "-" + str(args[0])
+      name = name + "-" + str(fill_in(args[0]))
     stamp = path.join('{stamps}', name)
     if not path.exists('{stamps}'):
       mkdir('{stamps}')
@@ -324,7 +323,7 @@ def install(name, *confopts):
     execute('make', 'install')
 
 
-__all__ = ['VARS', 'panic', 'cmpver', 'find_executable', 'execute',
+__all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'execute',
            'rmtree', 'mkdir', 'copytree', 'unarc', 'fetch', 'cwd',
            'remove', 'rename', 'find_files', 'env', 'path', 'check_stamp',
            'source', 'configure', 'build', 'install']

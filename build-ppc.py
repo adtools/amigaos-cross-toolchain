@@ -88,79 +88,71 @@ def doit():
         name = path.basename(url)
       fetch(name, url)
 
-  lha = VARS['lha']
-  source(lha, copy=path.join('{build}', lha))
-  configure(lha,
+  source('{lha}', copy=path.join('{build}', '{lha}'))
+  configure('{lha}',
             '--disable-shared',
             '--prefix={host}')
-  build(lha)
-  install(lha)
+  build('{lha}')
+  install('{lha}')
 
-  gmp = VARS['gmp']
-  source(gmp)
-  configure(gmp,
+  source('{gmp}')
+  configure('{gmp}',
             '--disable-shared',
             '--prefix={host}')
-  build(gmp)
-  install(gmp)
+  build('{gmp}')
+  install('{gmp}')
 
-  mpfr = VARS['mpfr']
-  source(mpfr)
-  configure(mpfr,
+  source('{mpfr}')
+  configure('{mpfr}',
             '--disable-shared',
             '--prefix={host}',
             '--with-gmp={host}')
-  build(mpfr)
-  install(mpfr)
+  build('{mpfr}')
+  install('{mpfr}')
 
-  mpc = VARS['mpc']
-  source(mpc)
-  configure(mpc,
+  source('{mpc}')
+  configure('{mpc}',
             '--disable-shared',
             '--prefix={host}',
             '--with-gmp={host}',
             '--with-mpfr={host}')
-  build(mpc)
-  install(mpc)
+  build('{mpc}')
+  install('{mpc}')
 
-  isl = VARS['isl']
-  source(isl)
-  configure(isl,
+  source('{isl}')
+  configure('{isl}',
             '--disable-shared',
             '--prefix={host}',
             '--with-gmp-prefix={host}')
-  build(isl)
-  install(isl)
+  build('{isl}')
+  install('{isl}')
 
-  cloog = VARS['cloog']
-  source(cloog)
-  configure(cloog,
+  source('{cloog}')
+  configure('{cloog}',
             '--disable-shared',
             '--prefix={host}',
             '--with-isl=system',
             '--with-gmp-prefix={host}',
             '--with-isl-prefix={host}')
-  build(cloog)
-  install(cloog)
+  build('{cloog}')
+  install('{cloog}')
 
-  binutils = VARS['binutils']
   binutils_env = {}
   if cmpver('eq', '{binutils_ver}', '2.18'):
     binutils_env.update(CFLAGS='-Wno-error')
   elif cmpver('eq', '{binutils_ver}', '2.23.2'):
     binutils_env.update(CFLAGS='-Wno-error')
 
-  source(binutils)
+  source('{binutils}')
   with env(**binutils_env):
-    configure(binutils,
+    configure('{binutils}',
               '--prefix={target}',
               '--target=ppc-amigaos')
-    build(binutils)
-    install(binutils)
+    build('{binutils}')
+    install('{binutils}')
 
   prepare_sdk()
 
-  gcc = VARS['gcc']
   gcc_env = {}
   if cmpver('eq', '{gcc_ver}', '4.2.4'):
     cflags = ['-std=gnu89']
@@ -168,9 +160,9 @@ def doit():
       cflags.append('-m32')
     gcc_env.update(CFLAGS=' '.join(cflags))
 
-  source(gcc)
+  source('{gcc}')
   with env(**gcc_env):
-    configure(gcc,
+    configure('{gcc}',
               '--with-bugurl="http://sf.net/p/adtools"',
               '--target=ppc-amigaos',
               '--with-gmp={host}',
@@ -182,8 +174,8 @@ def doit():
               '--enable-sjlj-exceptions'
               '--disable-libstdcxx-pch'
               '--disable-tls')
-    build(gcc)
-    install(gcc)
+    build('{gcc}')
+    install('{gcc}')
 
 
 def clean():
@@ -213,32 +205,28 @@ if __name__ == "__main__":
   if platform.machine() not in ['i386', 'i686', 'x86_64']:
     panic('Build on %s architecture not supported!', platform.machine())
 
-  VARS.update({
-    'top': path.abspath('.'),
-    'binutils_ver': args.binutils,
-    'gcc_ver': args.gcc
-  })
+  setvar(top=path.abspath('.'),
+         binutils_ver=args.binutils,
+         gcc_ver=args.gcc)
 
-  VARS.update({
-    'lha': 'lhasa-0.3.0',
-    'gmp': 'gmp-5.1.3',
-    'mpfr': 'mpfr-3.1.3',
-    'mpc': 'mpc-1.0.3',
-    'isl': 'isl-0.12.2',
-    'cloog': 'cloog-0.18.4',
-    'binutils': 'binutils-{binutils_ver}',
-    'gcc': 'gcc-{gcc_ver}',
-    'patches': path.join('{top}', 'patches'),
-    'stamps': path.join('{top}', 'stamps'),
-    'build': path.join('{top}', 'build'),
-    'sources': path.join('{top}', 'sources'),
-    'host': path.join('{top}', 'host'),
-    'target': path.join('{top}', 'target'),
-    'archives': path.join('{top}', 'archives', 'ppc'),
-  })
+  setvar(lha='lhasa-0.3.0',
+         gmp='gmp-5.1.3',
+         mpfr='mpfr-3.1.3',
+         mpc='mpc-1.0.3',
+         isl='isl-0.12.2',
+         cloog='cloog-0.18.4',
+         binutils='binutils-{binutils_ver}',
+         gcc='gcc-{gcc_ver}',
+         patches=path.join('{top}', 'patches'),
+         stamps=path.join('{top}', 'stamps'),
+         build=path.join('{top}', 'build'),
+         sources=path.join('{top}', 'sources'),
+         host=path.join('{top}', 'host'),
+         target=path.join('{top}', 'target'),
+         archives=path.join('{top}', 'archives', 'ppc'))
 
   if args.prefix is not None:
-    VARS['target'] = args.prefix
+    setvar(target=args.prefix)
 
   if not path.exists('{target}'):
     mkdir('{target}')

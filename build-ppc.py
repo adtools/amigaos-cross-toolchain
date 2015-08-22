@@ -2,21 +2,22 @@
 
 # Build cross toolchain for AmigaOS 4.x / PowerPC target.
 
-from os import getcwd, environ, path
-from contextlib import contextmanager
 from argparse import ArgumentParser
+from contextlib import contextmanager
+from fnmatch import fnmatch
 from glob import glob
-import distutils.spawn
-import subprocess
-import shutil
-import os
-import logging
-import platform
-import urllib2
-import tarfile
-import zipfile
-import sys
 from logging import debug, info, error
+from os import getcwd, environ, path
+import distutils.spawn
+import logging
+import os
+import platform
+import shutil
+import subprocess
+import sys
+import tarfile
+import urllib2
+import zipfile
 
 URLS = \
   ['ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2',
@@ -66,6 +67,19 @@ def fill_in_args(fn):
     kwargs = dict((key, fill_in(value)) for key, value in kwargs.items())
     return fn(*args, **kwargs)
   return wrapper
+
+
+def flatten(*args):
+  queue = list(args)
+
+  while queue:
+    item = queue.pop(0)
+    if type(item) == list:
+      queue = item + queue
+    elif type(item) == tuple:
+      queue = list(item) + queue
+    else:
+      yield item
 
 
 chdir = fill_in_args(os.chdir)
@@ -122,6 +136,16 @@ def find_executable(name):
 
 
 @fill_in_args
+def find_files(pattern):
+  found = []
+  for root, dirs, files in os.walk('.', topdown=True):
+    for name in files:
+      if fnmatch(name, pattern):
+        found.append(path.join(root, name))
+  return found
+
+
+@fill_in_args
 def touch(name):
   try:
     os.utime(name, None)
@@ -131,15 +155,23 @@ def touch(name):
 
 @fill_in_args
 def rmtree(*names):
-  for name in names:
-    if path.exists(name):
+  for name in flatten(names):
+    if path.isdir(name):
       debug('rmtree "%s"', relpath(name))
       shutil.rmtree(name)
 
 
 @fill_in_args
-def makedirs(*names):
-  for name in names:
+def remove(*names):
+  for name in flatten(names):
+    if path.isfile(name):
+      debug('remove "%s"', relpath(name))
+      os.remove(name)
+
+
+@fill_in_args
+def mkdir(*names):
+  for name in flatten(names):
     debug('makedir "%s"', relpath(name))
     os.makedirs(name)
 
@@ -219,7 +251,7 @@ def unarc(name):
 def cwd(name):
   old = getcwd()
   if not path.exists(name):
-    makedirs(name)
+    mkdir(name)
   try:
     debug('enter directory "%s"', relpath(name))
     chdir(name)
@@ -254,7 +286,7 @@ def check_stamp(fn):
       name = name + "-" + str(args[0])
     stamp = path.join('{stamps}', name)
     if not path.exists('{stamps}'):
-      makedirs('{stamps}')
+      mkdir('{stamps}')
     if not path.exists(stamp):
       fn(*args, **kwargs)
       touch(stamp)
@@ -306,7 +338,7 @@ def configure(name, *confopts):
   info('configuring "%s"', name)
 
   with cwd(path.join('{build}', name)):
-    execute('find', '.', '-name', 'config.cache', '-delete', '-print')
+    remove(find_files('config.cache'))
     execute(path.join('{sources}', name, 'configure'), *confopts)
 
 
@@ -522,6 +554,6 @@ if __name__ == "__main__":
     VARS[key] = fill_in(value)
 
   if not path.exists('{target}'):
-    makedirs('{target}')
+    mkdir('{target}')
 
   eval(args.action + "()")

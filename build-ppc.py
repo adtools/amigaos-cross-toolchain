@@ -17,33 +17,40 @@ from glob import glob
 from logging import debug, info, error
 
 URLS = \
-  ["ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2",
-   "ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz",
-   "ftp://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2",
-   "http://isl.gforge.inria.fr/isl-0.12.2.tar.bz2",
-   "http://www.bastoul.net/cloog/pages/download/cloog-0.18.4.tar.gz",
-   "http://soulsphere.org/projects/lhasa/lhasa-0.3.0.tar.gz",
-   ("http://hyperion-entertainment.biz/index.php/downloads" +
-    "?view=download&amp;format=raw&amp;file=69", "SDK_53.24.lha"),
-   ("svn://svn.code.sf.net/p/adtools/code/trunk/binutils", "binutils-2.18"),
-   ("svn://svn.code.sf.net/p/adtools/code/trunk/gcc", "gcc-4.2.4"),
-   ("svn://svn.code.sf.net/p/adtools/code/branches/binutils/2.23.2",
-    "binutils-2.23.2"),
-   ("svn://svn.code.sf.net/p/adtools/code/branches/gcc/4.9.x", "gcc-4.9.1"),
-   ("http://github.com/adtools/sfdc/archive/master.zip", "sfdc-master.zip"),
-   ("http://clib2.cvs.sourceforge.net/viewvc/clib2/?view=tar", "clib2.tar.gz")]
+  ['ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2',
+   'ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz',
+   'ftp://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2',
+   'http://isl.gforge.inria.fr/isl-0.12.2.tar.bz2',
+   'http://www.bastoul.net/cloog/pages/download/cloog-0.18.4.tar.gz',
+   'http://soulsphere.org/projects/lhasa/lhasa-0.3.0.tar.gz',
+   ('http://hyperion-entertainment.biz/index.php/downloads' +
+    '?view=download&amp;format=raw&amp;file=69', 'SDK_53.24.lha'),
+   ('svn://svn.code.sf.net/p/adtools/code/trunk/binutils', 'binutils-2.18'),
+   ('svn://svn.code.sf.net/p/adtools/code/trunk/gcc', 'gcc-4.2.4'),
+   ('svn://svn.code.sf.net/p/adtools/code/branches/binutils/2.23.2',
+    'binutils-2.23.2'),
+   ('svn://svn.code.sf.net/p/adtools/code/branches/gcc/4.9.x', 'gcc-4.9.1'),
+   ('http://github.com/adtools/sfdc/archive/master.zip', 'sfdc-master.zip'),
+   ('http://clib2.cvs.sourceforge.net/viewvc/clib2/?view=tar', 'clib2.tar.gz')]
 
-VARS = {}
-TARGET_DIR = ""
-MAKE_OPTS = []
-TOP_DIR = ""
-STAMP_DIR = ""
-BUILD_DIR = ""
-ARCHIVES = ""
-PATCHES = ""
-SOURCE_DIR = ""
-BUILD_DIR = ""
-HOST_DIR = ""
+VARS = {
+  'lha': 'lhasa-0.3.0',
+  'gmp': 'gmp-5.1.3',
+  'mpfr': 'mpfr-3.1.3',
+  'mpc': 'mpc-1.0.3',
+  'isl': 'isl-0.12.2',
+  'cloog': 'cloog-0.18.4',
+  'binutils': 'binutils-{binutils_ver}',
+  'gcc': 'gcc-{gcc_ver}',
+  'patches': path.join('{top}', 'patches'),
+  'stamps': path.join('{top}', 'stamps'),
+  'build': path.join('{top}', 'build'),
+  'sources': path.join('{top}', 'sources'),
+  'host': path.join('{top}', 'host'),
+  'target': path.join('{top}', 'target'),
+  'archives': path.join('{top}', 'archives/ppc'),
+  'make_opts': ''
+}
 
 
 def panic(*args):
@@ -51,14 +58,38 @@ def panic(*args):
   sys.exit(1)
 
 
-def mkver(strver):
-  return tuple(int(x) for x in strver.split('.'))
+def cmpver(op, v1, v2):
+  assert op in ['eq', 'lt', 'gt']
+
+  v1 = [int(x) for x in v1.split('.')]
+  v2 = [int(x) for x in v2.split('.')]
+
+  def _cmp(l1, l2):
+    if not len(l1) and not len(l2):
+      return 0
+    if not len(l1):
+      return -1
+    if not len(l2):
+      return 1
+
+    if l1[0] < l2[0]:
+      return -1
+    if l1[0] > l2[0]:
+      return 1
+    if l1[0] == l2[0]:
+      return _cmp(l1[1:], l2[1:])
+
+  res = _cmp(v1, v2)
+
+  return ((op == 'eq' and res == 0) or
+          (op == 'lt' and res < 0) or
+          (op == 'gt' and res > 0))
 
 
 def relpath(name):
   if not path.isabs(name):
     name = path.abspath(name)
-  return path.relpath(name, TOP_DIR)
+  return path.relpath(name, VARS['top'])
 
 
 def rmtree(*names):
@@ -176,9 +207,9 @@ def check_stamp(fn):
     name = fn.func_name.replace('_', '-')
     if len(args) > 0:
       name = name + "-" + str(args[0])
-    stamp = path.join(STAMP_DIR, name)
-    if not path.exists(STAMP_DIR):
-      makedirs(STAMP_DIR)
+    stamp = path.join(VARS['stamps'], name)
+    if not path.exists(VARS['stamps']):
+      makedirs(VARS['stamps'])
     if not path.exists(stamp):
       fn(*args, **kwargs)
       check_call(['touch', stamp])
@@ -188,8 +219,9 @@ def check_stamp(fn):
   return wrapper
 
 
+@check_stamp
 def fetch():
-  with cwd(ARCHIVES):
+  with cwd(VARS['archives']):
     for url in URLS:
       if type(url) == tuple:
         url, name = url[0], url[1]
@@ -216,16 +248,16 @@ def prepare_sdk():
   clib2 = ''
   newlib = ''
 
-  with cwd(SOURCE_DIR):
+  with cwd(VARS['sources']):
     for arc in ['base.lha', 'clib2-*.lha', 'newlib-*.lha']:
       info('extracting "%s"' % arc)
-      execute('lha', '-xifq', path.join(ARCHIVES, 'SDK_53.24.lha'),
+      execute('lha', '-xifq', path.join(VARS['archives'], 'SDK_53.24.lha'),
               path.join('SDK_Install', arc))
-    base = path.join(SOURCE_DIR, glob('base*.lha')[0])
-    clib2 = path.join(SOURCE_DIR, glob('clib2*.lha')[0])
-    newlib = path.join(SOURCE_DIR, glob('newlib*.lha')[0])
+    base = path.join(VARS['sources'], glob('base*.lha')[0])
+    clib2 = path.join(VARS['sources'], glob('clib2*.lha')[0])
+    newlib = path.join(VARS['sources'], glob('newlib*.lha')[0])
 
-  with cwd(path.join(TARGET_DIR, 'ppc-amigaos/SDK')):
+  with cwd(path.join(VARS['target'], 'ppc-amigaos/SDK')):
     execute('lha', '-xf', clib2, 'clib2/*')
     execute('lha', '-xf', newlib, 'newlib/*')
     execute('lha', '-xf', base, 'Include/*')
@@ -233,18 +265,18 @@ def prepare_sdk():
 
 
 @check_stamp
-def prepare_source(name, copy=None):
+def source(name, copy=None):
   try:
-    src = glob(path.join(ARCHIVES, name) + '*')[0]
+    src = glob(path.join(VARS['archives'], name) + '*')[0]
   except IndexError:
     panic('Missing source for "%s".', src)
 
-  dst = path.join(SOURCE_DIR, name)
+  dst = path.join(VARS['sources'], name)
   rmtree(dst)
 
   info('preparing source "%s"', name)
 
-  with cwd(SOURCE_DIR):
+  with cwd(VARS['sources']):
     if path.isdir(src):
       copytree(src, dst, ignore=shutil.ignore_patterns('.svn'))
     else:
@@ -259,24 +291,24 @@ def prepare_source(name, copy=None):
 def configure(name, *confopts):
   info('configuring "%s"', name)
 
-  with cwd(path.join(BUILD_DIR, name)):
+  with cwd(path.join(VARS['build'], name)):
     execute('find', '.', '-name', 'config.cache', '-delete', '-print')
-    execute(path.join(SOURCE_DIR, name, 'configure'), *confopts)
+    execute(path.join(VARS['sources'], name, 'configure'), *confopts)
 
 
 @check_stamp
 def build(name, *confopts):
   info('building "%s"', name)
 
-  with cwd(path.join(BUILD_DIR, name)):
-    execute('make', *MAKE_OPTS)
+  with cwd(path.join(VARS['build'], name)):
+    execute('make', *VARS['make_opts'])
 
 
 @check_stamp
 def install(name, *confopts):
   info('installing "%s"', name)
 
-  with cwd(path.join(BUILD_DIR, name)):
+  with cwd(path.join(VARS['build'], name)):
     execute('make', 'install')
 
 
@@ -290,77 +322,78 @@ def doit():
   environ['CXX'] = check_output(['which', 'g++']).strip()
   environ['LANG'] = 'C'
   environ['TERM'] = 'xterm'
-  environ['PATH'] = ":".join([path.join(TARGET_DIR, 'bin'),
-                              path.join(HOST_DIR, 'bin'),
+  environ['PATH'] = ":".join([path.join(VARS['target'], 'bin'),
+                              path.join(VARS['host'], 'bin'),
                               environ['PATH']])
 
+  fetch()
+
   lha = VARS['lha']
-  prepare_source(lha,
-                 copy=path.join(BUILD_DIR, lha))
+  source(lha, copy=path.join(VARS['build'], lha))
   configure(lha,
             '--disable-shared',
-            '--prefix=' + HOST_DIR)
+            '--prefix=' + VARS['host'])
   build(lha)
   install(lha)
 
   gmp = VARS['gmp']
-  prepare_source(gmp)
+  source(gmp)
   configure(gmp,
             '--disable-shared',
-            '--prefix=' + HOST_DIR)
+            '--prefix=' + VARS['host'])
   build(gmp)
   install(gmp)
 
   mpfr = VARS['mpfr']
-  prepare_source(mpfr)
+  source(mpfr)
   configure(mpfr,
             '--disable-shared',
-            '--prefix=' + HOST_DIR,
-            '--with-gmp=' + HOST_DIR)
+            '--prefix=' + VARS['host'],
+            '--with-gmp=' + VARS['host'])
   build(mpfr)
   install(mpfr)
 
   mpc = VARS['mpc']
-  prepare_source(mpc)
+  source(mpc)
   configure(mpc,
             '--disable-shared',
-            '--prefix=' + HOST_DIR,
-            '--with-gmp=' + HOST_DIR,
-            '--with-mpfr=' + HOST_DIR)
+            '--prefix=' + VARS['host'],
+            '--with-gmp=' + VARS['host'],
+            '--with-mpfr=' + VARS['host'])
   build(mpc)
   install(mpc)
 
   isl = VARS['isl']
-  prepare_source(isl)
+  source(isl)
   configure(isl,
             '--disable-shared',
-            '--prefix=' + HOST_DIR,
-            '--with-gmp-prefix=' + HOST_DIR)
+            '--prefix=' + VARS['host'],
+            '--with-gmp-prefix=' + VARS['host'])
   build(isl)
   install(isl)
 
   cloog = VARS['cloog']
-  prepare_source(cloog)
+  source(cloog)
   configure(cloog,
             '--disable-shared',
-            '--prefix=' + HOST_DIR,
+            '--prefix=' + VARS['host'],
             '--with-isl=system',
-            '--with-gmp-prefix=' + HOST_DIR,
-            '--with-isl-prefix=' + HOST_DIR)
+            '--with-gmp-prefix=' + VARS['host'],
+            '--with-isl-prefix=' + VARS['host'])
   build(cloog)
   install(cloog)
 
   binutils = VARS['binutils']
   binutils_env = {}
-  if VARS['binutils-ver'] == (2, 18):
+  if cmpver('eq', VARS['binutils_ver'], '2.18'):
     binutils_env.update(CFLAGS='-Wno-error')
-  elif VARS['binutils-ver'] == (2, 23, 2):
+  elif cmpver('eq', VARS['binutils_ver'], '2.23.2'):
     binutils_env.update(CFLAGS='-Wno-error')
 
-  prepare_source(binutils)
+  source(binutils)
   with env(**binutils_env):
     configure(binutils,
-              '--prefix=' + TARGET_DIR,
+              '--prefix=' + VARS['target'],
               '--target=ppc-amigaos')
     build(binutils)
     install(binutils)
@@ -369,20 +402,18 @@ def doit():
 
   gcc = VARS['gcc']
   gcc_env = {}
-  if VARS['gcc-ver'] == (4, 2, 4):
+  if cmpver('eq', VARS['gcc_ver'], '4.2.4'):
     gcc_env.update(CFLAGS='-std=gnu89 -m32')
 
-  prepare_source(gcc)
+  source(gcc)
   with env(**gcc_env):
     configure(gcc,
               '--with-bugurl="http://sf.net/p/adtools"',
               '--target=ppc-amigaos',
-              '--with-gmp=' + HOST_DIR,
-              '--with-mpfr=' + HOST_DIR,
-              '--with-mpc=' + HOST_DIR,
-              '--with-isl=' + HOST_DIR,
-              '--with-cloog=' + HOST_DIR,
-              '--prefix=' + TARGET_DIR,
+              '--with-gmp=' + VARS['host'],
+              '--with-mpfr=' + VARS['host'],
+              '--with-cloog=' + VARS['host'],
+              '--prefix=' + VARS['target'],
               '--enable-languages=c,c++',
               '--enable-haifa',
               '--enable-sjlj-exceptions'
@@ -393,16 +424,17 @@ def doit():
 
 
 def clean():
-  rmtree(STAMP_DIR)
-  rmtree(SOURCE_DIR)
-  rmtree(HOST_DIR)
+  rmtree(VARS['stamps'])
+  rmtree(VARS['sources'])
+  rmtree(VARS['host'])
+  rmtree(VARS['build'])
 
 
 if __name__ == "__main__":
   logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 
   parser = ArgumentParser(description='Build cross toolchain.')
-  parser.add_argument('action', choices=['fetch', 'doit', 'clean'],
+  parser.add_argument('action', choices=['doit', 'clean'], default='doit',
                       help='perform action')
   parser.add_argument('--binutils', choices=['2.18', '2.23.2'], default='2.18',
                       help='desired binutils version')
@@ -412,36 +444,25 @@ if __name__ == "__main__":
                       help='installation directory')
   args = parser.parse_args()
 
-  VARS = {
-    'lha': 'lhasa-0.3.0',
-    'gmp': 'gmp-5.1.3',
-    'mpfr': 'mpfr-3.1.3',
-    'mpc': 'mpc-1.0.3',
-    'isl': 'isl-0.12.2',
-    'cloog': 'cloog-0.18.4',
-    'binutils': 'binutils-' + args.binutils,
-    'gcc': 'gcc-' + args.gcc,
-    'binutils-ver': mkver(args.binutils),
-    'gcc-ver': mkver(args.gcc)
-  }
-
-  TOP_DIR = path.abspath('.')
+  VARS.update({
+    'top': path.abspath('.'),
+    'binutils_ver': args.binutils,
+    'gcc_ver': args.gcc
+  })
 
   if args.prefix is not None:
-    TARGET_DIR = args.prefix
-  else:
-    TARGET_DIR = path.join(TOP_DIR, 'target')
+    VARS['target'] = args.prefix
 
-  if not path.exists(TARGET_DIR):
-    makedirs(TARGET_DIR)
+  for key, value in VARS.items():
+    if type(value) == str:
+      VARS[key] = value.format(**VARS)
 
-    # MAKE_OPTS = "-j" + check_output(['getconf', '_NPROCESSORS_CONF']).strip()
+  """
+  VARS['make_opts'] = (
+    '-j' + check_output(['getconf', '_NPROCESSORS_CONF']).strip())
+  """
 
-  STAMP_DIR = path.join(TOP_DIR, 'stamp')
-  BUILD_DIR = path.join(TOP_DIR, 'build')
-  SOURCE_DIR = path.join(TOP_DIR, 'source')
-  HOST_DIR = path.join(TOP_DIR, 'host')
-  ARCHIVES = path.join(TOP_DIR, 'archives/ppc')
-  PATCHES = path.join(TOP_DIR, 'patches')
+  if not path.exists(VARS['target']):
+    makedirs(VARS['target'])
 
   eval(args.action + "()")

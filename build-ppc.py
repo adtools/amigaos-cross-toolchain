@@ -7,7 +7,6 @@ from logging import info
 from os import environ
 import argparse
 import logging
-import shutil
 import platform
 
 URLS = \
@@ -29,68 +28,6 @@ URLS = \
 
 
 from common import * # NOQA
-
-
-@check_stamp
-def fetch(name, url):
-  if url.startswith('http') or url.startswith('ftp'):
-    if not path.exists(name):
-      download(url, name)
-    else:
-      info('File "%s" already downloaded.', name)
-  elif url.startswith('svn'):
-    if not path.exists(name):
-      execute('svn', 'checkout', url, name)
-    else:
-      execute('svn', 'update', name)
-
-
-@check_stamp
-def source(name, copy=None):
-  try:
-    src = glob(path.join('{archives}', name) + '*')[0]
-  except IndexError:
-    panic('Missing source for "%s".', src)
-
-  dst = path.join('{sources}', name)
-  rmtree(dst)
-
-  info('preparing source "%s"', name)
-
-  with cwd('{sources}'):
-    if path.isdir(src):
-      copytree(src, dst, ignore=shutil.ignore_patterns('.svn'))
-    else:
-      unarc(src)
-
-    if copy is not None:
-      rmtree(copy)
-      copytree(dst, copy)
-
-
-@check_stamp
-def configure(name, *confopts):
-  info('configuring "%s"', name)
-
-  with cwd(path.join('{build}', name)):
-    remove(find_files('config.cache'))
-    execute(path.join('{sources}', name, 'configure'), *confopts)
-
-
-@check_stamp
-def build(name, *confopts):
-  info('building "%s"', name)
-
-  with cwd(path.join('{build}', name)):
-    execute('make')
-
-
-@check_stamp
-def install(name, *confopts):
-  info('installing "%s"', name)
-
-  with cwd(path.join('{build}', name)):
-    execute('make', 'install')
 
 
 @check_stamp

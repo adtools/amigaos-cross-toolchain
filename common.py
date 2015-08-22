@@ -1,6 +1,7 @@
 #!/usr/bin/env python -B
 
 from logging import debug, info, error
+from glob import glob
 from os import path
 from fnmatch import fnmatch
 import contextlib
@@ -261,6 +262,69 @@ def check_stamp(fn):
   return wrapper
 
 
+@check_stamp
+def fetch(name, url):
+  if url.startswith('http') or url.startswith('ftp'):
+    if not path.exists(name):
+      download(url, name)
+    else:
+      info('File "%s" already downloaded.', name)
+  elif url.startswith('svn'):
+    if not path.exists(name):
+      execute('svn', 'checkout', url, name)
+    else:
+      execute('svn', 'update', name)
+
+
+@check_stamp
+def source(name, copy=None):
+  try:
+    src = glob(path.join('{archives}', name) + '*')[0]
+  except IndexError:
+    panic('Missing source for "%s".', src)
+
+  dst = path.join('{sources}', name)
+  rmtree(dst)
+
+  info('preparing source "%s"', name)
+
+  with cwd('{sources}'):
+    if path.isdir(src):
+      copytree(src, dst, ignore=shutil.ignore_patterns('.svn'))
+    else:
+      unarc(src)
+
+    if copy is not None:
+      rmtree(copy)
+      copytree(dst, copy)
+
+
+@check_stamp
+def configure(name, *confopts):
+  info('configuring "%s"', name)
+
+  with cwd(path.join('{build}', name)):
+    remove(find_files('config.cache'))
+    execute(path.join('{sources}', name, 'configure'), *confopts)
+
+
+@check_stamp
+def build(name, *confopts):
+  info('building "%s"', name)
+
+  with cwd(path.join('{build}', name)):
+    execute('make')
+
+
+@check_stamp
+def install(name, *confopts):
+  info('installing "%s"', name)
+
+  with cwd(path.join('{build}', name)):
+    execute('make', 'install')
+
+
 __all__ = ['VARS', 'panic', 'cmpver', 'find_executable', 'execute',
-           'rmtree', 'mkdir', 'copytree', 'touch', 'unarc', 'download', 'cwd',
-           'remove', 'rename', 'find_files', 'env', 'path', 'check_stamp']
+           'rmtree', 'mkdir', 'copytree', 'unarc', 'fetch', 'cwd',
+           'remove', 'rename', 'find_files', 'env', 'path', 'check_stamp',
+           'source', 'configure', 'build', 'install']

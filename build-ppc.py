@@ -204,10 +204,11 @@ if __name__ == "__main__":
                       help='installation directory')
   args = parser.parse_args()
 
-  if platform.system() not in ['Darwin', 'Linux', 'Windows']:
+  if not (platform.system() in ['Darwin', 'Linux'] or
+          fnmatch(platform.system(), 'CYGWIN*')):
     panic('Build on %s not supported!', platform.system())
 
-  if platform.machine() not in ['i386', 'i686', 'x86_64']:
+  if platform.machine() not in ['i686', 'x86_64']:
     panic('Build on %s architecture not supported!', platform.machine())
 
   setvar(top=path.abspath('.'),

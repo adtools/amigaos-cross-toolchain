@@ -1,0 +1,330 @@
+#!/usr/bin/python -B
+
+# Build cross toolchain for AmigaOS <= 3.9 / M68k target.
+
+from logging import info
+from os import environ
+import argparse
+import logging
+import platform
+import sys
+
+URLS = \
+  ['http://soulsphere.org/projects/lhasa/lhasa-0.3.0.tar.gz',
+   'ftp://ftp.gnu.org/gnu/m4/m4-1.4.17.tar.gz',
+   'ftp://ftp.gnu.org/gnu/gawk/gawk-3.1.8.tar.gz',
+   'ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.13.tar.gz',
+   'ftp://ftp.gnu.org/gnu/bison/bison-1.35.tar.gz',
+   'ftp://ftp.gnu.org/gnu/texinfo/texinfo-4.12.tar.gz',
+   'ftp://ftp.gnu.org/gnu/binutils/binutils-2.9.1.tar.gz',
+   'ftp://ftp.gnu.org/gnu/gcc/gcc-2.95.3/gcc-core-2.95.3.tar.gz',
+   'ftp://ftp.gnu.org/gnu/gcc/gcc-2.95.3/gcc-g++-2.95.3.tar.gz',
+   ('http://fossies.org/linux/misc/old/flex-2.5.4a.tar.gz',
+    'flex-2.5.4.tar.gz'),
+   ('git://github.com/cahirwpz/libnix', 'libnix-2.2'),
+   ('git://github.com/adtools/sfdc', 'sfdc-1.5'),
+   ('http://www.haage-partner.de/download/AmigaOS/NDK39.lha', 'NDK_3.9.lha'),
+   ('ftp://ftp.exotica.org.uk/mirrors/geekgadgets/amiga/m68k/snapshots/' +
+    '990529/bin/libamiga-bin.tgz', 'libamiga.tar.gz'),
+   ('ftp://ftp.exotica.org.uk/mirrors/geekgadgets/amiga/m68k/snapshots/' +
+    '990529/src/libm-5.4-src.tgz', 'libm-5.4.tar.gz'),
+   ('http://sourceforge.net/projects/amiga/files/ixemul.library/48.2/' +
+    'ixemul-src.lha/download', 'ixemul-48.2.lha'),
+   'http://sun.hasenbraten.de/vasm/release/vasm.tar.gz',
+   'http://sun.hasenbraten.de/vlink/release/vlink.tar.gz',
+   'http://www.ibaug.de/vbcc/vbcc.tar.gz',
+   'http://mail.pb-owl.de/~frank/vbcc/current/vbcc_target_m68k-amigaos.lha']
+
+
+from common import * # NOQA
+
+
+def init():
+  for var in environ.keys():
+    if var not in ['_', 'LOGNAME', 'HOME', 'SHELL', 'TMPDIR', 'PWD']:
+      del environ[var]
+
+  environ['PATH'] = '/usr/bin:/bin'
+  environ['LANG'] = 'C'
+  environ['TERM'] = 'xterm'
+
+  """
+  Make sure we always choose known compiler (from the distro) and not one in
+  user's path that could shadow the original one.
+  """
+  if platform.system() == 'Darwin':
+    CC, CXX = 'clang', 'clang++'
+  else:
+    CC, CXX = 'gcc', 'g++'
+
+  """
+  On 64-bit architecture GNU Assembler crashes writing out an object, due to
+  (probably) miscalculated structure sizes.  There could be some other bugs
+  lurking there in 64-bit mode, but I have little incentive chasing them.
+  Just compile everything in 32-bit mode and forget about the issues.
+  """
+
+  ARCH = '-m32' if platform.machine() == 'x86_64' else ''
+
+  environ['CC'] = ' '.join([find_executable(CC), '-std=gnu89', ARCH])
+  environ['CXX'] = ' '.join([find_executable(CXX), '-std=gnu++98', ARCH])
+
+  find_executable('patch')
+  find_executable('bison')
+  find_executable('flex')
+  find_executable('make')
+  find_executable('git')
+  find_executable('svn')
+
+  environ['PATH'] = ":".join([path.join('{target}', 'bin'),
+                              path.join('{host}', 'bin'),
+                              environ['PATH']])
+
+
+@check_stamp
+def prepare_target():
+  info('preparing target')
+
+  with cwd('{target}'):
+    mkdir('bin', 'doc', 'etc', 'lib', 'm68k-amigaos', 'os-include',
+          'os-include/lvo', 'os-lib', 'os-lib/fd', 'os-lib/sfd',
+          'vbcc-include', 'vbcc-lib')
+
+  with cwd('{target}/m68k-amigaos'):
+    symlink('../os-include', 'include')
+    symlink('../lib', 'lib')
+
+
+@check_stamp
+def install_ndk():
+  info('installing ndk')
+
+  copytree('{sources}/{NDK}/Include/include_h', '{target}/os-include')
+  copytree('{sources}/{NDK}/Include/include_i', '{target}/os-include')
+  copytree('{sources}/{NDK}/Include/fd', '{target}/os-lib/fd')
+  copytree('{sources}/{NDK}/Include/sfd', '{target}/os-lib/sfd')
+  copytree('{sources}/{NDK}/Include/linker_libs', '{target}/os-lib',
+           exclude=['README'])
+  copytree('{sources}/{NDK}/Documentation/Autodocs', '{target}/doc')
+
+  for name in find('{target}/os-lib/sfd', include=['*.sfd']):
+    base = path.basename(name).split('_')[0]
+
+    execute('sfdc', '--target=m68k-amigaos', '--mode=proto',
+            '--output={target}/os-include/proto/' + base + '.h', name)
+    execute('sfdc', '--target=m68k-amigaos', '--mode=macros',
+            '--output={target}/os-include/inline/' + base + '.h', name)
+    execute('sfdc', '--target=m68k-amigaos', '--mode=lvo',
+            '--output={target}/os-include/lvo/' + base + '_lib.i', name)
+
+
+@check_stamp
+def install_libamiga():
+  info('installing libamiga')
+
+  copytree('{sources}/{libamiga}/lib', '{target}/lib')
+
+
+def doit():
+  init()
+
+  with cwd('{archives}'):
+    for url in URLS:
+      if type(url) == tuple:
+        url, name = url[0], url[1]
+      else:
+        name = path.basename(url)
+      fetch(name, url)
+
+  unpack('{lha}')
+  configure('{lha}',
+            '--disable-shared',
+            '--prefix={host}',
+            copy_source=True)
+  build('{lha}')
+  install('{lha}')
+
+  unpack('{m4}')
+  configure('{m4}', '--prefix={host}')
+  build('{m4}')
+  install('{m4}')
+
+  unpack('{gawk}')
+  configure('{gawk}', '--prefix={host}')
+  build('{gawk}')
+  install('{gawk}')
+
+  unpack('{flex}')
+  configure('{flex}', '--prefix={host}')
+  build('{flex}')
+  install('{flex}')
+
+  unpack('{bison}')
+  configure('{bison}', '--prefix={host}')
+  build('{bison}')
+  install('{bison}')
+
+  unpack('{texinfo}')
+  configure('{texinfo}', '--prefix={host}')
+  build('{texinfo}')
+  install('{texinfo}')
+
+  unpack('{autoconf}')
+  configure('{autoconf}', '--prefix={host}')
+  build('{autoconf}')
+  install('{autoconf}')
+
+  prepare_target()
+
+  """
+  Older gcc compilers (i.e. 2.95.3 and 3.4.6) and binutils have to be tricked
+  into thinking that they're being compiled on Linux IA-32 machine. Theirs
+  config.guess script knows nothing about x86-64 or darwin.
+  """
+
+  unpack('{binutils}')
+  patch('{binutils}')
+  configure('{binutils}',
+            '--prefix={target}',
+            '--host=i686-linux-gnu',
+            '--target=m68k-amigaos')
+  build('{binutils}')
+  install('{binutils}')
+
+  unpack('{ixemul}', top_dir='ixemul')
+  patch('{ixemul}')
+
+  unpack('{gcc_core}')
+  unpack('{gcc_gpp}')
+  patch('{gcc}')
+  configure('{gcc}',
+            '--prefix={target}',
+            '--host=i686-linux-gnu',
+            '--build=i686-linux-gnu',
+            '--target=m68k-amigaos',
+            '--enable-languages=c',
+            '--with-headers={sources}/{ixemul}/include')
+  build('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  install('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+
+  unpack('{sfdc}')
+  patch('{sfdc}')
+  configure('{sfdc}', '--prefix={target}', copy_source=True)
+  build('{sfdc}')
+  install('{sfdc}')
+
+  unpack('{NDK}')
+  patch('{NDK}')
+  install_ndk()
+
+  unpack('{libamiga}', in_dir='libamiga')
+  install_libamiga()
+
+  unpack('{libnix}')
+  configure('{libnix}',
+            '--prefix={target}',
+            '--host=i686-linux-gnu',
+            '--target=m68k-amigaos')
+  build('{libnix}',
+        CC='m68k-amigaos-gcc',
+        CPP='m68k-amigaos-gcc -E',
+        AR='m68k-amigaos-ar',
+        AS='m68k-amigaos-as',
+        RANLIB='m68k-amigaos-ranlib',
+        LD='m68k-amigaos-ld')
+  install('{libnix}')
+
+  copy('{sources}/{libnix}/sources/headers/stabs.h',
+       '{target}/m68k-amigaos/sys-include')
+
+  unpack('{libm}', top_dir='contrib/libm')
+  with env(CC='m68k-amigaos-gcc -noixemul',
+           AR='m68k-amigaos-ar',
+           RANLIB='m68k-amigaos-ranlib'):
+    configure('{libm}',
+              '--prefix={target}',
+              '--host=i686-linux-gnu',
+              '--target=m68k-amigaos')
+  build('{libm}')
+  install('{libm}')
+
+  with cwd('{sources}'):
+    remove('{gpp}')
+    symlink('{gcc}', '{gpp}')
+
+  configure('{gpp}',
+            '--prefix={target}',
+            '--host=i686-linux-gnu',
+            '--build=i686-linux-gnu',
+            '--target=m68k-amigaos',
+            '--enable-languages=c++',
+            '--with-headers={sources}/{ixemul}/include')
+  build('{gpp}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  install('{gpp}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+
+
+def clean():
+  rmtree('{stamps}')
+  rmtree('{sources}')
+  rmtree('{host}')
+  rmtree('{build}')
+
+
+if __name__ == "__main__":
+  logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
+
+  parser = argparse.ArgumentParser(description='Build cross toolchain.')
+  parser.add_argument('action', choices=['doit', 'clean'], default='doit',
+                      help='perform action')
+  parser.add_argument('--binutils', choices=['2.9.1'], default='2.9.1',
+                      help='desired binutils version')
+  parser.add_argument('--gcc', choices=['2.95.3'], default='2.95.3',
+                      help='desired gcc version')
+  parser.add_argument('--prefix', type=str, default=None,
+                      help='installation directory')
+  args = parser.parse_args()
+
+  if not (platform.system() in ['Darwin', 'Linux'] or
+          fnmatch(platform.system(), 'CYGWIN*')):
+    panic('Build on %s not supported!', platform.system())
+
+  if platform.machine() not in ['i686', 'x86_64']:
+    panic('Build on %s architecture not supported!', platform.machine())
+
+  setvar(top=path.abspath(path.dirname(sys.argv[0])),
+         binutils_ver=args.binutils,
+         gcc_ver=args.gcc)
+
+  setvar(lha='lhasa-0.3.0',
+         m4='m4-1.4.17',
+         gawk='gawk-3.1.8',
+         flex='flex-2.5.4',
+         bison='bison-1.35',
+         autoconf='autoconf-2.13',
+         texinfo='texinfo-4.12',
+         NDK='NDK_3.9',
+         sfdc='sfdc-1.5',
+         ixemul='ixemul-48.2',
+         libnix='libnix-2.2',
+         libm='libm-5.4',
+         binutils='binutils-{binutils_ver}',
+         gcc_core='gcc-core-{gcc_ver}',
+         gcc_gpp='gcc-g++-{gcc_ver}',
+         gcc='gcc-{gcc_ver}',
+         gpp='g++-{gcc_ver}',
+         libamiga='libamiga',
+         patches=path.join('{top}', 'patches'),
+         stamps=path.join('{top}', '.build-m68k', 'stamps'),
+         build=path.join('{top}', '.build-m68k', 'build'),
+         sources=path.join('{top}', '.build-m68k', 'sources'),
+         host=path.join('{top}', '.build-m68k', 'host'),
+         target=path.join('{top}', 'm68k-amigaos'),
+         archives=path.join('{top}', '.build-m68k', 'archives'))
+
+  if args.prefix is not None:
+    setvar(target=args.prefix)
+
+  if not path.exists('{target}'):
+    mkdir('{target}')
+
+  eval(args.action + "()")

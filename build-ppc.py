@@ -225,12 +225,12 @@ if __name__ == "__main__":
          binutils='binutils-{binutils_ver}',
          gcc='gcc-{gcc_ver}',
          patches=path.join('{top}', 'patches'),
-         stamps=path.join('{top}', 'stamps'),
-         build=path.join('{top}', 'build'),
-         sources=path.join('{top}', 'sources'),
-         host=path.join('{top}', 'host'),
-         target=path.join('{top}', 'target'),
-         archives=path.join('{top}', 'archives', 'ppc'))
+         stamps=path.join('{top}', '.build-ppc', 'stamps'),
+         build=path.join('{top}', '.build-ppc', 'build'),
+         sources=path.join('{top}', '.build-ppc', 'sources'),
+         host=path.join('{top}', '.build-ppc', 'host'),
+         target=path.join('{top}', 'ppc-amigaos'),
+         archives=path.join('{top}', '.build-ppc', 'archives'))
 
   if args.prefix is not None:
     setvar(target=args.prefix)

@@ -53,7 +53,7 @@ def prepare_sdk():
     move('Include', 'include')
 
 
-def doit():
+def make():
   for var in environ.keys():
     if var not in ['_', 'LOGNAME', 'HOME', 'SHELL', 'TMPDIR', 'PWD']:
       del environ[var]
@@ -194,7 +194,7 @@ if __name__ == "__main__":
   logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 
   parser = argparse.ArgumentParser(description='Build cross toolchain.')
-  parser.add_argument('action', choices=['doit', 'clean'], default='doit',
+  parser.add_argument('action', choices=['make', 'clean'], default='make',
                       help='perform action')
   parser.add_argument('--binutils', choices=['2.18', '2.23.2'], default='2.18',
                       help='desired binutils version')

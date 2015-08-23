@@ -39,48 +39,6 @@ URLS = \
 from common import * # NOQA
 
 
-def init():
-  for var in environ.keys():
-    if var not in ['_', 'LOGNAME', 'HOME', 'SHELL', 'TMPDIR', 'PWD']:
-      del environ[var]
-
-  environ['PATH'] = '/usr/bin:/bin'
-  environ['LANG'] = 'C'
-  environ['TERM'] = 'xterm'
-
-  """
-  Make sure we always choose known compiler (from the distro) and not one in
-  user's path that could shadow the original one.
-  """
-  if platform.system() == 'Darwin':
-    CC, CXX = 'clang', 'clang++'
-  else:
-    CC, CXX = 'gcc', 'g++'
-
-  """
-  On 64-bit architecture GNU Assembler crashes writing out an object, due to
-  (probably) miscalculated structure sizes.  There could be some other bugs
-  lurking there in 64-bit mode, but I have little incentive chasing them.
-  Just compile everything in 32-bit mode and forget about the issues.
-  """
-
-  ARCH = '-m32' if platform.machine() == 'x86_64' else ''
-
-  environ['CC'] = ' '.join([find_executable(CC), '-std=gnu89', ARCH])
-  environ['CXX'] = ' '.join([find_executable(CXX), '-std=gnu++98', ARCH])
-
-  find_executable('patch')
-  find_executable('bison')
-  find_executable('flex')
-  find_executable('make')
-  find_executable('git')
-  find_executable('svn')
-
-  environ['PATH'] = ":".join([path.join('{target}', 'bin'),
-                              path.join('{host}', 'bin'),
-                              environ['PATH']])
-
-
 @check_stamp
 def prepare_target():
   info('preparing target')
@@ -125,8 +83,46 @@ def install_libamiga():
   copytree('{sources}/{libamiga}/lib', '{target}/lib')
 
 
-def doit():
-  init()
+def make():
+  for var in environ.keys():
+    if var not in ['_', 'LOGNAME', 'HOME', 'SHELL', 'TMPDIR', 'PWD']:
+      del environ[var]
+
+  environ['PATH'] = '/usr/bin:/bin'
+  environ['LANG'] = 'C'
+  environ['TERM'] = 'xterm'
+
+  """
+  Make sure we always choose known compiler (from the distro) and not one in
+  user's path that could shadow the original one.
+  """
+  if platform.system() == 'Darwin':
+    CC, CXX = 'clang', 'clang++'
+  else:
+    CC, CXX = 'gcc', 'g++'
+
+  """
+  On 64-bit architecture GNU Assembler crashes writing out an object, due to
+  (probably) miscalculated structure sizes.  There could be some other bugs
+  lurking there in 64-bit mode, but I have little incentive chasing them.
+  Just compile everything in 32-bit mode and forget about the issues.
+  """
+
+  ARCH = '-m32' if platform.machine() == 'x86_64' else ''
+
+  environ['CC'] = ' '.join([find_executable(CC), '-std=gnu89', ARCH])
+  environ['CXX'] = ' '.join([find_executable(CXX), '-std=gnu++98', ARCH])
+
+  find_executable('patch')
+  find_executable('bison')
+  find_executable('flex')
+  find_executable('make')
+  find_executable('git')
+  find_executable('svn')
+
+  environ['PATH'] = ":".join([path.join('{target}', 'bin'),
+                              path.join('{host}', 'bin'),
+                              environ['PATH']])
 
   with cwd('{archives}'):
     for url in URLS:
@@ -274,7 +270,7 @@ if __name__ == "__main__":
   logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 
   parser = argparse.ArgumentParser(description='Build cross toolchain.')
-  parser.add_argument('action', choices=['doit', 'clean'], default='doit',
+  parser.add_argument('action', choices=['make', 'clean'], default='make',
                       help='perform action')
   parser.add_argument('--binutils', choices=['2.9.1'], default='2.9.1',
                       help='desired binutils version')

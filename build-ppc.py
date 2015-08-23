@@ -50,7 +50,7 @@ def prepare_sdk():
     execute('lha', '-xf', clib2, 'clib2/*')
     execute('lha', '-xf', newlib, 'newlib/*')
     execute('lha', '-xf', base, 'Include/*')
-    rename('Include', 'include')
+    move('Include', 'include')
 
 
 def doit():
@@ -87,27 +87,27 @@ def doit():
         name = path.basename(url)
       fetch(name, url)
 
-  source('{lha}', copy=path.join('{build}', '{lha}'))
+  unpack('{lha}', copy=path.join('{build}', '{lha}'))
   configure('{lha}',
             '--disable-shared',
             '--prefix={host}')
   build('{lha}')
   install('{lha}')
 
-  source('{texinfo}')
+  unpack('{texinfo}')
   configure('{texinfo}',
             '--prefix={host}')
   build('{texinfo}')
   install('{texinfo}')
 
-  source('{gmp}')
+  unpack('{gmp}')
   configure('{gmp}',
             '--disable-shared',
             '--prefix={host}')
   build('{gmp}')
   install('{gmp}')
 
-  source('{mpfr}')
+  unpack('{mpfr}')
   configure('{mpfr}',
             '--disable-shared',
             '--prefix={host}',
@@ -115,7 +115,7 @@ def doit():
   build('{mpfr}')
   install('{mpfr}')
 
-  source('{mpc}')
+  unpack('{mpc}')
   configure('{mpc}',
             '--disable-shared',
             '--prefix={host}',
@@ -124,7 +124,7 @@ def doit():
   build('{mpc}')
   install('{mpc}')
 
-  source('{isl}')
+  unpack('{isl}')
   configure('{isl}',
             '--disable-shared',
             '--prefix={host}',
@@ -132,7 +132,7 @@ def doit():
   build('{isl}')
   install('{isl}')
 
-  source('{cloog}')
+  unpack('{cloog}')
   configure('{cloog}',
             '--disable-shared',
             '--prefix={host}',
@@ -148,7 +148,7 @@ def doit():
   elif cmpver('eq', '{binutils_ver}', '2.23.2'):
     binutils_env.update(CFLAGS='-Wno-error')
 
-  source('{binutils}')
+  unpack('{binutils}')
   with env(**binutils_env):
     configure('{binutils}',
               '--prefix={target}',
@@ -165,7 +165,7 @@ def doit():
       cflags.append('-m32')
     gcc_env.update(CFLAGS=' '.join(cflags))
 
-  source('{gcc}')
+  unpack('{gcc}')
   with env(**gcc_env):
     configure('{gcc}',
               '--with-bugurl="http://sf.net/p/adtools"',

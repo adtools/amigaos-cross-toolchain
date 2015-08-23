@@ -53,6 +53,7 @@ def flatten(*args):
 chdir = fill_in_args(os.chdir)
 path.exists = fill_in_args(path.exists)
 path.join = fill_in_args(path.join)
+path.relpath = fill_in_args(path.relpath)
 
 
 @fill_in_args
@@ -91,10 +92,10 @@ def cmpver(op, v1, v2):
 
 
 @fill_in_args
-def relpath(name):
+def topdir(name):
   if not path.isabs(name):
     name = path.abspath(name)
-  return path.relpath(name, fill_in('{top}'))
+  return path.relpath(name, '{top}')
 
 
 @fill_in_args
@@ -104,13 +105,18 @@ def find_executable(name):
 
 
 @fill_in_args
-def find_files(pattern):
-  found = []
-  for root, dirs, files in os.walk('.', topdown=True):
-    for name in files:
-      if fnmatch(name, pattern):
-        found.append(path.join(root, name))
-  return found
+def find(root, include=None, exclude=None):
+  lst = []
+  for name in sorted(os.listdir(root)):
+    if exclude and any(fnmatch(name, pat) for pat in exclude):
+      continue
+    if include and not any(fnmatch(name, pat) for pat in include):
+      continue
+    fullname = path.join(root, name)
+    lst.append(fullname)
+    if path.isdir(fullname):
+      lst.extend(find(fullname, include, exclude))
+  return lst
 
 
 @fill_in_args
@@ -125,7 +131,7 @@ def touch(name):
 def rmtree(*names):
   for name in flatten(names):
     if path.isdir(name):
-      debug('rmtree "%s"', relpath(name))
+      debug('rmtree "%s"', topdir(name))
       shutil.rmtree(name)
 
 
@@ -133,33 +139,48 @@ def rmtree(*names):
 def remove(*names):
   for name in flatten(names):
     if path.isfile(name):
-      debug('remove "%s"', relpath(name))
+      debug('remove "%s"', topdir(name))
       os.remove(name)
 
 
 @fill_in_args
 def mkdir(*names):
   for name in flatten(names):
-    debug('makedir "%s"', relpath(name))
-    os.makedirs(name)
+    if not path.isdir(name):
+      debug('makedir "%s"', topdir(name))
+      os.makedirs(name)
+
+
+@fill_in_args
+def copy(src, dst):
+  debug('copy "%s" to "%s"', topdir(src), topdir(dst))
+  shutil.copy(src, dst)
 
 
 @fill_in_args
 def copytree(src, dst, **kwargs):
-  debug('copytree "%s" to "%s"', relpath(src), relpath(dst))
-  shutil.copytree(src, dst, **kwargs)
+  debug('copytree "%s" to "%s"', topdir(src), topdir(dst))
+
+  mkdir(dst)
+
+  for name in find(src, **kwargs):
+    if path.isdir(name):
+      mkdir(path.join(dst, path.relpath(name, src)))
+    else:
+      copy(name, path.join(dst, path.relpath(name, src)))
 
 
 @fill_in_args
-def rename(src, dst):
-  debug('rename "%s" to "%s"', relpath(src), relpath(dst))
-  os.rename(src, dst)
+def move(src, dst):
+  debug('move "%s" to "%s"', topdir(src), topdir(dst))
+  shutil.move(src, dst)
 
 
 @fill_in_args
 def symlink(src, name):
-  debug('symlink "%s" from "%s"', src, relpath(name))
-  os.symlink(src, name)
+  if not path.islink(name):
+    debug('symlink "%s" points at "%s"', topdir(name), src)
+    os.symlink(src, name)
 
 
 @fill_in_args
@@ -196,10 +217,10 @@ def download(url, name):
 
 @fill_in_args
 def unarc(name):
-  info('extract files from "%s"' % relpath(name))
+  info('extract files from "%s"' % topdir(name))
 
   if name.endswith('.lha'):
-    execute('lha', '-xq', name)
+    execute('lha', '-x', name)
   else:
     if name.endswith('.tar.gz') or name.endswith('.tar.bz2'):
       module = tarfile
@@ -221,7 +242,7 @@ def cwd(name):
   if not path.exists(name):
     mkdir(name)
   try:
-    debug('enter directory "%s"', relpath(name))
+    debug('enter directory "%s"', topdir(name))
     chdir(name)
     yield
   finally:
@@ -276,58 +297,103 @@ def fetch(name, url):
     if not path.exists(name):
       execute('svn', 'checkout', url, name)
     else:
-      execute('svn', 'update', name)
+      with cwd(name):
+        execute('svn', 'update')
+  elif url.startswith('git'):
+    if not path.exists(name):
+      execute('git', 'clone', url, name)
+    else:
+      with cwd(name):
+        execute('git', 'pull')
+  else:
+    panic('URL "%s" not recognized!', url)
 
 
 @check_stamp
-def source(name, copy=None):
+def unpack(name, top_dir=None, in_dir=None):
   try:
     src = glob(path.join('{archives}', name) + '*')[0]
   except IndexError:
-    panic('Missing source for "%s".', src)
+    panic('Missing files for "%s".', src)
 
   dst = path.join('{sources}', name)
   rmtree(dst)
 
-  info('preparing source "%s"', name)
+  info('preparing files for "%s"', name)
 
-  with cwd('{sources}'):
+  if in_dir is not None:
+    workdir = path.join('{sources}', in_dir)
+  else:
+    workdir = '{sources}'
+
+  with cwd(workdir):
     if path.isdir(src):
-      copytree(src, dst, ignore=shutil.ignore_patterns('.svn'))
+      copytree(src, dst, exclude=['*.svn'])
     else:
       unarc(src)
-
-    if copy is not None:
-      rmtree(copy)
-      copytree(dst, copy)
+      if top_dir is not None:
+        move(top_dir, name)
+        if path.dirname(top_dir):
+          rmtree(path.split(top_dir))
 
 
 @check_stamp
-def configure(name, *confopts):
+def patch(name):
+  with cwd('{sources}'):
+    found = []
+
+    for root, _, files in os.walk(path.join('{patches}', name), topdown=True):
+      for name in files:
+        if not fnmatch(name, '*~'):
+          found.append(path.join(root, name))
+
+    for name in sorted(found):
+      if fnmatch(name, '*.diff'):
+        execute('patch', '-t', '-p0', '-i', name)
+      else:
+        dst = path.relpath(name, '{patches}')
+        mkdir(path.dirname(dst))
+        copy(path.join(root, name), dst)
+
+
+@check_stamp
+def configure(name, *confopts, **kwargs):
   info('configuring "%s"', name)
 
+  if kwargs.get('copy_source', False):
+    rmtree(path.join('{build}', name))
+    copytree(path.join('{sources}', name), path.join('{build}', name))
+    from_dir = '.'
+  else:
+    from_dir = path.join('{sources}', name)
+
   with cwd(path.join('{build}', name)):
-    remove(find_files('config.cache'))
-    execute(path.join('{sources}', name, 'configure'), *confopts)
+    remove(find('.', include=['config.cache']))
+    execute(path.join(from_dir, 'configure'), *confopts)
 
 
 @check_stamp
-def build(name, *confopts):
+def build(name, *targets, **makevars):
   info('building "%s"', name)
 
   with cwd(path.join('{build}', name)):
-    execute('make')
+    args = list(targets) + ['%s=%s' % item for item in makevars.items()]
+    execute('make', *args)
 
 
 @check_stamp
-def install(name, *confopts):
+def install(name, *targets, **makevars):
   info('installing "%s"', name)
 
+  if not targets:
+    targets = ['install']
+
   with cwd(path.join('{build}', name)):
-    execute('make', 'install')
+    args = list(targets) + ['%s=%s' % item for item in makevars.items()]
+    execute('make', *args)
 
 
 __all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'execute',
-           'rmtree', 'mkdir', 'copytree', 'unarc', 'fetch', 'cwd',
-           'remove', 'rename', 'find_files', 'env', 'path', 'check_stamp',
-           'source', 'configure', 'build', 'install']
+           'rmtree', 'mkdir', 'copy', 'copytree', 'unarc', 'fetch', 'cwd',
+           'symlink', 'remove', 'move', 'find', 'env', 'path', 'check_stamp',
+           'unpack', 'patch', 'configure', 'build', 'install']

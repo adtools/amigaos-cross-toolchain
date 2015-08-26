@@ -1,0 +1,166 @@
+#!/usr/bin/python -B
+
+# Build development cross toolchain for m68k-elf target.
+
+from glob import glob
+from logging import info
+from os import environ
+import argparse
+import logging
+import platform
+
+URLS = \
+  ['ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2',
+   'ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz',
+   'ftp://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2',
+   'http://isl.gforge.inria.fr/isl-0.12.2.tar.bz2',
+   'http://www.bastoul.net/cloog/pages/download/cloog-0.18.4.tar.gz',
+   'git://sourceware.org/git/binutils',
+   'git://gcc.gnu.org/git/gcc']
+
+
+from common import * # NOQA
+
+
+def make():
+  for var in environ.keys():
+    if var not in ['_', 'LOGNAME', 'HOME', 'SHELL', 'TMPDIR', 'PWD']:
+      del environ[var]
+
+  environ['PATH'] = '/usr/bin:/bin'
+  environ['LANG'] = 'C'
+  environ['TERM'] = 'xterm'
+
+  if platform.system() == 'Darwin':
+    cc, cxx = 'clang', 'clang++'
+  else:
+    cc, cxx = 'gcc', 'g++'
+
+  environ['CC'] = find_executable(cc)
+  environ['CXX'] = find_executable(cxx)
+
+  find_executable('bison')
+  find_executable('flex')
+  find_executable('make')
+  find_executable('git')
+
+  environ['PATH'] = ":".join([path.join('{target}', 'bin'),
+                              path.join('{host}', 'bin'),
+                              environ['PATH']])
+
+  with cwd('{archives}'):
+    for url in URLS:
+      if type(url) == tuple:
+        url, name = url[0], url[1]
+      else:
+        name = path.basename(url)
+      fetch(name, url)
+
+  unpack('{gmp}')
+  configure('{gmp}',
+            '--disable-shared',
+            '--prefix={host}')
+  build('{gmp}')
+  install('{gmp}')
+
+  unpack('{mpfr}')
+  configure('{mpfr}',
+            '--disable-shared',
+            '--prefix={host}',
+            '--with-gmp={host}')
+  build('{mpfr}')
+  install('{mpfr}')
+
+  unpack('{mpc}')
+  configure('{mpc}',
+            '--disable-shared',
+            '--prefix={host}',
+            '--with-gmp={host}',
+            '--with-mpfr={host}')
+  build('{mpc}')
+  install('{mpc}')
+
+  unpack('{isl}')
+  configure('{isl}',
+            '--disable-shared',
+            '--prefix={host}',
+            '--with-gmp-prefix={host}')
+  build('{isl}')
+  install('{isl}')
+
+  unpack('{cloog}')
+  configure('{cloog}',
+            '--disable-shared',
+            '--prefix={host}',
+            '--with-isl=system',
+            '--with-gmp-prefix={host}',
+            '--with-isl-prefix={host}')
+  build('{cloog}')
+  install('{cloog}')
+
+  unpack('binutils')
+  configure('binutils',
+            '--prefix={target}',
+            '--target=m68k-elf')
+  build('binutils')
+  install('binutils')
+
+  unpack('gcc')
+  configure('gcc',
+            '--target=m68k-elf',
+            '--with-gmp={host}',
+            '--with-mpfr={host}',
+            '--with-cloog={host}',
+            '--prefix={target}',
+            '--enable-languages=c',
+            '--without-headers')
+  build('gcc', 'all-gcc')
+  install('gcc', 'install-gcc')
+
+
+def clean():
+  rmtree('{stamps}')
+  rmtree('{sources}')
+  rmtree('{host}')
+  rmtree('{build}')
+
+
+if __name__ == "__main__":
+  logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
+
+  parser = argparse.ArgumentParser(description='Build cross toolchain.')
+  parser.add_argument('action', choices=['make', 'clean'], default='make',
+                      help='perform action')
+  parser.add_argument('--prefix', type=str, default=None,
+                      help='installation directory')
+  args = parser.parse_args()
+
+  if not (platform.system() in ['Darwin', 'Linux'] or
+          fnmatch(platform.system(), 'CYGWIN*')):
+    panic('Build on %s not supported!', platform.system())
+
+  if platform.machine() not in ['i686', 'x86_64']:
+    panic('Build on %s architecture not supported!', platform.machine())
+
+  setvar(top=path.abspath('.'))
+
+  setvar(gmp='gmp-5.1.3',
+         mpfr='mpfr-3.1.3',
+         mpc='mpc-1.0.3',
+         isl='isl-0.12.2',
+         cloog='cloog-0.18.4',
+         patches=path.join('{top}', 'patches'),
+         stamps=path.join('{top}', '.build-dev', 'stamps'),
+         build=path.join('{top}', '.build-dev', 'build'),
+         sources=path.join('{top}', '.build-dev', 'sources'),
+         host=path.join('{top}', '.build-dev', 'host'),
+         target=path.join('{top}', 'm68k-elf'),
+         archives=path.join('{top}', '.build-dev', 'archives'))
+
+  if args.prefix is not None:
+    setvar(target=args.prefix)
+
+  if not path.exists('{target}'):
+    mkdir('{target}')
+
+  eval(args.action + "()")

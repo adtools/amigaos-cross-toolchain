@@ -138,7 +138,32 @@ def install_vbcc_toolchain():
            '{target}/vbcc-include')
   copytree('{sources}/vclib/targets/m68k-amigaos/lib',
            '{target}/vbcc-lib')
-  copy('{sources}/vclib/config/aos68k', '{target}/etc/vc.config')
+  config = textfile(
+    ('-cc=vbccm68k -quiet -hunkdebug %s -o= %s %s -O=%ld' +
+     ' -I{target}/vbcc-include -I{target}/os-include'),
+    ('-ccv=vbccm68k -hunkdebug %s -o= %s %s -O=%ld' +
+     ' -I{target}/vbcc-include -I{target}/os-include'),
+    ('-as=vasmm68k_mot -quiet -Fhunk -phxass -opt-fconst -nowarn=62' +
+     ' -I{target}/os-include %s -o %s'),
+    ('-asv=vasmm68k_mot -Fhunk -phxass -opt-fconst -nowarn=62' +
+     ' -I{target}/os-include %s -o %s'),
+    '-rm=rm %s',
+    '-rmv=rm -v %s',
+    ('-ld=vlink -bamigahunk -x -Bstatic -Cvbcc -nostdlib' +
+     ' {target}/vbcc-lib/startup.o %s %s' +
+     ' -L{target}/vbcc-lib -L{target}/vbcc-include -lvc -o %s'),
+    ('-l2=vlink -bamigahunk -x -Bstatic -Cvbcc -nostdlib %s %s' +
+     ' -L{target}/vbcc-lib -L{target}/vbcc-include -o %s'),
+    ('-ldv=vlink -bamigahunk -t -x -Bstatic -Cvbcc -nostdlib'
+     ' {target}/vbcc-lib/startup.o %s %s' +
+     ' -L{target}/vbcc-lib -L{target}/vbcc-include -lvc -o %s'),
+    ('-l2v=vlink -bamigahunk -t -x -Bstatic -Cvbcc -nostdlib %s %s' +
+     ' -L{target}/vbcc-lib -L{target}/vbcc-include -o %s'),
+    '-ldnodb=-s -Rshort',
+    '-ul=-l%s',
+    '-cf=-F%s',
+    '-ml=500')
+  move(config, '{target}/etc/vc.config')
 
 
 def make():

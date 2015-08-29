@@ -173,7 +173,7 @@ def mkdir(*names):
 @fill_in_args
 def copy(src, dst):
   debug('copy "%s" to "%s"', topdir(src), topdir(dst))
-  shutil.copy(src, dst)
+  shutil.copy2(src, dst)
 
 
 @fill_in_args
@@ -183,10 +183,11 @@ def copytree(src, dst, **kwargs):
   mkdir(dst)
 
   for name in find(src, **kwargs):
+    target = path.join(dst, path.relpath(name, src))
     if path.isdir(name):
-      mkdir(path.join(dst, path.relpath(name, src)))
+      mkdir(target)
     else:
-      copy(name, path.join(dst, path.relpath(name, src)))
+      copy(name, target)
 
 
 @fill_in_args
@@ -383,12 +384,15 @@ def patch(name, work_dir='{sources}'):
 def configure(name, *confopts, **kwargs):
   info('configuring "%s"', name)
 
+  if 'from_dir' in kwargs:
+    from_dir = kwargs['from_dir']
+  else:
+    from_dir = path.join('{sources}', name)
+
   if kwargs.get('copy_source', False):
     rmtree(path.join('{build}', name))
     copytree(path.join('{sources}', name), path.join('{build}', name))
     from_dir = '.'
-  else:
-    from_dir = path.join('{sources}', name)
 
   with cwd(path.join('{build}', name)):
     remove(find('.', include=['config.cache']))

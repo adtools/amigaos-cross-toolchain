@@ -2,8 +2,6 @@
 
 # Build development cross toolchain for m68k-elf target.
 
-from glob import glob
-from logging import info
 from os import environ
 import argparse
 import logging
@@ -98,29 +96,31 @@ def make():
   build('{cloog}')
   install('{cloog}')
 
-  unpack('binutils')
-  configure('binutils',
-            '--prefix={target}',
-            '--target=m68k-elf')
-  build('binutils')
-  install('binutils')
+  with env(CFLAGS='-Wno-error'):
+    configure('binutils',
+              '--prefix={target}',
+              '--with-isl={host}',
+              '--target=m68k-elf',
+              from_dir='{archives}/binutils')
+    build('binutils')
+    install('binutils')
 
-  unpack('gcc')
-  configure('gcc',
-            '--target=m68k-elf',
-            '--with-gmp={host}',
-            '--with-mpfr={host}',
-            '--with-cloog={host}',
-            '--prefix={target}',
-            '--enable-languages=c',
-            '--without-headers')
-  build('gcc', 'all-gcc')
-  install('gcc', 'install-gcc')
+    configure('gcc',
+              '--target=m68k-elf',
+              '--with-gmp={host}',
+              '--with-mpfr={host}',
+              '--with-isl={host}',
+              '--with-cloog={host}',
+              '--prefix={target}',
+              '--enable-languages=c',
+              '--without-headers',
+              from_dir='{archives}/gcc')
+    build('gcc', 'all-gcc')
+    install('gcc', 'install-gcc')
 
 
 def clean():
   rmtree('{stamps}')
-  rmtree('{sources}')
   rmtree('{host}')
   rmtree('{build}')
 
@@ -154,6 +154,7 @@ if __name__ == "__main__":
          build=path.join('{top}', '.build-dev', 'build'),
          sources=path.join('{top}', '.build-dev', 'sources'),
          host=path.join('{top}', '.build-dev', 'host'),
+         tmpdir=path.join('{top}', '.build-dev', 'tmp'),
          target=path.join('{top}', 'm68k-elf'),
          archives=path.join('{top}', '.build-dev', 'archives'))
 

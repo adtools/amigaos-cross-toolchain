@@ -70,9 +70,11 @@ def make():
   environ['CC'] = find_executable(cc)
   environ['CXX'] = find_executable(cxx)
 
+  find_executable('patch')
   find_executable('bison')
   find_executable('flex')
   find_executable('make')
+  find_executable('git')
   find_executable('svn')
 
   environ['PATH'] = ":".join([path.join('{target}', 'bin'),
@@ -87,10 +89,11 @@ def make():
         name = path.basename(url)
       fetch(name, url)
 
-  unpack('{lha}', copy=path.join('{build}', '{lha}'))
+  unpack('{lha}')
   configure('{lha}',
             '--disable-shared',
-            '--prefix={host}')
+            '--prefix={host}',
+            copy_source=True)
   build('{lha}')
   install('{lha}')
 
@@ -229,6 +232,7 @@ if __name__ == "__main__":
          build=path.join('{top}', '.build-ppc', 'build'),
          sources=path.join('{top}', '.build-ppc', 'sources'),
          host=path.join('{top}', '.build-ppc', 'host'),
+         tmpdir=path.join('{top}', '.build-ppc', 'tmpdir'),
          target=path.join('{top}', 'ppc-amigaos'),
          archives=path.join('{top}', '.build-ppc', 'archives'))
 

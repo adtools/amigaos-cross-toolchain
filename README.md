@@ -1,9 +1,9 @@
-AmigaOS/m68k targeted cross compilers and assembler
+AmigaOS m68k & ppc targeted cross compiler and assembler for Unix environment
 ===
 
 **Author:** [Krystian Bacławski](mailto:krystian.baclawski@gmail.com)
 
-**Short description:** m68k-amigaos gcc / binutils / vbcc / vasm toolchain build script.
+**Short description:** AmigaOS toolchain build script.
 
 ### Overview
 
@@ -13,13 +13,10 @@ AmigaOS/m68k targeted cross compilers and assembler
  * g++ 2.95.3
  * libstdc++ 2.10
  * binutils 2.9.1 (assembler, linker, etc.)
- * libnix 2.1 (standard ANSI/C library replacement for AmigaOS)
+ * libnix 2.2 (standard ANSI/C library replacement for AmigaOS)
  * libm 5.4 (provides math library implementation for non-FPU Amigas)
  * AmigaOS headers & libraries & autodocs (for AmigaOS 3.9)
- * ixemul.library 48.2
- * vbcc 0.9b + vclib
- * vasm 1.6b
- * vlink 0.14c
+ * vbcc toolchain (most recent release) including vasm, vlink and C standard library
 
 **Note:** *Patches are welcome!*
 
@@ -37,7 +34,6 @@ There are no downloads provided for the time being. I do as much as possible to 
 Documentation from Free Software Fundation:
 
  * [gcc 2.95.3](http://gcc.gnu.org/onlinedocs/gcc-2.95.3/gcc.html)
- * [gcc 3.4.6](http://gcc.gnu.org/onlinedocs/gcc-3.4.6/gcc/)
  * [binutils](http://sourceware.org/binutils/docs/)
 
 Texinfo documents from GeekGadgets converted into HTML:
@@ -57,12 +53,14 @@ AmigaOS specific documents:
 
 You have to have following packages installed in your system:
 
- * GNU autoconf
  * GNU gcc 4.x **32-bit version!**
  * GNU make 3.x
- * lha
  * perl 5.10
  * libncurses5-dev **32-bit version!**
+ * git
+ * subversion
+ * wget
+ * patch
 
 *For MacOSX users*: you'll likely need to have [MacPorts](http://www.macports.org) or [Homebrew](http://brew.sh) installed in order to build the toolchain.
 
@@ -79,23 +77,15 @@ Follow steps listed below:
 # cd m68k-amigaos-toolchain
 ```
 
-2. Download sources (use `fetch.sh` script in `archives` directory):   
+2. Run `toolchain-m68k` script (with `--prefix` option to specify where to install the toolchain). Note, that the destination directory must be writable by the user. 
 
     ```
-# cd archives   
-# ./fetch.sh
-```
-   
-3. Run `bootstrap.sh` script (with `--prefix` option to specify where to install the toolchain). Note, that the destination directory must be writable by the user. 
-
-    ```
-# cd ..
-# ./bootstrap.sh --prefix=/opt/m68k-amigaos build
+# ./toolchain-m68k --prefix=/opt/m68k-amigaos make
 ```
 
-4. Wait for the result :-)
+3. Wait for the result :-)
 
-5. *(optional)* Install additional SDKs (e.g. AHI, CyberGraphX, Magic User Interface, etc.):
+4. *(optional)* Install additional SDKs (e.g. AHI, CyberGraphX, Magic User Interface, etc.):
 
     ```
 # export PATH=/opt/m68k-amigaos/bin:$PATH

@@ -6,8 +6,8 @@
 *.o
 .DS_Store
 .ropeproject
-.build-ppc/
-.build-m68k/
+.build-*/
 m68k-amigaos/
+m68k-elf/
 ppc-amigaos/
 tmp/

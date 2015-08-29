@@ -1,0 +1,23 @@
+--- vbcc/Makefile	2010-03-12 13:43:50.000000000 +0100
++++ vbcc/Makefile	2015-08-29 09:03:00.000000000 +0200
+@@ -1,6 +1,6 @@
+ 
+ # used to create vbcc, vc and ucpp
+-CC = gcc -std=c9x -g -DHAVE_AOS4 #-DHAVE_ECPP -DHAVE_MISRA
++CC = gcc -std=c9x -O2 -fomit-frame-pointer -DHAVE_AOS4 -DETCDIR="$(ETCDIR)" #-DHAVE_ECPP -DHAVE_MISRA
+ LDFLAGS = -lm
+ 
+ # native version; used to create dtgen
+@@ -160,10 +160,10 @@
+ 	$(NCC) datatypes/dtgen.c -o bin/dtgen -Idatatypes $(NLDFLAGS)
+ 
+ $(TRGDIR)/dt.h: bin/dtgen $(TRGDIR)/machine.dt
+-	bin/dtgen $(TRGDIR)/machine.dt $(TRGDIR)/dt.h $(TRGDIR)/dt.c
++	bin/dtgen $(TRGDIR)/machine.dt $(TRGDIR)/dt.h $(TRGDIR)/dt.c < $(CONFIG)
+ 
+ $(TRGDIR)/dt.c: bin/dtgen $(TRGDIR)/machine.dt
+-	bin/dtgen $(TRGDIR)/machine.dt $(TRGDIR)/dt.h $(TRGDIR)/dt.c
++	bin/dtgen $(TRGDIR)/machine.dt $(TRGDIR)/dt.h $(TRGDIR)/dt.c < $(CONFIG)
+ 
+ $(TRGDIR)/dt.o: $(TRGDIR)/dt.h $(TRGDIR)/dt.c
+ 	$(CC) -c $(TRGDIR)/dt.c -o $(TRGDIR)/dt.o -I$(TRGDIR) -Idatatypes

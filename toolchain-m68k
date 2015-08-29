@@ -33,7 +33,8 @@ URLS = \
    'http://sun.hasenbraten.de/vasm/release/vasm.tar.gz',
    'http://sun.hasenbraten.de/vlink/release/vlink.tar.gz',
    'http://www.ibaug.de/vbcc/vbcc.tar.gz',
-   'http://mail.pb-owl.de/~frank/vbcc/current/vbcc_target_m68k-amigaos.lha']
+   ('http://mail.pb-owl.de/~frank/vbcc/current/vbcc_target_m68k-amigaos.lha',
+    'vclib.lha')]
 
 
 from common import * # NOQA
@@ -80,7 +81,64 @@ def install_ndk():
 def install_libamiga():
   info('installing libamiga')
 
-  copytree('{sources}/{libamiga}/lib', '{target}/lib')
+  copytree('{sources}/libamiga/lib', '{target}/lib')
+
+
+@check_stamp
+def build_vbcc():
+  copytree('{sources}/vbcc', '{build}/vbcc')
+  mkdir('{build}/vbcc/bin')
+  config = textfile(
+    'y', 'y', 'signed char',
+    'y', 'unsigned char',
+    'n', 'y', 'signed short',
+    'n', 'y', 'unsigned short',
+    'n', 'y', 'signed int',
+    'n', 'y', 'unsigned int',
+    'n', 'y', 'signed long',
+    'n', 'y', 'unsigned long',
+    'n', 'y', 'float',
+    'n', 'y', 'double')
+  build('vbcc', TARGET='m68k', ETCDIR='\\"{target}/etc\\"', CONFIG=config)
+  remove(config)
+
+
+@check_stamp
+def build_vlink():
+  mkdir('{build}/vlink/objects')
+  build('vlink')
+
+
+@check_stamp
+def install_vbcc_toolchain():
+  info('installing vasm')
+
+  copy('{build}/vasm/vasmm68k_mot', '{target}/bin')
+  copy('{build}/vasm/vobjdump', '{target}/bin')
+  vasm = textfile(
+    '#!/bin/sh',
+    '',
+    'vasmm68k_mot -I{target}/os-include "$@"')
+  chmod(vasm, 0755)
+  move(vasm, '{target}/bin/vasm')
+
+  info('installing vlink')
+
+  copy('{build}/vlink/vlink', '{target}/bin')
+
+  info('installing vbcc')
+
+  copy('{build}/vbcc/bin/vbccm68k', '{target}/bin')
+  copy('{build}/vbcc/bin/vc', '{target}/bin')
+  copy('{build}/vbcc/bin/vprof', '{target}/bin')
+
+  info('installing vbcc_target_m68k-amigaos')
+
+  copytree('{sources}/vclib/targets/m68k-amigaos/include',
+           '{target}/vbcc-include')
+  copytree('{sources}/vclib/targets/m68k-amigaos/lib',
+           '{target}/vbcc-lib')
+  copy('{sources}/vclib/config/aos68k', '{target}/etc/vc.config')
 
 
 def make():
@@ -172,6 +230,20 @@ def make():
 
   prepare_target()
 
+  unpack('vasm', work_dir='{build}')
+  build('vasm', CPU='m68k', SYNTAX='mot')
+
+  unpack('vlink', work_dir='{build}')
+  build_vlink()
+
+  unpack('vbcc')
+  patch('vbcc')
+  build_vbcc()
+
+  unpack('vclib', top_dir='vbcc_target_m68k-amigaos')
+
+  install_vbcc_toolchain()
+
   """
   Older gcc compilers (i.e. 2.95.3 and 3.4.6) and binutils have to be tricked
   into thinking that they're being compiled on Linux IA-32 machine. Theirs
@@ -190,8 +262,8 @@ def make():
   unpack('{ixemul}', top_dir='ixemul')
   patch('{ixemul}')
 
-  unpack('{gcc_core}')
-  unpack('{gcc_gpp}')
+  unpack('{gcc_core}', top_dir='{gcc}', dst_dir='{gcc}')
+  unpack('{gcc_gpp}', top_dir='{gcc}', dst_dir='{gcc}')
   patch('{gcc}')
   configure('{gcc}',
             '--prefix={target}',
@@ -213,7 +285,7 @@ def make():
   patch('{NDK}')
   install_ndk()
 
-  unpack('{libamiga}', in_dir='libamiga')
+  unpack('libamiga', top_dir='.')
   install_libamiga()
 
   unpack('{libnix}')
@@ -264,6 +336,7 @@ def clean():
   rmtree('{sources}')
   rmtree('{host}')
   rmtree('{build}')
+  rmtree('{tmpdir}')
 
 
 if __name__ == "__main__":
@@ -308,12 +381,12 @@ if __name__ == "__main__":
          gcc_gpp='gcc-g++-{gcc_ver}',
          gcc='gcc-{gcc_ver}',
          gpp='g++-{gcc_ver}',
-         libamiga='libamiga',
          patches=path.join('{top}', 'patches'),
          stamps=path.join('{top}', '.build-m68k', 'stamps'),
          build=path.join('{top}', '.build-m68k', 'build'),
          sources=path.join('{top}', '.build-m68k', 'sources'),
          host=path.join('{top}', '.build-m68k', 'host'),
+         tmpdir=path.join('{top}', '.build-m68k', 'tmp'),
          target=path.join('{top}', 'm68k-amigaos'),
          archives=path.join('{top}', '.build-m68k', 'archives'))
 

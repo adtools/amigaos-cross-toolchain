@@ -13,6 +13,7 @@ import sys
 import tarfile
 import urllib2
 import zipfile
+import tempfile
 
 
 VARS = {}
@@ -105,7 +106,10 @@ def find_executable(name):
 
 
 @fill_in_args
-def find(root, include=None, exclude=None):
+def find(root, **kwargs):
+  only_files = kwargs.get('only_files', False)
+  include = kwargs.get('include', None)
+  exclude = kwargs.get('exclude', None)
   lst = []
   for name in sorted(os.listdir(root)):
     if exclude and any(fnmatch(name, pat) for pat in exclude):
@@ -113,9 +117,10 @@ def find(root, include=None, exclude=None):
     if include and not any(fnmatch(name, pat) for pat in include):
       continue
     fullname = path.join(root, name)
-    lst.append(fullname)
+    if not (path.isdir(fullname) and only_files):
+      lst.append(fullname)
     if path.isdir(fullname):
-      lst.extend(find(fullname, include, exclude))
+      lst.extend(find(fullname, **kwargs))
   return lst
 
 
@@ -125,6 +130,20 @@ def touch(name):
     os.utime(name, None)
   except:
     open(name, 'a').close()
+
+
+@fill_in_args
+def mkdtemp(**kwargs):
+  if 'dir' in kwargs and not path.isdir(kwargs['dir']):
+    mkdir(kwargs['dir'])
+  return tempfile.mkdtemp(**kwargs)
+
+
+@fill_in_args
+def mkstemp(**kwargs):
+  if 'dir' in kwargs and not path.isdir(kwargs['dir']):
+    mkdir(kwargs['dir'])
+  return tempfile.mkstemp(**kwargs)
 
 
 @fill_in_args
@@ -184,12 +203,27 @@ def symlink(src, name):
 
 
 @fill_in_args
+def chmod(name, mode):
+  debug('change permissions on "%s" to "%o"', topdir(name), mode)
+  os.chmod(name, mode)
+
+
+@fill_in_args
 def execute(*cmd):
   debug('execute "%s"', " ".join(cmd))
   try:
     subprocess.check_call(cmd)
   except subprocess.CalledProcessError as ex:
     panic('command "%s" failed with %d', " ".join(list(ex.cmd)), ex.returncode)
+
+
+@fill_in_args
+def textfile(*lines):
+  f, name = mkstemp(dir='{tmpdir}')
+  debug('creating text file script "%s"', topdir(name))
+  os.write(f, '\n'.join(lines) + '\n')
+  os.close(f)
+  return name
 
 
 @fill_in_args
@@ -310,50 +344,39 @@ def fetch(name, url):
 
 
 @check_stamp
-def unpack(name, top_dir=None, in_dir=None):
+def unpack(name, work_dir='{sources}', top_dir=None, dst_dir=None):
   try:
     src = glob(path.join('{archives}', name) + '*')[0]
   except IndexError:
-    panic('Missing files for "%s".', src)
+    panic('Missing files for "%s".', name)
 
-  dst = path.join('{sources}', name)
-  rmtree(dst)
+  dst = path.join(work_dir, dst_dir or name)
 
   info('preparing files for "%s"', name)
 
-  if in_dir is not None:
-    workdir = path.join('{sources}', in_dir)
+  if path.isdir(src):
+    if top_dir is not None:
+      src = path.join(src, top_dir)
+    copytree(src, dst, exclude=['*.svn'])
   else:
-    workdir = '{sources}'
-
-  with cwd(workdir):
-    if path.isdir(src):
-      copytree(src, dst, exclude=['*.svn'])
-    else:
+    tmpdir = mkdtemp(dir='{tmpdir}')
+    with cwd(tmpdir):
       unarc(src)
-      if top_dir is not None:
-        move(top_dir, name)
-        if path.dirname(top_dir):
-          rmtree(path.split(top_dir))
+    copytree(path.join(tmpdir, top_dir or name), dst)
+    rmtree(tmpdir)
 
 
 @check_stamp
-def patch(name):
-  with cwd('{sources}'):
-    found = []
-
-    for root, _, files in os.walk(path.join('{patches}', name), topdown=True):
-      for name in files:
-        if not fnmatch(name, '*~'):
-          found.append(path.join(root, name))
-
-    for name in sorted(found):
+def patch(name, work_dir='{sources}'):
+  with cwd(work_dir):
+    for name in find(path.join('{patches}', name),
+                     only_files=True, exclude=['*~']):
       if fnmatch(name, '*.diff'):
         execute('patch', '-t', '-p0', '-i', name)
       else:
         dst = path.relpath(name, '{patches}')
         mkdir(path.dirname(dst))
-        copy(path.join(root, name), dst)
+        copy(name, dst)
 
 
 @check_stamp
@@ -393,7 +416,7 @@ def install(name, *targets, **makevars):
     execute('make', *args)
 
 
-__all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'execute',
+__all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'chmod', 'execute',
            'rmtree', 'mkdir', 'copy', 'copytree', 'unarc', 'fetch', 'cwd',
-           'symlink', 'remove', 'move', 'find', 'env', 'path', 'check_stamp',
-           'unpack', 'patch', 'configure', 'build', 'install']
+           'symlink', 'remove', 'move', 'find', 'textfile', 'env', 'path',
+           'check_stamp', 'unpack', 'patch', 'configure', 'build', 'install']

@@ -21,8 +21,9 @@ URLS = \
    'ftp://ftp.gnu.org/gnu/gcc/gcc-2.95.3/gcc-g++-2.95.3.tar.gz',
    ('http://fossies.org/linux/misc/old/flex-2.5.4a.tar.gz',
     'flex-2.5.4.tar.gz'),
-   ('git://github.com/cahirwpz/libnix', 'libnix-2.2'),
-   ('git://github.com/adtools/sfdc', 'sfdc-1.5'),
+   'git://github.com/cahirwpz/libnix',
+   'git://github.com/cahirwpz/fd2sfd',
+   'git://github.com/adtools/sfdc',
    ('http://www.haage-partner.de/download/AmigaOS/NDK39.lha', 'NDK_3.9.lha'),
    ('ftp://ftp.exotica.org.uk/mirrors/geekgadgets/amiga/m68k/snapshots/' +
     '990529/bin/libamiga-bin.tgz', 'libamiga.tar.gz'),
@@ -298,11 +299,17 @@ def make():
   build('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
   install('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 
-  unpack('{sfdc}')
-  patch('{sfdc}')
-  configure('{sfdc}', '--prefix={target}', copy_source=True)
-  build('{sfdc}')
-  install('{sfdc}')
+  unpack('fd2sfd')
+  patch('fd2sfd')
+  configure('fd2sfd', '--prefix={target}', copy_source=True)
+  build('fd2sfd')
+  install('fd2sfd')
+
+  unpack('sfdc')
+  patch('sfdc')
+  configure('sfdc', '--prefix={target}', copy_source=True)
+  build('sfdc')
+  install('sfdc')
 
   unpack('{NDK}')
   patch('{NDK}')
@@ -311,21 +318,21 @@ def make():
   unpack('libamiga', top_dir='.')
   install_libamiga()
 
-  unpack('{libnix}')
-  configure('{libnix}',
+  unpack('libnix')
+  configure('libnix',
             '--prefix={target}',
             '--host=i686-linux-gnu',
             '--target=m68k-amigaos')
-  build('{libnix}',
+  build('libnix',
         CC='m68k-amigaos-gcc',
         CPP='m68k-amigaos-gcc -E',
         AR='m68k-amigaos-ar',
         AS='m68k-amigaos-as',
         RANLIB='m68k-amigaos-ranlib',
         LD='m68k-amigaos-ld')
-  install('{libnix}')
+  install('libnix')
 
-  copy('{sources}/{libnix}/sources/headers/stabs.h',
+  copy('{sources}/libnix/sources/headers/stabs.h',
        '{target}/m68k-amigaos/sys-include')
 
   unpack('{libm}', top_dir='contrib/libm')
@@ -395,9 +402,7 @@ if __name__ == "__main__":
          autoconf='autoconf-2.13',
          texinfo='texinfo-4.12',
          NDK='NDK_3.9',
-         sfdc='sfdc-1.5',
          ixemul='ixemul-48.2',
-         libnix='libnix-2.2',
          libm='libm-5.4',
          binutils='binutils-{binutils_ver}',
          gcc_core='gcc-core-{gcc_ver}',

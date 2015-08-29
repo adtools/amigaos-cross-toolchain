@@ -1,19 +1,10 @@
---- fd2sfd-1.0/Makefile.in	2003-07-31 08:10:19.000000000 +0200
-+++ fd2sfd-1.0/Makefile.in	2014-05-29 00:09:00.000000000 +0200
-@@ -17,6 +17,7 @@
- 
- INSTALL		= @INSTALL@
- INSTALL_PROGRAM	= @INSTALL_PROGRAM@ -s
-+INSTALL_SCRIPT	= @INSTALL_SCRIPT@
- INSTALL_DATA	= @INSTALL_DATA@
- 
- VPATH		= $(srcdir)
+--- fd2sfd/Makefile.in	2003-07-31 08:10:19.000000000 +0200
++++ fd2sfd/Makefile.in	2014-05-29 00:09:00.000000000 +0200
 @@ -40,49 +41,11 @@
  
  	# Install tools
  	$(INSTALL_PROGRAM) $(EXECUTABLE) $(bindir)
--	$(INSTALL_PROGRAM) cross/bin/gg-fix-includes $(bindir)
-+	$(INSTALL_SCRIPT) cross/bin/gg-fix-includes $(bindir)
+ 	$(INSTALL_SCRIPT) cross/bin/gg-fix-includes $(bindir)
  	for f in `cd $(srcdir)/cross/share/ && find * -type f`; do \
 -	  $(INSTALL_DATA) -D $(srcdir)/cross/share/$${f} $(fd2sfddir)/$${f}; \
 -	done

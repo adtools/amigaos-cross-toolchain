@@ -1,13 +1,15 @@
-AmigaOS m68k & ppc targeted cross compiler and assembler for Unix environment
+AmigaOS cross compiler for Linux / MacOSX / Windows
 ===
 
 **Author:** [Krystian Bacławski](mailto:krystian.baclawski@gmail.com)
 
-**Short description:** AmigaOS toolchain build script.
+**Short description:** Cross toolchain build script for AmigaOS m68k and ppc targets. Supported host platforms are Linux, MacOSX and Windows (Cygwin).
 
 ### Overview
 
-**m68k-amigaos-toolchain** project provides an easy way to build m68k AmigaOS 3.x target toolchain in a Unix-like environment. Build process should produce following set of tools:
+**amigaos-cross-toolchain** project provides an easy way to build AmigaOS 3.x (m68k) and ppc AmigaOS 4.x (ppc) target toolchain in a Unix-like environment.
+
+Build process should produce following set of tools for **m68k-amigaos** target:
 
  * gcc 2.95.3
  * g++ 2.95.3
@@ -18,11 +20,20 @@ AmigaOS m68k & ppc targeted cross compiler and assembler for Unix environment
  * AmigaOS headers & libraries & autodocs (for AmigaOS 3.9)
  * vbcc toolchain (most recent release) including vasm, vlink and C standard library
 
+... and following set of tools for **ppc-amigaos** target:
+
+ * gcc 4.2.4
+ * g++ 4.2.4
+ * binutils 2.18 (assembler, linker, etc.)
+ * newlib
+ * clib 2.2
+ * AmigaOS headers & libraries & autodocs (for AmigaOS 4.1)
+
 **Note:** *Patches are welcome!*
 
 ### Downloads
 
-There are no downloads provided for the time being. I do as much as possible to make the toolchain portable among Unix-like environments. Following platforms were tested and the toolchain is known to work for them:
+There are no binary downloads provided for the time being. I do as much as possible to make the toolchain portable among Unix-like environments. Following platforms were tested and the toolchain is known to work for them:
 
  * Cygwin 1.7.18 (gcc 4.5.3)
  * Ubuntu 14.04 LTS 32-bit (gcc 4.8.2)
@@ -70,14 +81,14 @@ You have to have following packages installed in your system:
 
 Follow steps listed below:
 
-1. Fetch *m68k-amigaos-toolchain* project to your local drive:  
+1. Fetch *amigaos-cross-toolchain* project to your local drive:  
 
     ```
-# git clone git://github.com/cahirwpz/m68k-amigaos-toolchain.git
-# cd m68k-amigaos-toolchain
+# git clone git://github.com/cahirwpz/amigaos-cross-toolchain.git
+# cd amigaos-cross-toolchain
 ```
 
-2. Run `toolchain-m68k` script (with `--prefix` option to specify where to install the toolchain). Note, that the destination directory must be writable by the user. 
+2. Run `toolchain-m68k` or `toolchain-ppc` script (with `--prefix` option to specify where to install the toolchain). Note, that the destination directory must be writable by the user. 
 
     ```
 # ./toolchain-m68k --prefix=/opt/m68k-amigaos make

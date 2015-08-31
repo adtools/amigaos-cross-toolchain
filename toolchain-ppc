@@ -2,6 +2,7 @@
 
 # Build cross toolchain for AmigaOS 4.x / PowerPC target.
 
+from fnmatch import fnmatch
 from glob import glob
 from logging import info
 from os import environ
@@ -74,7 +75,6 @@ def make():
   find_executable('bison')
   find_executable('flex')
   find_executable('make')
-  find_executable('git')
   find_executable('svn')
 
   environ['PATH'] = ":".join([path.join('{target}', 'bin'),
@@ -196,6 +196,16 @@ def clean():
 if __name__ == "__main__":
   logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 
+  if not sys.version_info[:2] == (2, 7):
+    panic('I need Python 2.7 to run!')
+
+  if not (platform.system() in ['Darwin', 'Linux'] or
+          fnmatch(platform.system(), 'CYGWIN*')):
+    panic('Build on %s not supported!', platform.system())
+
+  if platform.machine() not in ['i686', 'x86_64']:
+    panic('Build on %s architecture not supported!', platform.machine())
+
   parser = argparse.ArgumentParser(description='Build cross toolchain.')
   parser.add_argument('action', choices=['make', 'clean'], default='make',
                       help='perform action')
@@ -206,13 +216,6 @@ if __name__ == "__main__":
   parser.add_argument('--prefix', type=str, default=None,
                       help='installation directory')
   args = parser.parse_args()
-
-  if not (platform.system() in ['Darwin', 'Linux'] or
-          fnmatch(platform.system(), 'CYGWIN*')):
-    panic('Build on %s not supported!', platform.system())
-
-  if platform.machine() not in ['i686', 'x86_64']:
-    panic('Build on %s architecture not supported!', platform.machine())
 
   setvar(top=path.abspath('.'),
          binutils_ver=args.binutils,

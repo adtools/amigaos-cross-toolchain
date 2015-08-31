@@ -2,6 +2,7 @@
 
 # Build development cross toolchain for m68k-elf target.
 
+from fnmatch import fnmatch
 from os import environ
 import argparse
 import logging
@@ -128,12 +129,8 @@ def clean():
 if __name__ == "__main__":
   logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 
-  parser = argparse.ArgumentParser(description='Build cross toolchain.')
-  parser.add_argument('action', choices=['make', 'clean'], default='make',
-                      help='perform action')
-  parser.add_argument('--prefix', type=str, default=None,
-                      help='installation directory')
-  args = parser.parse_args()
+  if not sys.version_info[:2] == (2, 7):
+    panic('I need Python 2.7 to run!')
 
   if not (platform.system() in ['Darwin', 'Linux'] or
           fnmatch(platform.system(), 'CYGWIN*')):
@@ -141,6 +138,13 @@ if __name__ == "__main__":
 
   if platform.machine() not in ['i686', 'x86_64']:
     panic('Build on %s architecture not supported!', platform.machine())
+
+  parser = argparse.ArgumentParser(description='Build cross toolchain.')
+  parser.add_argument('action', choices=['make', 'clean'], default='make',
+                      help='perform action')
+  parser.add_argument('--prefix', type=str, default=None,
+                      help='installation directory')
+  args = parser.parse_args()
 
   setvar(top=path.abspath('.'))
 

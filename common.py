@@ -358,7 +358,7 @@ def unpack(name, work_dir='{sources}', top_dir=None, dst_dir=None):
   if path.isdir(src):
     if top_dir is not None:
       src = path.join(src, top_dir)
-    copytree(src, dst, exclude=['*.svn'])
+    copytree(src, dst, exclude=['.svn', '.git'])
   else:
     tmpdir = mkdtemp(dir='{tmpdir}')
     with cwd(tmpdir):

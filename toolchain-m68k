@@ -195,8 +195,8 @@ def make():
 
   ARCH = '-m32' if platform.machine() == 'x86_64' else ''
 
-  environ['CC'] = ' '.join([find_executable(CC), '-std=gnu89', ARCH])
-  environ['CXX'] = ' '.join([find_executable(CXX), '-std=gnu++98', ARCH])
+  environ['CC'] = ' '.join([find_executable(CC), ARCH])
+  environ['CXX'] = ' '.join([find_executable(CXX), ARCH])
 
   find_executable('patch')
   find_executable('make')
@@ -289,13 +289,15 @@ def make():
   unpack('{gcc_core}', top_dir='{gcc}', dst_dir='{gcc}')
   unpack('{gcc_gpp}', top_dir='{gcc}', dst_dir='{gcc}')
   patch('{gcc}')
-  configure('{gcc}',
-            '--prefix={target}',
-            '--host=i686-linux-gnu',
-            '--build=i686-linux-gnu',
-            '--target=m68k-amigaos',
-            '--enable-languages=c',
-            '--with-headers={sources}/{ixemul}/include')
+  with env(CC=environ['CC'] + ' -std=gnu89',
+           CXX=environ['CXX'] + ' -std=gnu++98'):
+    configure('{gcc}',
+              '--prefix={target}',
+              '--host=i686-linux-gnu',
+              '--build=i686-linux-gnu',
+              '--target=m68k-amigaos',
+              '--enable-languages=c',
+              '--with-headers={sources}/{ixemul}/include')
   build('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
   install('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 
@@ -350,13 +352,15 @@ def make():
     remove('{gpp}')
     symlink('{gcc}', '{gpp}')
 
-  configure('{gpp}',
-            '--prefix={target}',
-            '--host=i686-linux-gnu',
-            '--build=i686-linux-gnu',
-            '--target=m68k-amigaos',
-            '--enable-languages=c++',
-            '--with-headers={sources}/{ixemul}/include')
+  with env(CC=environ['CC'] + ' -std=gnu89',
+           CXX=environ['CXX'] + ' -std=gnu++98'):
+    configure('{gpp}',
+              '--prefix={target}',
+              '--host=i686-linux-gnu',
+              '--build=i686-linux-gnu',
+              '--target=m68k-amigaos',
+              '--enable-languages=c++',
+              '--with-headers={sources}/{ixemul}/include')
   build('{gpp}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
   install('{gpp}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 

@@ -3,7 +3,7 @@
 @@ -40,49 +41,11 @@
  
  	# Install tools
- 	$(INSTALL_PROGRAM) $(EXECUTABLE) $(bindir)
+ 	$(INSTALL_PROGRAM) -s $(EXECUTABLE) $(bindir)
  	$(INSTALL_SCRIPT) cross/bin/gg-fix-includes $(bindir)
  	for f in `cd $(srcdir)/cross/share/ && find * -type f`; do \
 -	  $(INSTALL_DATA) -D $(srcdir)/cross/share/$${f} $(fd2sfddir)/$${f}; \

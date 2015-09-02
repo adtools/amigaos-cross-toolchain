@@ -296,10 +296,10 @@ def build():
               '--host=i686-linux-gnu',
               '--build=i686-linux-gnu',
               '--target=m68k-amigaos',
-              '--enable-languages=c',
+              '--enable-languages=c,c++',
               '--with-headers={sources}/{ixemul}/include')
-  make('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
-  make('{gcc}', 'install', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  make('{gcc}', 'all-gcc', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  make('{gcc}', 'install-gcc', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 
   unpack('fd2sfd')
   patch('fd2sfd')
@@ -348,21 +348,8 @@ def build():
   make('{libm}')
   make('{libm}', 'install')
 
-  with cwd('{sources}'):
-    remove('{gpp}')
-    symlink('{gcc}', '{gpp}')
-
-  with env(CC=environ['CC'] + ' -std=gnu89',
-           CXX=environ['CXX'] + ' -std=gnu++98'):
-    configure('{gpp}',
-              '--prefix={target}',
-              '--host=i686-linux-gnu',
-              '--build=i686-linux-gnu',
-              '--target=m68k-amigaos',
-              '--enable-languages=c++',
-              '--with-headers={sources}/{ixemul}/include')
-  make('{gpp}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
-  make('{gpp}', 'install', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  make('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  make('{gcc}', 'install', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 
 
 def clean():

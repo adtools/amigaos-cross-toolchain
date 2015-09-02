@@ -65,12 +65,12 @@ def build():
   environ['TERM'] = 'xterm'
 
   if platform.system() == 'Darwin':
-    cc, cxx = 'clang', 'clang++'
+    CC, CXX = 'clang', 'clang++'
   else:
-    cc, cxx = 'gcc', 'g++'
+    CC, CXX = 'gcc', 'g++'
 
-  environ['CC'] = find_executable(cc)
-  environ['CXX'] = find_executable(cxx)
+  environ['CC'] = find_executable(CC)
+  environ['CXX'] = find_executable(CXX)
 
   find_executable('patch')
   find_executable('bison')
@@ -146,17 +146,11 @@ def build():
   make('{cloog}')
   make('{cloog}', 'install')
 
-  binutils_env = {}
-  if cmpver('eq', '{binutils_ver}', '2.18'):
-    binutils_env.update(CFLAGS='-Wno-error')
-  elif cmpver('eq', '{binutils_ver}', '2.23.2'):
-    binutils_env.update(CFLAGS='-Wno-error')
-
-  unpack('{binutils}')
-  with env(**binutils_env):
+  with env(CFLAGS='-Wno-error'):
     configure('{binutils}',
               '--prefix={target}',
-              '--target=ppc-amigaos')
+              '--target=ppc-amigaos',
+              from_dir='{archives}/{binutils}')
     make('{binutils}')
     make('{binutils}', 'install')
 
@@ -164,27 +158,27 @@ def build():
 
   gcc_env = {}
   if cmpver('eq', '{gcc_ver}', '4.2.4'):
-    cflags = ['-std=gnu89']
-    if platform.machine() == 'x86_64':
-      cflags.append('-m32')
-    gcc_env.update(CFLAGS=' '.join(cflags))
+    gcc_env.update(CFLAGS='-std=gnu89',
+                   CC=find_executable(CC) + ' -m32',
+                   CXX=find_executable(CXX) + ' -m32')
 
-  unpack('{gcc}')
   with env(**gcc_env):
     configure('{gcc}',
               '--with-bugurl="http://sf.net/p/adtools"',
               '--target=ppc-amigaos',
               '--with-gmp={host}',
               '--with-mpfr={host}',
+              '--with-isl={host}',
               '--with-cloog={host}',
               '--prefix={target}',
               '--enable-languages=c,c++',
               '--enable-haifa',
-              '--enable-sjlj-exceptions'
-              '--disable-libstdcxx-pch'
-              '--disable-tls')
-    make('{gcc}')
-    make('{gcc}', 'install')
+              '--enable-sjlj-exceptions',
+              '--disable-libstdcxx-pch',
+              '--disable-tls',
+              from_dir='{archives}/{gcc}')
+  make('{gcc}')
+  make('{gcc}', 'install')
 
 
 def clean():
@@ -230,7 +224,7 @@ if __name__ == "__main__":
          cloog='cloog-0.18.4',
          texinfo='texinfo-4.12',
          binutils='binutils-{binutils_ver}',
-         sdk='SDK_53.29',
+         sdk='SDK_53.24',
          gcc='gcc-{gcc_ver}',
          patches=path.join('{top}', 'patches'),
          stamps=path.join('{top}', '.build-ppc', 'stamps'),

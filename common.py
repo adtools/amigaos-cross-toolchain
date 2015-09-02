@@ -303,25 +303,30 @@ def env(**kwargs):
         os.environ[key] = value
 
 
-def check_stamp(fn):
-  @fill_in_args
-  def wrapper(*args, **kwargs):
-    name = fn.func_name.replace('_', '-')
-    if len(args) > 0:
-      name = name + "-" + str(fill_in(args[0]))
-    stamp = path.join('{stamps}', name)
-    if not path.exists('{stamps}'):
-      mkdir('{stamps}')
-    if not path.exists(stamp):
-      fn(*args, **kwargs)
-      touch(stamp)
-    else:
-      info('already done "%s"', name)
+def recipe(name, nargs=0):
+  def real_decorator(fn):
+    @fill_in_args
+    def wrapper(*args, **kwargs):
+      target = [str(arg) for arg in args[:min(nargs, len(args))]]
+      if len(target) > 0:
+        target = [target[0], name] + target[1:]
+        target = '-'.join(target)
+      else:
+        target = name
+      target = target.replace('_', '-')
+      stamp = path.join('{stamps}', target)
+      if not path.exists('{stamps}'):
+        mkdir('{stamps}')
+      if not path.exists(stamp):
+        fn(*args, **kwargs)
+        touch(stamp)
+      else:
+        info('already done "%s"', target)
+    return wrapper
+  return real_decorator
 
-  return wrapper
 
-
-@check_stamp
+@recipe('fetch', 1)
 def fetch(name, url):
   if url.startswith('http') or url.startswith('ftp'):
     if not path.exists(name):
@@ -344,7 +349,7 @@ def fetch(name, url):
     panic('URL "%s" not recognized!', url)
 
 
-@check_stamp
+@recipe('unpack', 1)
 def unpack(name, work_dir='{sources}', top_dir=None, dst_dir=None):
   try:
     src = glob(path.join('{archives}', name) + '*')[0]
@@ -367,7 +372,7 @@ def unpack(name, work_dir='{sources}', top_dir=None, dst_dir=None):
     rmtree(tmpdir)
 
 
-@check_stamp
+@recipe('patch', 1)
 def patch(name, work_dir='{sources}'):
   with cwd(work_dir):
     for name in find(path.join('{patches}', name),
@@ -380,7 +385,7 @@ def patch(name, work_dir='{sources}'):
         copy(name, dst)
 
 
-@check_stamp
+@recipe('configure', 1)
 def configure(name, *confopts, **kwargs):
   info('configuring "%s"', name)
 
@@ -399,28 +404,18 @@ def configure(name, *confopts, **kwargs):
     execute(path.join(from_dir, 'configure'), *confopts)
 
 
-@check_stamp
-def build(name, *targets, **makevars):
-  info('building "%s"', name)
+@recipe('make', 2)
+def make(name, target=None, **makevars):
+  info('running make "%s"', target)
 
   with cwd(path.join('{build}', name)):
-    args = list(targets) + ['%s=%s' % item for item in makevars.items()]
-    execute('make', *args)
-
-
-@check_stamp
-def install(name, *targets, **makevars):
-  info('installing "%s"', name)
-
-  if not targets:
-    targets = ['install']
-
-  with cwd(path.join('{build}', name)):
-    args = list(targets) + ['%s=%s' % item for item in makevars.items()]
+    args = ['%s=%s' % item for item in makevars.items()]
+    if target is not None:
+      args = [target] + args
     execute('make', *args)
 
 
 __all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'chmod', 'execute',
            'rmtree', 'mkdir', 'copy', 'copytree', 'unarc', 'fetch', 'cwd',
            'symlink', 'remove', 'move', 'find', 'textfile', 'env', 'path',
-           'check_stamp', 'unpack', 'patch', 'configure', 'build', 'install']
+           'recipe', 'unpack', 'patch', 'configure', 'make']

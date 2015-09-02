@@ -42,7 +42,7 @@ URLS = \
 from common import * # NOQA
 
 
-@check_stamp
+@recipe('target-prepare')
 def prepare_target():
   info('preparing target')
 
@@ -56,7 +56,7 @@ def prepare_target():
     symlink('../lib', 'lib')
 
 
-@check_stamp
+@recipe('{NDK}-install')
 def install_ndk():
   info('installing ndk')
 
@@ -79,14 +79,14 @@ def install_ndk():
             '--output={target}/os-include/lvo/' + base + '_lib.i', name)
 
 
-@check_stamp
+@recipe('libamiga-install')
 def install_libamiga():
   info('installing libamiga')
 
   copytree('{sources}/libamiga/lib', '{target}/lib')
 
 
-@check_stamp
+@recipe('vbcc-build')
 def build_vbcc():
   copytree('{sources}/vbcc', '{build}/vbcc')
   mkdir('{build}/vbcc/bin')
@@ -101,17 +101,17 @@ def build_vbcc():
     'n', 'y', 'unsigned long',
     'n', 'y', 'float',
     'n', 'y', 'double')
-  build('vbcc', TARGET='m68k', ETCDIR='\\"{target}/etc\\"', CONFIG=config)
+  make('vbcc', TARGET='m68k', ETCDIR='\\"{target}/etc\\"', CONFIG=config)
   remove(config)
 
 
-@check_stamp
+@recipe('vlink-build')
 def build_vlink():
   mkdir('{build}/vlink/objects')
-  build('vlink')
+  make('vlink')
 
 
-@check_stamp
+@recipe('vbcc-install')
 def install_vbcc_toolchain():
   info('installing vasm')
 
@@ -168,7 +168,7 @@ def install_vbcc_toolchain():
   move(config, '{target}/etc/vc.config')
 
 
-def make():
+def build():
   for var in environ.keys():
     if var not in ['_', 'LOGNAME', 'HOME', 'SHELL', 'TMPDIR', 'PWD']:
       del environ[var]
@@ -219,43 +219,43 @@ def make():
             '--disable-shared',
             '--prefix={host}',
             copy_source=True)
-  build('{lha}')
-  install('{lha}')
+  make('{lha}')
+  make('{lha}', 'install')
 
   unpack('{m4}')
   configure('{m4}', '--prefix={host}')
-  build('{m4}')
-  install('{m4}')
+  make('{m4}')
+  make('{m4}', 'install')
 
   unpack('{gawk}')
   configure('{gawk}', '--prefix={host}')
-  build('{gawk}')
-  install('{gawk}')
+  make('{gawk}')
+  make('{gawk}', 'install')
 
   unpack('{flex}')
   configure('{flex}', '--prefix={host}')
-  build('{flex}')
-  install('{flex}')
+  make('{flex}')
+  make('{flex}', 'install')
 
   unpack('{bison}')
   configure('{bison}', '--prefix={host}')
-  build('{bison}')
-  install('{bison}')
+  make('{bison}')
+  make('{bison}', 'install')
 
   unpack('{texinfo}')
   configure('{texinfo}', '--prefix={host}')
-  build('{texinfo}')
-  install('{texinfo}')
+  make('{texinfo}')
+  make('{texinfo}', 'install')
 
   unpack('{autoconf}')
   configure('{autoconf}', '--prefix={host}')
-  build('{autoconf}')
-  install('{autoconf}')
+  make('{autoconf}')
+  make('{autoconf}', 'install')
 
   prepare_target()
 
   unpack('vasm', work_dir='{build}')
-  build('vasm', CPU='m68k', SYNTAX='mot')
+  make('vasm', CPU='m68k', SYNTAX='mot')
 
   unpack('vlink', work_dir='{build}')
   build_vlink()
@@ -280,8 +280,8 @@ def make():
             '--prefix={target}',
             '--host=i686-linux-gnu',
             '--target=m68k-amigaos')
-  build('{binutils}')
-  install('{binutils}')
+  make('{binutils}')
+  make('{binutils}', 'install')
 
   unpack('{ixemul}', top_dir='ixemul')
   patch('{ixemul}')
@@ -298,20 +298,20 @@ def make():
               '--target=m68k-amigaos',
               '--enable-languages=c',
               '--with-headers={sources}/{ixemul}/include')
-  build('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
-  install('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  make('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  make('{gcc}', 'install', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 
   unpack('fd2sfd')
   patch('fd2sfd')
   configure('fd2sfd', '--prefix={target}', copy_source=True)
-  build('fd2sfd')
-  install('fd2sfd')
+  make('fd2sfd')
+  make('fd2sfd', 'install')
 
   unpack('sfdc')
   patch('sfdc')
   configure('sfdc', '--prefix={target}', copy_source=True)
-  build('sfdc')
-  install('sfdc')
+  make('sfdc')
+  make('sfdc', 'install')
 
   unpack('{NDK}')
   patch('{NDK}')
@@ -325,14 +325,14 @@ def make():
             '--prefix={target}',
             '--host=i686-linux-gnu',
             '--target=m68k-amigaos')
-  build('libnix',
-        CC='m68k-amigaos-gcc',
-        CPP='m68k-amigaos-gcc -E',
-        AR='m68k-amigaos-ar',
-        AS='m68k-amigaos-as',
-        RANLIB='m68k-amigaos-ranlib',
-        LD='m68k-amigaos-ld')
-  install('libnix')
+  make('libnix',
+       CC='m68k-amigaos-gcc',
+       CPP='m68k-amigaos-gcc -E',
+       AR='m68k-amigaos-ar',
+       AS='m68k-amigaos-as',
+       RANLIB='m68k-amigaos-ranlib',
+       LD='m68k-amigaos-ld')
+  make('libnix', 'install')
 
   copy('{sources}/libnix/sources/headers/stabs.h',
        '{target}/m68k-amigaos/sys-include')
@@ -345,8 +345,8 @@ def make():
               '--prefix={target}',
               '--host=i686-linux-gnu',
               '--target=m68k-amigaos')
-  build('{libm}')
-  install('{libm}')
+  make('{libm}')
+  make('{libm}', 'install')
 
   with cwd('{sources}'):
     remove('{gpp}')
@@ -361,8 +361,8 @@ def make():
               '--target=m68k-amigaos',
               '--enable-languages=c++',
               '--with-headers={sources}/{ixemul}/include')
-  build('{gpp}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
-  install('{gpp}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  make('{gpp}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  make('{gpp}', 'install', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 
 
 def clean():
@@ -387,7 +387,7 @@ if __name__ == "__main__":
     panic('Build on %s architecture not supported!', platform.machine())
 
   parser = argparse.ArgumentParser(description='Build cross toolchain.')
-  parser.add_argument('action', choices=['make', 'clean'], default='make',
+  parser.add_argument('action', choices=['build', 'clean'], default='build',
                       help='perform action')
   parser.add_argument('--binutils', choices=['2.9.1'], default='2.9.1',
                       help='desired binutils version')

@@ -21,7 +21,7 @@ URLS = \
 from common import * # NOQA
 
 
-def make():
+def build():
   for var in environ.keys():
     if var not in ['_', 'LOGNAME', 'HOME', 'SHELL', 'TMPDIR', 'PWD']:
       del environ[var]
@@ -59,16 +59,16 @@ def make():
   configure('{gmp}',
             '--disable-shared',
             '--prefix={host}')
-  build('{gmp}')
-  install('{gmp}')
+  make('{gmp}')
+  make('{gmp}', 'install')
 
   unpack('{mpfr}')
   configure('{mpfr}',
             '--disable-shared',
             '--prefix={host}',
             '--with-gmp={host}')
-  build('{mpfr}')
-  install('{mpfr}')
+  make('{mpfr}')
+  make('{mpfr}', 'install')
 
   unpack('{mpc}')
   configure('{mpc}',
@@ -76,16 +76,16 @@ def make():
             '--prefix={host}',
             '--with-gmp={host}',
             '--with-mpfr={host}')
-  build('{mpc}')
-  install('{mpc}')
+  make('{mpc}')
+  make('{mpc}', 'install')
 
   unpack('{isl}')
   configure('{isl}',
             '--disable-shared',
             '--prefix={host}',
             '--with-gmp-prefix={host}')
-  build('{isl}')
-  install('{isl}')
+  make('{isl}')
+  make('{isl}', 'install')
 
   unpack('{cloog}')
   configure('{cloog}',
@@ -94,8 +94,8 @@ def make():
             '--with-isl=system',
             '--with-gmp-prefix={host}',
             '--with-isl-prefix={host}')
-  build('{cloog}')
-  install('{cloog}')
+  make('{cloog}')
+  make('{cloog}', 'install')
 
   with env(CFLAGS='-Wno-error'):
     configure('binutils',
@@ -103,8 +103,8 @@ def make():
               '--with-isl={host}',
               '--target=m68k-elf',
               from_dir='{archives}/binutils')
-    build('binutils')
-    install('binutils')
+    make('binutils')
+    make('binutils', 'install')
 
     configure('gcc',
               '--target=m68k-elf',
@@ -116,8 +116,8 @@ def make():
               '--enable-languages=c',
               '--without-headers',
               from_dir='{archives}/gcc')
-    build('gcc', 'all-gcc')
-    install('gcc', 'install-gcc')
+    make('gcc', 'all-gcc')
+    make('gcc', 'install-gcc')
 
 
 def clean():
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     panic('Build on %s architecture not supported!', platform.machine())
 
   parser = argparse.ArgumentParser(description='Build cross toolchain.')
-  parser.add_argument('action', choices=['make', 'clean'], default='make',
+  parser.add_argument('action', choices=['build', 'clean'], default='build',
                       help='perform action')
   parser.add_argument('--prefix', type=str, default=None,
                       help='installation directory')

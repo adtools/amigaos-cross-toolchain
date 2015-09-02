@@ -9,6 +9,7 @@ from os import environ
 import argparse
 import logging
 import platform
+import sys
 
 URLS = \
   ['ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2',
@@ -30,9 +31,9 @@ URLS = \
 from common import * # NOQA
 
 
-@check_stamp
+@recipe('{sdk}-prepare')
 def prepare_sdk():
-  info('preparing SDK')
+  info('preparing {sdk}')
 
   base = ''
   clib2 = ''
@@ -41,7 +42,7 @@ def prepare_sdk():
   with cwd('{sources}'):
     for arc in ['base.lha', 'clib2-*.lha', 'newlib-*.lha']:
       info('extracting "%s"' % arc)
-      execute('lha', '-xifq', path.join('{archives}', 'SDK_53.24.lha'),
+      execute('lha', '-xifq', path.join('{archives}', '{sdk}.lha'),
               path.join('SDK_Install', arc))
     base = path.join('{sources}', glob('base*.lha')[0])
     clib2 = path.join('{sources}', glob('clib2*.lha')[0])
@@ -54,7 +55,7 @@ def prepare_sdk():
     move('Include', 'include')
 
 
-def make():
+def build():
   for var in environ.keys():
     if var not in ['_', 'LOGNAME', 'HOME', 'SHELL', 'TMPDIR', 'PWD']:
       del environ[var]
@@ -94,29 +95,29 @@ def make():
             '--disable-shared',
             '--prefix={host}',
             copy_source=True)
-  build('{lha}')
-  install('{lha}')
+  make('{lha}')
+  make('{lha}', 'install')
 
   unpack('{texinfo}')
   configure('{texinfo}',
             '--prefix={host}')
-  build('{texinfo}')
-  install('{texinfo}')
+  make('{texinfo}')
+  make('{texinfo}', 'install')
 
   unpack('{gmp}')
   configure('{gmp}',
             '--disable-shared',
             '--prefix={host}')
-  build('{gmp}')
-  install('{gmp}')
+  make('{gmp}')
+  make('{gmp}', 'install')
 
   unpack('{mpfr}')
   configure('{mpfr}',
             '--disable-shared',
             '--prefix={host}',
             '--with-gmp={host}')
-  build('{mpfr}')
-  install('{mpfr}')
+  make('{mpfr}')
+  make('{mpfr}', 'install')
 
   unpack('{mpc}')
   configure('{mpc}',
@@ -124,16 +125,16 @@ def make():
             '--prefix={host}',
             '--with-gmp={host}',
             '--with-mpfr={host}')
-  build('{mpc}')
-  install('{mpc}')
+  make('{mpc}')
+  make('{mpc}', 'install')
 
   unpack('{isl}')
   configure('{isl}',
             '--disable-shared',
             '--prefix={host}',
             '--with-gmp-prefix={host}')
-  build('{isl}')
-  install('{isl}')
+  make('{isl}')
+  make('{isl}', 'install')
 
   unpack('{cloog}')
   configure('{cloog}',
@@ -142,8 +143,8 @@ def make():
             '--with-isl=system',
             '--with-gmp-prefix={host}',
             '--with-isl-prefix={host}')
-  build('{cloog}')
-  install('{cloog}')
+  make('{cloog}')
+  make('{cloog}', 'install')
 
   binutils_env = {}
   if cmpver('eq', '{binutils_ver}', '2.18'):
@@ -156,8 +157,8 @@ def make():
     configure('{binutils}',
               '--prefix={target}',
               '--target=ppc-amigaos')
-    build('{binutils}')
-    install('{binutils}')
+    make('{binutils}')
+    make('{binutils}', 'install')
 
   prepare_sdk()
 
@@ -182,8 +183,8 @@ def make():
               '--enable-sjlj-exceptions'
               '--disable-libstdcxx-pch'
               '--disable-tls')
-    build('{gcc}')
-    install('{gcc}')
+    make('{gcc}')
+    make('{gcc}', 'install')
 
 
 def clean():
@@ -207,7 +208,7 @@ if __name__ == "__main__":
     panic('Build on %s architecture not supported!', platform.machine())
 
   parser = argparse.ArgumentParser(description='Build cross toolchain.')
-  parser.add_argument('action', choices=['make', 'clean'], default='make',
+  parser.add_argument('action', choices=['build', 'clean'], default='build',
                       help='perform action')
   parser.add_argument('--binutils', choices=['2.18', '2.23.2'], default='2.18',
                       help='desired binutils version')
@@ -229,6 +230,7 @@ if __name__ == "__main__":
          cloog='cloog-0.18.4',
          texinfo='texinfo-4.12',
          binutils='binutils-{binutils_ver}',
+         sdk='SDK_53.29',
          gcc='gcc-{gcc_ver}',
          patches=path.join('{top}', 'patches'),
          stamps=path.join('{top}', '.build-ppc', 'stamps'),

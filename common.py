@@ -231,8 +231,15 @@ def textfile(*lines):
 def download(url, name):
   u = urllib2.urlopen(url)
   meta = u.info()
-  size = int(meta.getheaders('Content-Length')[0])
-  info('download: %s (size: %d)' % (name, size))
+  try:
+    size = int(meta.getheaders('Content-Length')[0])
+  except IndexError:
+    size = None
+
+  if size:
+    info('download: %s (size: %d)' % (name, size))
+  else:
+    info('download: %s' % name)
 
   with open(name, 'wb') as f:
     done = 0
@@ -243,9 +250,13 @@ def download(url, name):
         break
       done += len(buf)
       f.write(buf)
-      status = r"%10d  [%3.2f%%]" % (done, done * 100. / size)
+      if size:
+        status = r"%d [%3.2f%%]" % (done, done * 100. / size)
+      else:
+        status = r"%d" % done
       status = status + chr(8) * (len(status) + 1)
-      print status,
+      sys.stdout.write(status)
+      sys.stdout.flush()
 
   print ""
 
@@ -309,10 +320,10 @@ def recipe(name, nargs=0):
     def wrapper(*args, **kwargs):
       target = [str(arg) for arg in args[:min(nargs, len(args))]]
       if len(target) > 0:
-        target = [target[0], name] + target[1:]
+        target = [target[0], fill_in(name)] + target[1:]
         target = '-'.join(target)
       else:
-        target = name
+        target = fill_in(name)
       target = target.replace('_', '-')
       stamp = path.join('{stamps}', target)
       if not path.exists('{stamps}'):

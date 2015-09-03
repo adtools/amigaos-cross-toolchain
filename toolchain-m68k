@@ -268,6 +268,22 @@ def build():
 
   install_vbcc_toolchain()
 
+  unpack('fd2sfd')
+  patch('fd2sfd')
+  configure('fd2sfd', '--prefix={target}', copy_source=True)
+  make('fd2sfd')
+  make('fd2sfd', 'install')
+
+  unpack('sfdc')
+  patch('sfdc')
+  configure('sfdc', '--prefix={target}', copy_source=True)
+  make('sfdc')
+  make('sfdc', 'install')
+
+  unpack('{NDK}')
+  patch('{NDK}')
+  install_ndk()
+
   """
   Older gcc compilers (i.e. 2.95.3 and 3.4.6) and binutils have to be tricked
   into thinking that they're being compiled on Linux IA-32 machine. Theirs
@@ -300,22 +316,6 @@ def build():
               '--with-headers={sources}/{ixemul}/include')
   make('{gcc}', 'all-gcc', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
   make('{gcc}', 'install-gcc', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
-
-  unpack('fd2sfd')
-  patch('fd2sfd')
-  configure('fd2sfd', '--prefix={target}', copy_source=True)
-  make('fd2sfd')
-  make('fd2sfd', 'install')
-
-  unpack('sfdc')
-  patch('sfdc')
-  configure('sfdc', '--prefix={target}', copy_source=True)
-  make('sfdc')
-  make('sfdc', 'install')
-
-  unpack('{NDK}')
-  patch('{NDK}')
-  install_ndk()
 
   unpack('libamiga', top_dir='.')
   install_libamiga()

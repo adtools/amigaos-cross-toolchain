@@ -100,7 +100,7 @@ Follow steps listed below:
 
     ```
 # export PATH=/opt/m68k-amigaos/bin:$PATH
-# ./install-sdk.sh --prefix=/opt/m68k-amigaos ahi cgx mui
+# ./toolchain-m68k --prefix=/opt/m68k-amigaos install-sdk ahi cgx mui
 ```
 
 **Note:** *If the build process fails, please write me an e-mail.  I'll try to help out. Don't forget to put into e-mail as much data about your environment as possible!*

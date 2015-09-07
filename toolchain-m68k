@@ -8,6 +8,8 @@ from os import environ
 import argparse
 import logging
 import platform
+import re
+import string
 import sys
 
 URLS = \
@@ -37,6 +39,16 @@ URLS = \
    'http://www.ibaug.de/vbcc/vbcc.tar.gz',
    ('http://mail.pb-owl.de/~frank/vbcc/current/vbcc_target_m68k-amigaos.lha',
     'vclib.lha')]
+
+
+MULTILIB = [('', []),
+            ('libb', ['-fbaserel', '-DSMALL_DATA']),
+            ('libm020', ['-m68020']),
+            ('libb/libm020', ['-fbaserel', '-DSMALL_DATA', '-m68020']),
+            ('libm020/libm881', ['-m68020', '-m68881']),
+            ('libb/libm020/libm881',
+             ['-fbaserel', '-DSMALL_DATA', '-m68020', '-m68881']),
+            ('libb32/libm020', ['-fbaserel32', '-DSMALL_DATA', '-m68020'])]
 
 
 from common import * # NOQA
@@ -314,8 +326,10 @@ def build():
               '--target=m68k-amigaos',
               '--enable-languages=c,c++',
               '--with-headers={sources}/{ixemul}/include')
-  make('{gcc}', 'all-gcc', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
-  make('{gcc}', 'install-gcc', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  make('{gcc}', 'all-gcc',
+       MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  make('{gcc}', 'install-gcc',
+       MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 
   unpack('libamiga', top_dir='.')
   install_libamiga()
@@ -360,6 +374,159 @@ def clean():
   rmtree('{tmpdir}')
 
 
+def read_sdk(filename):
+  phase = 'info'
+  info = {}
+  files = []
+
+  for line in open(filename):
+    line = line.strip()
+
+    if phase == 'info':
+      if line == '':
+        phase = 'files'
+      else:
+        fields = [field.strip() for field in line.split(':', 1)]
+        info[string.lower(fields[0])] = fields[1]
+    elif phase == 'files':
+      if ':' in line:
+        fields = [field.strip() for field in re.split('[: ]+', line)]
+        files.append(tuple(fields))
+      elif '=' in line:
+        fields = [field.strip() for field in line.split('=')]
+        files.append(tuple(['file'] + fields))
+      else:
+        files.append(('file', line))
+
+  return (info, files)
+
+
+def list_sdk():
+  print 'Available SDKs:'
+
+  for filename in find('{top}/sdk', include='*.sdk'):
+    info, _ = read_sdk(filename)
+    name = path.splitext(path.basename(filename))[0]
+    print ' - %s %s : %s' % (name, info['version'], info['short'])
+
+
+def add_stubs(src):
+  obj = re.sub(r'\.c$', r'.o', src)
+
+  for libdir, cflags in MULTILIB:
+    lib = path.join('{target}/lib', libdir, 'libnix/libstubs.a')
+    info('stubs: "%s" -> "%s"', obj, lib)
+    cflags = list(cflags) + ['-noixemul', '-c', '-o', obj, src]
+    execute('m68k-amigaos-gcc', '-Wall', '-O3', '-fomit-frame-pointer', *cflags)
+    execute('m68k-amigaos-ar', 'rs', lib, obj)
+    remove(obj)
+
+
+def add_lib(src, libname):
+  obj = re.sub(r'\.a$', r'.o', libname)
+
+  for libdir, cflags in MULTILIB:
+    lib = path.join('{target}/lib', libdir, libname)
+    info('lib: "%s" -> "%s"', obj, lib)
+    cflags = list(cflags) + ['-noixemul', '-c', '-o', obj, src]
+    execute('m68k-amigaos-gcc', '-Wall', '-O3', '-fomit-frame-pointer', *cflags)
+    execute('m68k-amigaos-ar', 'rcs', lib, obj)
+    remove(obj)
+
+
+@recipe('install-sdk', 1)
+def process_sdk(sdk, files):
+  with cwd(path.join('{sources}', sdk)):
+    for f in files:
+      kind = f[0]
+
+      if kind == 'fd2sfd':
+        fd, protos = f[1], f[2]
+        basename = path.splitext(path.basename(source))[0]
+        sfd = basename + '.sfd'
+        execute('fd2sfd', '-o', sfd, fd, protos)
+        copy(sfd, path.join('{target}/os-lib/sfd', sfd))
+      elif kind == 'sfdc':
+        source = f[1]
+        basename = re.sub(r'_lib.sfd$', r'', path.basename(source))
+
+        proto = path.join('{target}/os-include/proto', basename + '.h')
+        inline = path.join('{target}/os-include/inline', basename + '.h')
+        lvo = path.join('{target}/os-include/lvo', basename + '.i')
+
+        info('sfdc: %s -> %s', source, proto)
+        execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=proto',
+                '--output=' + proto, source)
+        info('sfdc: %s -> %s', source, inline)
+        execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=macros',
+                '--output=' + inline, source)
+        info('sfdc: %s -> %s', source, lvo)
+        execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=lvo',
+                '--output=' + lvo, source)
+      elif kind == 'stubs':
+        filename = f[1]
+        c_file = re.sub(r'_lib\.sfd$', r'.c', path.basename(filename))
+
+        info('stubs: %s -> %s', filename, c_file)
+        execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=autoopen',
+                '--output=' + c_file, filename)
+        add_stubs(c_file)
+      elif kind == 'lib':
+        filename = f[1]
+        c_file = re.sub(r'_lib\.sfd$', r'.c', path.basename(filename))
+
+        info('lib: %s -> %s', filename, c_file)
+        execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=stubs',
+                '--output=' + c_file, filename)
+        add_lib(c_file, name)
+      elif kind == 'file':
+        source = f[1]
+        try:
+          name = f[2]
+        except:
+          name = path.basename(f[1])
+
+        if any(name.endswith(ext) for ext in ['.doc', '.html', '.pdf', '.ps']):
+          mkdir('{target}/doc')
+          copy(source, path.join('{target}/doc', name))
+        elif name.endswith('.guide'):
+          mkdir('{target}/guide')
+          copy(source, path.join('{target}/guide', name))
+        elif any(name.endswith(ext) for ext in ['.h', '.i']):
+          lastdir = path.basename(path.dirname(f[1]))
+          mkdir(path.join('{target}/os-include', lastdir))
+          copy(source, path.join('{target}/os-include', lastdir, name))
+        elif name.endswith('.fd'):
+          mkdir('{target}/os-lib/fd')
+          copy(source, path.join('{target}/os-lib/fd', name))
+        elif name.endswith('.sfd'):
+          mkdir('{target}/os-lib/sfd')
+          copy(source, path.join('{target}/os-lib/sfd', name))
+
+
+def install_sdk(*names):
+  environ['PATH'] = ":".join([path.join('{target}', 'bin'),
+                              path.join('{host}', 'bin'),
+                              environ['PATH']])
+
+  for name in names:
+    filename = path.join('{top}/sdk', name + '.sdk')
+
+    if not path.exists(filename):
+      panic('No SDK description file for "%s".', name)
+
+    desc, files = read_sdk(filename)
+
+    with cwd('{archives}'):
+      fetch(path.basename(desc['url']), desc['url'])
+
+    basename = path.splitext(path.basename(desc['url']))[0]
+
+    unpack(basename, top_dir='.')
+
+    process_sdk(basename, files)
+
+
 if __name__ == "__main__":
   logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 
@@ -374,8 +541,11 @@ if __name__ == "__main__":
     panic('Build on %s architecture not supported!', platform.machine())
 
   parser = argparse.ArgumentParser(description='Build cross toolchain.')
-  parser.add_argument('action', choices=['build', 'clean'], default='build',
-                      help='perform action')
+  parser.add_argument('action',
+                      choices=['build', 'list-sdk', 'install-sdk', 'clean'],
+                      default='build', help='perform action')
+  parser.add_argument('args', metavar='ARGS', type=str, nargs='*',
+                      help='action arguments')
   parser.add_argument('--binutils', choices=['2.9.1'], default='2.9.1',
                       help='desired binutils version')
   parser.add_argument('--gcc', choices=['2.95.3'], default='2.95.3',
@@ -418,4 +588,5 @@ if __name__ == "__main__":
   if not path.exists('{target}'):
     mkdir('{target}')
 
-  eval(args.action + "()")
+  action = args.action.replace('-', '_')
+  globals()[action].__call__(*args.args)

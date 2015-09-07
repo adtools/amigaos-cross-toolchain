@@ -49,13 +49,14 @@ function install_sdk {
   local sdk="$2"
 
   local url=`sed -ne "s/Url: //p" ${sdk}`
-  local tmp=`mktemp -d -t "${name}"`
+  #local tmp=`mktemp -d -t "${name}"`
+  local tmp=`mktemp -d -t "${name}.XXX"`
 
   pushd ${tmp}
 
   download "${url}"
 
-  lha -xgq `basename ${url}`
+  $(TOP_DIR)/.build-m68k/host/bin/lha -xq `basename ${url}`
 
   sed -ne '5,$p' ${sdk} | while read -a line; do
     if [[ ${#line[@]} > 1 ]]; then

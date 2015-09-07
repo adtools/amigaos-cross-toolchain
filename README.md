@@ -91,7 +91,7 @@ Follow steps listed below:
 2. Run `toolchain-m68k` or `toolchain-ppc` script (with `--prefix` option to specify where to install the toolchain). Note, that the destination directory must be writable by the user. 
 
     ```
-# ./toolchain-m68k --prefix=/opt/m68k-amigaos make
+# ./toolchain-m68k --prefix=/opt/m68k-amigaos build
 ```
 
 3. Wait for the result :-)

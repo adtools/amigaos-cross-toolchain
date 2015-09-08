@@ -13,7 +13,7 @@ import string
 import sys
 
 URLS = \
-  ['http://soulsphere.org/projects/lhasa/lhasa-0.3.0.tar.gz',
+  ['git://github.com/FrodeSolheim/python-lhafile',
    'ftp://ftp.gnu.org/gnu/m4/m4-1.4.17.tar.gz',
    'ftp://ftp.gnu.org/gnu/gawk/gawk-3.1.8.tar.gz',
    'ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.13.tar.gz',
@@ -210,6 +210,7 @@ def build():
   environ['CC'] = ' '.join([find_executable(CC), ARCH])
   environ['CXX'] = ' '.join([find_executable(CXX), ARCH])
 
+  find_executable('perl')
   find_executable('patch')
   find_executable('make')
   find_executable('git')
@@ -217,6 +218,8 @@ def build():
   environ['PATH'] = ":".join([path.join('{target}', 'bin'),
                               path.join('{host}', 'bin'),
                               environ['PATH']])
+
+  add_site_dir('{host}')
 
   with cwd('{archives}'):
     for url in URLS:
@@ -226,13 +229,8 @@ def build():
         name = path.basename(url)
       fetch(name, url)
 
-  unpack('{lha}')
-  configure('{lha}',
-            '--disable-shared',
-            '--prefix={host}',
-            copy_source=True)
-  make('{lha}')
-  make('{lha}', 'install')
+  unpack('python-lha', work_dir='{build}')
+  python_setup('python-lha')
 
   unpack('{m4}')
   configure('{m4}', '--prefix={host}')
@@ -509,6 +507,8 @@ def install_sdk(*names):
                               path.join('{host}', 'bin'),
                               environ['PATH']])
 
+  add_site_dir('{host}')
+
   for name in names:
     filename = path.join('{top}/sdk', name + '.sdk')
 
@@ -558,8 +558,7 @@ if __name__ == "__main__":
          binutils_ver=args.binutils,
          gcc_ver=args.gcc)
 
-  setvar(lha='lhasa-0.3.0',
-         m4='m4-1.4.17',
+  setvar(m4='m4-1.4.17',
          gawk='gawk-3.1.8',
          flex='flex-2.5.4',
          bison='bison-1.35',

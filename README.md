@@ -64,13 +64,13 @@ AmigaOS specific documents:
 
 You have to have following packages installed in your system:
 
- * GNU gcc 4.x **32-bit version!**
- * GNU make 3.x
- * perl 5.10
+ * GNU gcc 4.x **32-bit version!** or Clang
  * libncurses5-dev **32-bit version!**
+ * GNU make
+ * python-dev
+ * perl
  * git
  * subversion
- * wget
  * patch
 
 *For MacOSX users*: you'll likely need to have [MacPorts](http://www.macports.org) or [Homebrew](http://brew.sh) installed in order to build the toolchain.
@@ -99,7 +99,6 @@ Follow steps listed below:
 4. *(optional)* Install additional SDKs (e.g. AHI, CyberGraphX, Magic User Interface, etc.):
 
     ```
-# export PATH=/opt/m68k-amigaos/bin:$PATH
 # ./toolchain-m68k --prefix=/opt/m68k-amigaos install-sdk ahi cgx mui
 ```
 

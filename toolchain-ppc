@@ -12,13 +12,13 @@ import platform
 import sys
 
 URLS = \
-  ['ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2',
+  ['git://github.com/FrodeSolheim/python-lhafile',
+   'ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2',
    'ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz',
    'ftp://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2',
    'ftp://ftp.gnu.org/gnu/texinfo/texinfo-4.12.tar.gz',
    'http://isl.gforge.inria.fr/isl-0.12.2.tar.bz2',
    'http://www.bastoul.net/cloog/pages/download/cloog-0.18.4.tar.gz',
-   'http://soulsphere.org/projects/lhasa/lhasa-0.3.0.tar.gz',
    ('http://hyperion-entertainment.biz/index.php/downloads' +
     '?view=download&amp;format=raw&amp;file=69', 'SDK_53.24.lha'),
    ('svn://svn.code.sf.net/p/adtools/code/trunk/binutils', 'binutils-2.18'),
@@ -82,6 +82,8 @@ def build():
                               path.join('{host}', 'bin'),
                               environ['PATH']])
 
+  add_site_dir('{host}')
+
   with cwd('{archives}'):
     for url in URLS:
       if type(url) == tuple:
@@ -90,17 +92,11 @@ def build():
         name = path.basename(url)
       fetch(name, url)
 
-  unpack('{lha}')
-  configure('{lha}',
-            '--disable-shared',
-            '--prefix={host}',
-            copy_source=True)
-  make('{lha}')
-  make('{lha}', 'install')
+  unpack('python-lha', work_dir='{build}')
+  python_setup('python-lha')
 
   unpack('{texinfo}')
-  configure('{texinfo}',
-            '--prefix={host}')
+  configure('{texinfo}', '--prefix={host}')
   make('{texinfo}')
   make('{texinfo}', 'install')
 
@@ -164,13 +160,13 @@ def build():
 
   with env(**gcc_env):
     configure('{gcc}',
-              '--with-bugurl="http://sf.net/p/adtools"',
+              '--prefix={target}',
               '--target=ppc-amigaos',
+              '--with-bugurl="http://sf.net/p/adtools"',
               '--with-gmp={host}',
               '--with-mpfr={host}',
               '--with-isl={host}',
               '--with-cloog={host}',
-              '--prefix={target}',
               '--enable-languages=c,c++',
               '--enable-haifa',
               '--enable-sjlj-exceptions',
@@ -202,8 +198,9 @@ if __name__ == "__main__":
     panic('Build on %s architecture not supported!', platform.machine())
 
   parser = argparse.ArgumentParser(description='Build cross toolchain.')
-  parser.add_argument('action', choices=['build', 'clean'], default='build',
-                      help='perform action')
+  parser.add_argument('action',
+                      choices=['build', 'clean'],
+                      default='build', help='perform action')
   parser.add_argument('--binutils', choices=['2.18', '2.23.2'], default='2.18',
                       help='desired binutils version')
   parser.add_argument('--gcc', choices=['4.2.4', '4.9.1'], default='4.2.4',
@@ -212,12 +209,11 @@ if __name__ == "__main__":
                       help='installation directory')
   args = parser.parse_args()
 
-  setvar(top=path.abspath('.'),
+  setvar(top=path.abspath(path.dirname(sys.argv[0])),
          binutils_ver=args.binutils,
          gcc_ver=args.gcc)
 
-  setvar(lha='lhasa-0.3.0',
-         gmp='gmp-5.1.3',
+  setvar(gmp='gmp-5.1.3',
          mpfr='mpfr-3.1.3',
          mpc='mpc-1.0.3',
          isl='isl-0.12.2',
@@ -241,4 +237,5 @@ if __name__ == "__main__":
   if not path.exists('{target}'):
     mkdir('{target}')
 
-  eval(args.action + "()")
+  action = args.action.replace('-', '_')
+  globals()[action].__call__(*args.args)

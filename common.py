@@ -1,20 +1,20 @@
 #!/usr/bin/env python -B
 
-from logging import debug, info, error
-from glob import glob
-from os import path
 from fnmatch import fnmatch
+from glob import glob
+from logging import debug, info, error
+from os import path
 import contextlib
 import distutils.spawn
-import shutil
 import os
+import shutil
+import site
 import subprocess
 import sys
 import tarfile
+import tempfile
 import urllib2
 import zipfile
-import tempfile
-
 
 VARS = {}
 
@@ -165,7 +165,7 @@ def remove(*names):
 @fill_in_args
 def mkdir(*names):
   for name in flatten(names):
-    if not path.isdir(name):
+    if name and not path.isdir(name):
       debug('makedir "%s"', topdir(name))
       os.makedirs(name)
 
@@ -237,9 +237,9 @@ def download(url, name):
     size = None
 
   if size:
-    info('download: %s (size: %d)' % (name, size))
+    info('download: %s (size: %d)', name, size)
   else:
-    info('download: %s' % name)
+    info('download: %s', name)
 
   with open(name, 'wb') as f:
     done = 0
@@ -263,10 +263,17 @@ def download(url, name):
 
 @fill_in_args
 def unarc(name):
-  info('extract files from "%s"' % topdir(name))
+  info('extract files from "%s"', topdir(name))
 
   if name.endswith('.lha'):
-    execute('lha', '-x', name)
+    import lhafile
+    arc = lhafile.LhaFile(name)
+    for item in arc.infolist():
+      filename = os.sep.join(item.filename.split('\\'))
+      debug('extract "%s"', filename)
+      mkdir(path.dirname(filename))
+      with open(filename, 'w') as f:
+        f.write(arc.read(item.filename))
   else:
     if name.endswith('.tar.gz') or name.endswith('.tar.bz2'):
       module = tarfile
@@ -280,6 +287,14 @@ def unarc(name):
       debug('extract "%s"' % item.name)
       arc.extract(item)
     arc.close()
+
+
+@fill_in_args
+def add_site_dir(dirname):
+  dirname = path.join(dirname, 'lib', 'python%d.%d' % sys.version_info[:2],
+                      'site-packages')
+  info('adding "%s" to python site dirs', topdir(dirname))
+  site.addsitedir(dirname)
 
 
 @contextlib.contextmanager
@@ -335,6 +350,13 @@ def recipe(name, nargs=0):
         info('already done "%s"', target)
     return wrapper
   return real_decorator
+
+
+@recipe('python-setup', 1)
+def python_setup(name):
+  with cwd(path.join('{build}', name)):
+    execute('python', 'setup.py', 'build')
+    execute('python', 'setup.py', 'install', '--prefix={host}')
 
 
 @recipe('fetch', 1)
@@ -429,4 +451,5 @@ def make(name, target=None, **makevars):
 __all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'chmod', 'execute',
            'rmtree', 'mkdir', 'copy', 'copytree', 'unarc', 'fetch', 'cwd',
            'symlink', 'remove', 'move', 'find', 'textfile', 'env', 'path',
-           'recipe', 'unpack', 'patch', 'configure', 'make']
+           'add_site_dir', 'python_setup', 'recipe', 'unpack', 'patch',
+           'configure', 'make']

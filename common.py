@@ -270,8 +270,10 @@ def unarc(name):
     arc = lhafile.LhaFile(name)
     for item in arc.infolist():
       filename = os.sep.join(item.filename.split('\\'))
-      debug('extract "%s"', filename)
       mkdir(path.dirname(filename))
+      debug('extract "%s"', filename)
+      if path.isdir(filename):
+        continue
       with open(filename, 'w') as f:
         f.write(arc.read(item.filename))
   else:

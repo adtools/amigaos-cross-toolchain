@@ -140,6 +140,9 @@ Boston, MA 02111-1307, USA.  */
     "%{mstackcheck:-lstack} "						\
     "%{mstackextend:-lstack}}"
 
+#define LIBGCC_SPEC \
+  "-lgcc %{noixemul:-lnix}"
+
 /* If debugging, tell the linker to output amiga-hunk symbols *and* a BSD
    compatible debug hunk.
    Also, pass appropriate linker flavours depending on user-supplied

@@ -3,7 +3,7 @@ CXX = m68k-amigaos-g++ -noixemul -s
 CFLAGS = -Os -Wall -fomit-frame-pointer
 CXXFLAGS = -Os -Wall -fomit-frame-pointer
 
-BINS = hello-ks13 hello-ks20 hello-stdio hello-mui test-mmu
+BINS = hello-ks13 hello-ks20 hello-stdio hello-iostream hello-mui test-mmu
 
 all: $(BINS)
 
@@ -12,7 +12,7 @@ hello-ks13: CFLAGS += -m68000 -msmall-code
 hello-ks13: LDLIBS = -lnix13
 hello-ks13: hello-ks13.c
 
-hello-ks20: CC += -fbaserel 
+# MacOSX BUG: hello-ks20: CC += -fbaserel 
 hello-ks20: CFLAGS += -m68000 -msmall-code
 hello-ks20: hello-ks20.c
 
@@ -22,12 +22,10 @@ hello-stdio: hello-stdio.c
 hello-iostream: CXXFLAGS += -m68020
 hello-iostream: hello-iostream.cpp
 
-hello-mui: CC += -fbaserel
 hello-mui: CFLAGS += -m68020 -msmall-code
 hello-mui: LDLIBS = -lmui
 hello-mui: hello-mui.c
 
-test-mmu: CC += -fbaserel
 test-mmu: CFLAGS += -m68060 -msmall-code
 test-mmu: test-mmu.c
 

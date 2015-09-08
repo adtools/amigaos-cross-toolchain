@@ -433,8 +433,8 @@ def add_lib(src, libname):
 
 
 @recipe('install-sdk', 1)
-def process_sdk(sdk, files):
-  with cwd(path.join('{sources}', sdk)):
+def process_sdk(sdk, dirname, files):
+  with cwd(path.join('{sources}', dirname)):
     for f in files:
       kind = f[0]
 
@@ -472,7 +472,7 @@ def process_sdk(sdk, files):
       elif kind == 'lib':
         filename = f[1]
         c_file = re.sub(r'_lib.sfd$', r'.c', path.basename(filename))
-        lib_file = re.sub(r'_lib.sfd$', r'.a', path.basename(filename))
+        lib_file = 'lib' + sdk + '.a'
 
         info('lib: %s -> %s', filename, c_file)
         execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=stubs',
@@ -525,7 +525,7 @@ def install_sdk(*names):
 
     unpack(basename, top_dir='.')
 
-    process_sdk(basename, files)
+    process_sdk(name, basename, files)
 
 
 if __name__ == "__main__":

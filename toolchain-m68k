@@ -439,9 +439,9 @@ def process_sdk(sdk, files):
       kind = f[0]
 
       if kind == 'fd2sfd':
-        fd, protos = f[1], f[2]
-        basename = path.splitext(path.basename(source))[0]
-        sfd = basename + '.sfd'
+        fd, protos = f[1:]
+        sfd = path.splitext(path.basename(fd))[0] + '.sfd'
+        info('fd2sfd: "%s" "%s" -> "%s"', fd, protos, sfd)
         execute('fd2sfd', '-o', sfd, fd, protos)
         copy(sfd, path.join('{target}/os-lib/sfd', sfd))
       elif kind == 'sfdc':
@@ -452,31 +452,32 @@ def process_sdk(sdk, files):
         inline = path.join('{target}/os-include/inline', basename + '.h')
         lvo = path.join('{target}/os-include/lvo', basename + '.i')
 
-        info('sfdc: %s -> %s', source, proto)
+        info('sfdc: "%s" -> "%s"', source, proto)
         execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=proto',
                 '--output=' + proto, source)
-        info('sfdc: %s -> %s', source, inline)
+        info('sfdc: "%s" -> "%s"', source, inline)
         execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=macros',
                 '--output=' + inline, source)
-        info('sfdc: %s -> %s', source, lvo)
+        info('sfdc: "%s" -> "%s"', source, lvo)
         execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=lvo',
                 '--output=' + lvo, source)
       elif kind == 'stubs':
         filename = f[1]
         c_file = re.sub(r'_lib\.sfd$', r'.c', path.basename(filename))
 
-        info('stubs: %s -> %s', filename, c_file)
+        info('stubs: "%s" -> "%s"', filename, c_file)
         execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=autoopen',
                 '--output=' + c_file, filename)
         add_stubs(c_file)
       elif kind == 'lib':
         filename = f[1]
-        c_file = re.sub(r'_lib\.sfd$', r'.c', path.basename(filename))
+        c_file = re.sub(r'_lib.sfd$', r'.c', path.basename(filename))
+        lib_file = re.sub(r'_lib.sfd$', r'.a', path.basename(filename))
 
         info('lib: %s -> %s', filename, c_file)
         execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=stubs',
                 '--output=' + c_file, filename)
-        add_lib(c_file, name)
+        add_lib(c_file, lib_file)
       elif kind == 'file':
         source = f[1]
         try:

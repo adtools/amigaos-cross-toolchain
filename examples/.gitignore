@@ -2,3 +2,5 @@
 !*.*
 *~
 *.o
+*.device
+*.library

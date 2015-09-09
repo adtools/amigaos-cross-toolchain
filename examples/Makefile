@@ -3,8 +3,8 @@ CXX = m68k-amigaos-g++ -noixemul -s
 CFLAGS = -Os -Wall -fomit-frame-pointer
 CXXFLAGS = -Os -Wall -fomit-frame-pointer
 
-BINS = hello-ks13 hello-ks20 hello-stdio hello-iostream hello-mui test-mmu
-OBJS = simple-device.o simple-library.o
+BINS = hello-ks13 hello-ks20 hello-stdio hello-iostream hello-mui test-mmu \
+       simple.library simple.r.library simple.device
 
 all: $(BINS) $(OBJS)
 
@@ -36,17 +36,14 @@ simple-device.o: simple-device.c
 simple-library.o: CC += -fbaserel 
 simple-library.o: simple-library.c
 
-# normal library
-lib: CC = m68k-amigaos-gcc -nostdlib -fbaserel
-lib: libinit.o simple-library.o
+simple.library: simple-library.o
+	$(CC) -fbaserel -amiga-lib $(CFLAGS) -o $@ $^
 
-# multibase library
-libr: CC = m68k-amigaos-gcc -nostdlib -fbaserel
-libr: libinitr.o simple-library.o
+simple.r.library: simple-library.o
+	$(CC) -fbaserel -amiga-libr $(CFLAGS) -o $@ $^
 
-# device
-dev: CC = m68k-amigaos-gcc -nostdlib -fbaserel
-dev: devinit.o simple-device.o
+simple.device: simple-device.o
+	$(CC) -fbaserel -amiga-dev $(CFLAGS) -o $@ $^
 
 clean:
 	rm -f $(BINS)

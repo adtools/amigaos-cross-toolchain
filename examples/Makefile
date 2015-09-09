@@ -4,7 +4,7 @@ CFLAGS = -Os -Wall -fomit-frame-pointer
 CXXFLAGS = -Os -Wall -fomit-frame-pointer
 
 BINS = hello-ks13 hello-ks20 hello-stdio hello-iostream hello-mui test-mmu \
-       simple.library simple.r.library simple.device
+       simple.library simple.library_r simple.device
 
 all: $(BINS) $(OBJS)
 
@@ -30,20 +30,14 @@ hello-mui: hello-mui.c
 test-mmu: CFLAGS += -m68060 -msmall-code
 test-mmu: test-mmu.c
 
-simple-device.o: CC += -fbaserel 
-simple-device.o: simple-device.c
+simple.library: simple-library.c
+	$(CC) -ramiga-lib -fbaserel $(CFLAGS) -o $@ $^
 
-simple-library.o: CC += -fbaserel 
-simple-library.o: simple-library.c
+simple.library_r: simple-library.c
+	$(CC) -ramiga-libr -resident $(CFLAGS) -o $@ $^
 
-simple.library: simple-library.o
-	$(CC) -fbaserel -amiga-lib $(CFLAGS) -o $@ $^
-
-simple.r.library: simple-library.o
-	$(CC) -fbaserel -amiga-libr $(CFLAGS) -o $@ $^
-
-simple.device: simple-device.o
-	$(CC) -fbaserel -amiga-dev $(CFLAGS) -o $@ $^
+simple.device: simple-device.c
+	$(CC) -ramiga-dev -fbaserel $(CFLAGS) -o $@ $^
 
 clean:
 	rm -f $(BINS)

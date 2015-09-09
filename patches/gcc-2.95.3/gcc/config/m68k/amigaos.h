@@ -114,8 +114,15 @@ Boston, MA 02111-1307, USA.  */
     "%{!resident:%{!fbaserel:%{!resident32:%{!fbaserel32:"		\
       "%{pg:gcrt0.o%s}%{!pg:%{p:mcrt0.o%s}%{!p:crt0.o%s}}}}}}}"		\
   "%{noixemul:"								\
-    "%{resident:libnix/nrcrt0.o%s} "					\
-    "%{!resident:%{fbaserel:libnix/nbcrt0.o%s}%{!fbaserel:libnix/ncrt0.o%s}}} "
+    "%{ramiga-*:"							\
+      "%{ramiga-lib:libnix/libinit.o%s}"				\
+      "%{ramiga-libr:libnix/libinitr.o%s}"				\
+      "%{ramiga-dev:libnix/devinit.o%s}}"				\
+    "%{!ramiga-*:"							\
+      "%{resident:libnix/nrcrt0.o%s}"					\
+      "%{!resident:"							\
+        "%{fbaserel:libnix/nbcrt0.o%s}"					\
+        "%{!fbaserel:libnix/ncrt0.o%s}}}}"				\
 
 #define ENDFILE_SPEC "%{noixemul:-lstubs}"
 

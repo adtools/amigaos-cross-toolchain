@@ -19,6 +19,7 @@ Build process should produce following set of tools for **m68k-amigaos** target:
  * libm 5.4 (provides math library implementation for non-FPU Amigas)
  * AmigaOS headers & libraries & autodocs (for AmigaOS 3.9)
  * vbcc toolchain (most recent release) including vasm, vlink and C standard library
+ * IRA: a 68k disassembler/reassembler
 
 ... and following set of tools for **ppc-amigaos** target:
 

@@ -4,8 +4,9 @@ CFLAGS = -Os -Wall -fomit-frame-pointer
 CXXFLAGS = -Os -Wall -fomit-frame-pointer
 
 BINS = hello-ks13 hello-ks20 hello-stdio hello-iostream hello-mui test-mmu
+OBJS = simple-device.o simple-library.o
 
-all: $(BINS)
+all: $(BINS) $(OBJS)
 
 hello-ks13: CC += -fbaserel 
 hello-ks13: CFLAGS += -m68000 -msmall-code
@@ -28,6 +29,24 @@ hello-mui: hello-mui.c
 
 test-mmu: CFLAGS += -m68060 -msmall-code
 test-mmu: test-mmu.c
+
+simple-device.o: CC += -fbaserel 
+simple-device.o: simple-device.c
+
+simple-library.o: CC += -fbaserel 
+simple-library.o: simple-library.c
+
+# normal library
+lib: CC = m68k-amigaos-gcc -nostdlib -fbaserel
+lib: libinit.o simple-library.o
+
+# multibase library
+libr: CC = m68k-amigaos-gcc -nostdlib -fbaserel
+libr: libinitr.o simple-library.o
+
+# device
+dev: CC = m68k-amigaos-gcc -nostdlib -fbaserel
+dev: devinit.o simple-device.o
 
 clean:
 	rm -f $(BINS)

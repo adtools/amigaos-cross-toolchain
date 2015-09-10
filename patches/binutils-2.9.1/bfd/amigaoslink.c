@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 INODE
 amigalink, , implementation, amiga
 SECTION
-	amigalink
+        amigalink
 
 This is the description of the linker routines for the amiga.
 In fact, this includes a description of the changes made to the
@@ -34,12 +34,12 @@ a.out code, in order to build a working linker for the Amiga.
 INODE 
 alterations, , , amigalink
 SUBSECTION
-	alterations
+        alterations
 
 The file @file{aout-amiga.c} defines the amiga a.out backend. It differs from
 the sun3 backend only in these details:
-	o The @code{final_link} routine is @code{amiga_final_link}.
-	o The routine to get the relocated section contents is
+        o The @code{final_link} routine is @code{amiga_final_link}.
+        o The routine to get the relocated section contents is
            @code{aout_bfd_get_relocated_section_contents}.
 
 This ensures that the link is performed properly, but has the side effect of loosing
@@ -132,7 +132,7 @@ static boolean amiga_reloc_link_order
    from reloc.c */
 bfd_byte *
 get_relocated_section_contents (abfd, link_info, link_order, data,
-				relocateable, symbols)
+                                relocateable, symbols)
      bfd *abfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
@@ -147,7 +147,7 @@ get_relocated_section_contents (abfd, link_info, link_order, data,
   arelent **reloc_vector = NULL;
   long reloc_count;
   bfd_reloc_status_type (*reloc_func) (bfd *, arelent *, PTR, asection *,
-				       bfd *, char **);
+                                       bfd *, char **);
 
   DPRINT (5, ("Entering get_rel_sec_cont\n"));
 
@@ -175,8 +175,8 @@ get_relocated_section_contents (abfd, link_info, link_order, data,
   DPRINT (5, ("GRSC: GetSecCont()\n"));
   /* read in the section */
   if (!bfd_get_section_contents (input_bfd,
-				 input_section,
-				 (PTR) data, 0, input_section->_raw_size))
+                                 input_section,
+                                 (PTR) data, 0, input_section->_raw_size))
     goto error_return;
 
   /* We're not relaxing the section, so just copy the size info */
@@ -185,7 +185,7 @@ get_relocated_section_contents (abfd, link_info, link_order, data,
 
   DPRINT (5, ("GRSC: CanReloc\n"));
   reloc_count = bfd_canonicalize_reloc (input_bfd,
-					input_section, reloc_vector, symbols);
+                                        input_section, reloc_vector, symbols);
   if (reloc_count < 0)
     goto error_return;
 
@@ -196,64 +196,64 @@ get_relocated_section_contents (abfd, link_info, link_order, data,
       DPRINT (5, ("reloc_count=%d\n", reloc_count));
 
       for (parent = reloc_vector; *parent != (arelent *) NULL; parent++)
-	{
-	  char *error_message = (char *) NULL;
-	  bfd_reloc_status_type r;
+        {
+          char *error_message = (char *) NULL;
+          bfd_reloc_status_type r;
 
-	  DPRINT (5, ("Applying a reloc\nparent=%lx, reloc_vector=%lx,"
-		      "*parent=%lx\n", parent, reloc_vector, *parent));
-	  r = (*reloc_func) (input_bfd,
-			     *parent,
-			     (PTR) data,
-			     input_section,
-			     relocateable ? abfd : (bfd *) NULL,
-			     &error_message);
-	  if (relocateable)
-	    {
-	      asection *os = input_section->output_section;
+          DPRINT (5, ("Applying a reloc\nparent=%lx, reloc_vector=%lx,"
+                      "*parent=%lx\n", parent, reloc_vector, *parent));
+          r = (*reloc_func) (input_bfd,
+                             *parent,
+                             (PTR) data,
+                             input_section,
+                             relocateable ? abfd : (bfd *) NULL,
+                             &error_message);
+          if (relocateable)
+            {
+              asection *os = input_section->output_section;
 
-	      DPRINT (5, ("Keeping reloc\n"));
-	      /* A partial link, so keep the relocs */
-	      os->orelocation[os->reloc_count] = *parent;
-	      os->reloc_count++;
-	    }
+              DPRINT (5, ("Keeping reloc\n"));
+              /* A partial link, so keep the relocs */
+              os->orelocation[os->reloc_count] = *parent;
+              os->reloc_count++;
+            }
 
-	  if (r != bfd_reloc_ok)
-	    {
-	      switch (r)
-		{
-		case bfd_reloc_undefined:
-		  if (!((*link_info->callbacks->undefined_symbol)
-			(link_info,
-			 bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 input_bfd, input_section, (*parent)->address)))
-		    goto error_return;
-		  break;
-		case bfd_reloc_dangerous:
-		  BFD_ASSERT (error_message != (char *) NULL);
-		  if (!((*link_info->callbacks->reloc_dangerous)
-			(link_info, error_message, input_bfd, input_section,
-			 (*parent)->address)))
-		    goto error_return;
-		  break;
-		case bfd_reloc_overflow:
-		  if (!((*link_info->callbacks->reloc_overflow)
-			(link_info,
-			 bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 (*parent)->howto->name, (*parent)->addend, input_bfd,
-			 input_section, (*parent)->address)))
-		    goto error_return;
-		  break;
-		case bfd_reloc_outofrange:
-		default:
-		  DPRINT (10, ("get_rel_sec_cont fails, perform reloc "
-			       "returned $%x\n", r));
-		  abort ();
-		  break;
-		}
+          if (r != bfd_reloc_ok)
+            {
+              switch (r)
+                {
+                case bfd_reloc_undefined:
+                  if (!((*link_info->callbacks->undefined_symbol)
+                        (link_info,
+                         bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+                         input_bfd, input_section, (*parent)->address)))
+                    goto error_return;
+                  break;
+                case bfd_reloc_dangerous:
+                  BFD_ASSERT (error_message != (char *) NULL);
+                  if (!((*link_info->callbacks->reloc_dangerous)
+                        (link_info, error_message, input_bfd, input_section,
+                         (*parent)->address)))
+                    goto error_return;
+                  break;
+                case bfd_reloc_overflow:
+                  if (!((*link_info->callbacks->reloc_overflow)
+                        (link_info,
+                         bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
+                         (*parent)->howto->name, (*parent)->addend, input_bfd,
+                         input_section, (*parent)->address)))
+                    goto error_return;
+                  break;
+                case bfd_reloc_outofrange:
+                default:
+                  DPRINT (10, ("get_rel_sec_cont fails, perform reloc "
+                               "returned $%x\n", r));
+                  abort ();
+                  break;
+                }
 
-	    }
-	}
+            }
+        }
     }
   if (reloc_vector != NULL)
     free (reloc_vector);
@@ -285,42 +285,42 @@ my_add_to (data, offset, size, add, sign)
 
   switch (size)
     {
-    case 0:			/* byte size */
+    case 0:                     /* byte size */
       val = (int) (p[0]) + add;
       /* check for overflow */
       if (sign)
-	{
-	  if (val < -0x80 || val > 0x7f)
-	    ret = bfd_reloc_overflow;
-	}
+        {
+          if (val < -0x80 || val > 0x7f)
+            ret = bfd_reloc_overflow;
+        }
       else
-	{
-	  if ((val & 0xffffff00) != 0 && (val & 0xffffff00) != 0xffffff00)
-	    ret = bfd_reloc_overflow;
-	}
+        {
+          if ((val & 0xffffff00) != 0 && (val & 0xffffff00) != 0xffffff00)
+            ret = bfd_reloc_overflow;
+        }
       /* set the value */
       p[0] = val & 0xff;
       break;
 
-    case 1:			/* word size */
+    case 1:                     /* word size */
       val = (int) ((p[1] & 0xff) | (p[0] << 8)) + add;
       /* check for overflow */
       if (sign)
-	{
-	  if (val < -0x8000 || val > 0x7fff)
-	    ret = bfd_reloc_overflow;
-	}
+        {
+          if (val < -0x8000 || val > 0x7fff)
+            ret = bfd_reloc_overflow;
+        }
       else
-	{
-	  if ((val & 0xffff0000) != 0 && (val & 0xffff0000) != 0xffff0000)
-	    ret = bfd_reloc_overflow;
-	}
+        {
+          if ((val & 0xffff0000) != 0 && (val & 0xffff0000) != 0xffff0000)
+            ret = bfd_reloc_overflow;
+        }
       /* set the value */
       p[1] = val & 0xff;
       p[0] = ((val & 0xff00) >> 8) & 0xff;
       break;
 
-    case 2:			/* long word */
+    case 2:                     /* long word */
       val = bfd_getb_signed_32 (p) + add;
       /* If we are linking a resident program, then we limit the reloc size
          to about +/- 1 GB.
@@ -332,17 +332,17 @@ my_add_to (data, offset, size, add, sign)
          Without this it would be much more difficult to check for
          incorrect references.
        */
-      if (amiga_resident && (val & 0xc0000000) != 0 && (val & 0xc0000000) != 0xc0000000)	/* Overflow */
-	{
-	  ret = bfd_reloc_overflow;
-	}
+      if (amiga_resident && (val & 0xc0000000) != 0 && (val & 0xc0000000) != 0xc0000000)        /* Overflow */
+        {
+          ret = bfd_reloc_overflow;
+        }
       bfd_putb32 (val, p);
       break;
 
-    default:			/* Error */
+    default:                    /* Error */
       ret = bfd_reloc_notsupported;
       break;
-    }				/* Of switch */
+    }                           /* Of switch */
 
   DPRINT (5, ("Leaving add_value\n"));
   return (ret);
@@ -364,40 +364,40 @@ my_set_to (data, offset, size, val, sign)
 
   switch (size)
     {
-    case 0:			/* byte size */
+    case 0:                     /* byte size */
       /* check for overflow */
       if (sign)
-	{
-	  if (val < -0x80 || val > 0x7f)
-	    ret = bfd_reloc_overflow;
-	}
+        {
+          if (val < -0x80 || val > 0x7f)
+            ret = bfd_reloc_overflow;
+        }
       else
-	{
-	  if ((val & 0xffffff00) != 0 && (val & 0xffffff00) != 0xffffff00)
-	    ret = bfd_reloc_overflow;
-	}
+        {
+          if ((val & 0xffffff00) != 0 && (val & 0xffffff00) != 0xffffff00)
+            ret = bfd_reloc_overflow;
+        }
       /* set the value */
       p[0] = val & 0xff;
       break;
 
-    case 1:			/* word size */
+    case 1:                     /* word size */
       /* check for overflow */
       if (sign)
-	{
-	  if (val < -0x8000 || val > 0x7fff)
-	    ret = bfd_reloc_overflow;
-	}
+        {
+          if (val < -0x8000 || val > 0x7fff)
+            ret = bfd_reloc_overflow;
+        }
       else
-	{
-	  if ((val & 0xffff0000) != 0 && (val & 0xffff0000) != 0xffff0000)
-	    ret = bfd_reloc_overflow;
-	}
+        {
+          if ((val & 0xffff0000) != 0 && (val & 0xffff0000) != 0xffff0000)
+            ret = bfd_reloc_overflow;
+        }
       /* set the value */
       p[1] = val & 0xff;
       p[0] = ((val & 0xff00) >> 8) & 0xff;
       break;
 
-    case 2:			/* long word */
+    case 2:                     /* long word */
       /* If we are linking a resident program, then we limit the reloc size
          to about +/- 1 GB.
 
@@ -408,20 +408,20 @@ my_set_to (data, offset, size, val, sign)
          Without this it would be much more difficult to check for
          incorrect references.
        */
-      if (amiga_resident && (val & 0xc0000000) != 0 && (val & 0xc0000000) != 0xc0000000)	/* Overflow */
-	{
-	  ret = bfd_reloc_overflow;
-	}
+      if (amiga_resident && (val & 0xc0000000) != 0 && (val & 0xc0000000) != 0xc0000000)        /* Overflow */
+        {
+          ret = bfd_reloc_overflow;
+        }
       p[3] = val & 0xff;
       p[2] = (val >> 8) & 0xff;
       p[1] = (val >> 16) & 0xff;
       p[0] = (val >> 24) & 0xff;
       break;
 
-    default:			/* Error */
+    default:                    /* Error */
       ret = bfd_reloc_notsupported;
       break;
-    }				/* Of switch */
+    }                           /* Of switch */
 
   DPRINT (5, ("Leaving set_value\n"));
   return (ret);
@@ -437,8 +437,8 @@ amiga_perform_reloc (abfd, r, data, sec, obfd, error_message)
      bfd *obfd;
      char **error_message;
 {
-  asymbol *sym;			/* Reloc is relative to sym */
-  asection *target_section;	/* reloc is relative to this section */
+  asymbol *sym;                 /* Reloc is relative to sym */
+  asection *target_section;     /* reloc is relative to this section */
   int relocation;
   boolean copy;
   bfd_reloc_status_type ret;
@@ -446,13 +446,13 @@ amiga_perform_reloc (abfd, r, data, sec, obfd, error_message)
   int sign = false;
 
   DPRINT (5, ("Entering APR\nflavour is %d (aflavour=%d, aout_flavour=%d)\n",
-	      sec->owner->xvec->flavour, bfd_target_amiga_flavour,
-	      bfd_target_aout_flavour));
+              sec->owner->xvec->flavour, bfd_target_amiga_flavour,
+              bfd_target_aout_flavour));
 
   /* If obfd==NULL: Apply the reloc, if possible. */
   /* Else: Modify it and return */
 
-  if (obfd != NULL)		/* Only modify the reloc */
+  if (obfd != NULL)             /* Only modify the reloc */
     {
       r->address += sec->output_offset;
       sec->output_section->flags |= SEC_RELOC;
@@ -472,7 +472,7 @@ amiga_perform_reloc (abfd, r, data, sec, obfd, error_message)
 
   target_section = sym->section;
 
-  if (target_section == bfd_und_section_ptr)	/* Error */
+  if (target_section == bfd_und_section_ptr)    /* Error */
     {
       DPRINT (10, ("perform_reloc: Target is undefined section\n"));
       return bfd_reloc_undefined;
@@ -484,77 +484,77 @@ amiga_perform_reloc (abfd, r, data, sec, obfd, error_message)
 
   switch (r->howto->type)
     {
-    case HUNK_RELOC32:		/* 32 bit reloc */
+    case HUNK_RELOC32:          /* 32 bit reloc */
       DPRINT (5, ("RELOC32\n"));
       size = 2;
-      if (target_section == bfd_abs_section_ptr)	/* Ref to absolute hunk */
-	relocation = sym->value;
-      else if (target_section == bfd_com_section_ptr)	/* ref to common */
-	{
-	  relocation = 0;
-	  copy = true;
-	}
+      if (target_section == bfd_abs_section_ptr)        /* Ref to absolute hunk */
+        relocation = sym->value;
+      else if (target_section == bfd_com_section_ptr)   /* ref to common */
+        {
+          relocation = 0;
+          copy = true;
+        }
       else
-	{
-	  /* If we access a symbol in the .bss section, we have to convert
-	     this to an access to .data section */
-	  /* This is done through a change to the symbol... */
-	  if (amiga_base_relative
-	      && (strcmp (sym->section->output_section->name, ".bss") == 0))
-	    {
-	      /* get value for .data section */
-	      bfd *ibfd;
-	      asection *s;
+        {
+          /* If we access a symbol in the .bss section, we have to convert
+             this to an access to .data section */
+          /* This is done through a change to the symbol... */
+          if (amiga_base_relative
+              && (strcmp (sym->section->output_section->name, ".bss") == 0))
+            {
+              /* get value for .data section */
+              bfd *ibfd;
+              asection *s;
 
-	      ibfd = target_section->output_section->owner;
-	      for (s = ibfd->sections; s != NULL; s = s->next)
-		if (strcmp (s->name, ".data") == 0)
-		  {
-		    sym->section->output_offset = s->_raw_size;
-		    sym->section->output_section = s;
-		  }
-	    }
+              ibfd = target_section->output_section->owner;
+              for (s = ibfd->sections; s != NULL; s = s->next)
+                if (strcmp (s->name, ".data") == 0)
+                  {
+                    sym->section->output_offset = s->_raw_size;
+                    sym->section->output_section = s;
+                  }
+            }
 
-	  relocation = 0;
-	  copy = true;
-	}
+          relocation = 0;
+          copy = true;
+        }
       break;
 
     case HUNK_RELOC8:
     case HUNK_RELOC16:
       DPRINT (5, ("RELOC16/8\n"));
       size = (r->howto->type == HUNK_RELOC8) ? 0 : 1;
-      if (target_section == bfd_abs_section_ptr)	/* Ref to absolute hunk */
-	relocation = sym->value;
+      if (target_section == bfd_abs_section_ptr)        /* Ref to absolute hunk */
+        relocation = sym->value;
       else
-	{
-	  if (target_section == bfd_com_section_ptr)	/* Error.. */
-	    {
-	      relocation = 0;
-	      copy = false;
-	      ret = bfd_reloc_undefined;
-	    }
-	  else
-	    {
-	      DPRINT (5, ("PC relative\n"));
-	      /* This is a pc relative hunk... */
-	      if (sec->output_section != target_section->output_section)	/* Error */
-		{
-		  DPRINT (10, ("pc relative, but out of range I\n"));
-		  relocation = 0;
-		  copy = false;
-		  ret = bfd_reloc_outofrange;
-		}
-	      else
-		{		/* Same section */
-		  relocation = -(r->address + sec->output_offset);
-		  copy = false;
-		}
-	    }
-	}
+        {
+          if (target_section == bfd_com_section_ptr)    /* Error.. */
+            {
+              relocation = 0;
+              copy = false;
+              ret = bfd_reloc_undefined;
+            }
+          else
+            {
+              DPRINT (5, ("PC relative\n"));
+              /* This is a pc relative hunk... */
+              if (sec->output_section != target_section->output_section)        /* Error */
+                {
+                  DPRINT (10, ("pc relative, but out of range I\n"));
+                  relocation = 0;
+                  copy = false;
+                  ret = bfd_reloc_outofrange;
+                }
+              else
+                {               /* Same section */
+                  relocation = -(r->address + sec->output_offset);
+                  copy = false;
+                }
+            }
+        }
       break;
 
-    case HUNK_DREL32:		/* baserel relocs */
+    case HUNK_DREL32:           /* baserel relocs */
     case HUNK_DREL16:
     case HUNK_DREL8:
       DPRINT (5, ("HUNK_BASEREL relocs\n"));
@@ -565,48 +565,48 @@ amiga_perform_reloc (abfd, r, data, sec, obfd, error_message)
          following .data section.. */
 
       size =
-	(r->howto->type ==
-	 HUNK_DREL32) ? 2 : ((r->howto->type == HUNK_DREL16) ? 1 : 0);
+        (r->howto->type ==
+         HUNK_DREL32) ? 2 : ((r->howto->type == HUNK_DREL16) ? 1 : 0);
 
       if (target_section == bfd_abs_section_ptr)
-	{
-	  relocation = sym->value;
-	}
+        {
+          relocation = sym->value;
+        }
       else
-	{
-	  if (!(AMIGA_DATA (target_section->output_section->owner)->baserel))
-	    {
-	      fprintf (stderr,
-		       "Base symbol for base relative reloc not defined,"
-		       "section %s, reloc to symbol %s\n", sec->name,
-		       sym->name);
-	      copy = false;
-	      ret = bfd_reloc_notsupported;
-	      break;
-	    }
+        {
+          if (!(AMIGA_DATA (target_section->output_section->owner)->baserel))
+            {
+              fprintf (stderr,
+                       "Base symbol for base relative reloc not defined,"
+                       "section %s, reloc to symbol %s\n", sec->name,
+                       sym->name);
+              copy = false;
+              ret = bfd_reloc_notsupported;
+              break;
+            }
 
-	  /* If target->out is .bss, add the value of the .data section to sym->value and
-	     set output_section new to .data section.... */
-	  if (strcmp (target_section->output_section->name, ".bss") == 0)
-	    {
-	      bfd *ibfd;
-	      asection *s;
+          /* If target->out is .bss, add the value of the .data section to sym->value and
+             set output_section new to .data section.... */
+          if (strcmp (target_section->output_section->name, ".bss") == 0)
+            {
+              bfd *ibfd;
+              asection *s;
 
-	      ibfd = target_section->output_section->owner;
-	      for (s = ibfd->sections; s != NULL; s = s->next)
-		if (strcmp (s->name, ".data") == 0)
-		  {
-		    sym->section->output_section = s;
-		    sym->section->output_offset = s->_raw_size;
-		  }
-	    }
+              ibfd = target_section->output_section->owner;
+              for (s = ibfd->sections; s != NULL; s = s->next)
+                if (strcmp (s->name, ".data") == 0)
+                  {
+                    sym->section->output_section = s;
+                    sym->section->output_offset = s->_raw_size;
+                  }
+            }
 
-	  relocation = sym->value + sym->section->output_offset
-	    - (AMIGA_DATA (target_section->output_section->owner))->a4init
-	    + r->addend;
-	  copy = false;
-	  sign = true;
-	}
+          relocation = sym->value + sym->section->output_offset
+            - (AMIGA_DATA (target_section->output_section->owner))->a4init
+            + r->addend;
+          copy = false;
+          sign = true;
+        }
       break;
 
     default:
@@ -615,13 +615,13 @@ amiga_perform_reloc (abfd, r, data, sec, obfd, error_message)
       relocation = 0;
       ret = bfd_reloc_notsupported;
       break;
-    }				/* Of switch */
+    }                           /* Of switch */
 
   /* Add in relocation */
   if (relocation != 0)
     ret = my_add_to (data, r->address, size, relocation, sign);
 
-  if (copy)			/* Copy reloc to output section */
+  if (copy)                     /* Copy reloc to output section */
     {
       DPRINT (5, ("Copying reloc\n"));
       target_section = sec->output_section;
@@ -644,8 +644,8 @@ aout_perform_reloc (abfd, r, data, sec, obfd, error_message)
      bfd *obfd;
      char **error_message;
 {
-  asymbol *sym;			/* Reloc is relative to this */
-  asection *target_section;	/* reloc is relative to this section */
+  asymbol *sym;                 /* Reloc is relative to this */
+  asection *target_section;     /* reloc is relative to this section */
   int relocation;
   boolean copy, addval = true;
   bfd_reloc_status_type ret;
@@ -655,7 +655,7 @@ aout_perform_reloc (abfd, r, data, sec, obfd, error_message)
   /* If obfd==NULL: Apply the reloc, if possible. */
   /* Else: Modify it and return */
   DPRINT (5, ("Entering aout_perf_reloc\n"));
-  if (obfd != NULL)		/* Only modify the reloc */
+  if (obfd != NULL)             /* Only modify the reloc */
     {
       r->address += sec->output_offset;
       DPRINT (5, ("Leaving aout_perf_reloc, modified\n"));
@@ -665,7 +665,7 @@ aout_perform_reloc (abfd, r, data, sec, obfd, error_message)
   sym = *(r->sym_ptr_ptr);
   target_section = sym->section;
 
-  if (target_section == bfd_und_section_ptr)	/* Error */
+  if (target_section == bfd_und_section_ptr)    /* Error */
     {
       DPRINT (10, ("target_sec=UND, aout_perf_rel\n"));
       return bfd_reloc_undefined;
@@ -676,195 +676,195 @@ aout_perform_reloc (abfd, r, data, sec, obfd, error_message)
 
   switch (r->howto->type)
     {
-    case 0:			/* 8 bit reloc, pc relative or absolute */
-    case 1:			/* 16 bit reloc */
+    case 0:                     /* 8 bit reloc, pc relative or absolute */
+    case 1:                     /* 16 bit reloc */
       DPRINT (10, ("16/8 bit relative\n"));
       size = r->howto->type;
-      if (target_section == bfd_abs_section_ptr)	/* Ref to absolute hunk */
-	relocation = sym->value;
-      else if (target_section == bfd_com_section_ptr)	/* Error.. */
-	{
-	  relocation = 0;
-	  copy = false;
-	  ret = bfd_reloc_undefined;
-	  fprintf (stderr, "Pc relative relocation to  common symbol \"%s\" "
-		   "in section %s\n", sym->name, sec->name);
-	  DPRINT (10, ("Ref to common symbol...aout_perf_reloc\n"));
-	}
+      if (target_section == bfd_abs_section_ptr)        /* Ref to absolute hunk */
+        relocation = sym->value;
+      else if (target_section == bfd_com_section_ptr)   /* Error.. */
+        {
+          relocation = 0;
+          copy = false;
+          ret = bfd_reloc_undefined;
+          fprintf (stderr, "Pc relative relocation to  common symbol \"%s\" "
+                   "in section %s\n", sym->name, sec->name);
+          DPRINT (10, ("Ref to common symbol...aout_perf_reloc\n"));
+        }
       else
-	{
-	  /* This is a pc relative hunk... or a baserel... */
-	  if (sec->output_section != target_section->output_section)
-	    /* Error or baserel */
-	    {
-	      if (target_section->output_section->flags & SEC_DATA != 0)
-		/* Baserel reloc */
-		{
-		  goto baserel;	/* Dirty, but no code doubling.. */
-		}		/* Of is baserel */
+        {
+          /* This is a pc relative hunk... or a baserel... */
+          if (sec->output_section != target_section->output_section)
+            /* Error or baserel */
+            {
+              if (target_section->output_section->flags & SEC_DATA != 0)
+                /* Baserel reloc */
+                {
+                  goto baserel; /* Dirty, but no code doubling.. */
+                }               /* Of is baserel */
 
-	      relocation = 0;
-	      copy = false;
-	      ret = bfd_reloc_outofrange;
-	      fprintf (stderr,
-		       "pc relative relocation out of range in section"
-		       "%s. Relocation was to symbol %s\n", sec->name,
-		       sym->name);
+              relocation = 0;
+              copy = false;
+              ret = bfd_reloc_outofrange;
+              fprintf (stderr,
+                       "pc relative relocation out of range in section"
+                       "%s. Relocation was to symbol %s\n", sec->name,
+                       sym->name);
 
-	      DPRINT (10, ("Section%s, target %s: Reloc out of range..."
-			   "not same section, aout_perf\nsec->out=%s, target->out"
-			   "=%s, offset=%lx\n", sec->name,
-			   target_section->name, sec->output_section->name,
-			   target_section->output_section->name, r->address));
-	    }
-	  else
-	    {			/* Same section */
-	      relocation = -(r->address + sec->output_offset);
-	      copy = false;
-	      DPRINT (5, ("Reloc to same section...\n"));
-	    }
-	}
+              DPRINT (10, ("Section%s, target %s: Reloc out of range..."
+                           "not same section, aout_perf\nsec->out=%s, target->out"
+                           "=%s, offset=%lx\n", sec->name,
+                           target_section->name, sec->output_section->name,
+                           target_section->output_section->name, r->address));
+            }
+          else
+            {                   /* Same section */
+              relocation = -(r->address + sec->output_offset);
+              copy = false;
+              DPRINT (5, ("Reloc to same section...\n"));
+            }
+        }
       break;
 
-    case 4:			/* 8 bit displacement */
-    case 5:			/* 16 bit displacement */
-    case 6:			/* 32 bit displacement */
+    case 4:                     /* 8 bit displacement */
+    case 5:                     /* 16 bit displacement */
+    case 6:                     /* 32 bit displacement */
       size = r->howto->type - 4;
       sign = true;
-      if (target_section == bfd_abs_section_ptr)	/* Ref to absolute hunk */
-	relocation = sym->value;
+      if (target_section == bfd_abs_section_ptr)        /* Ref to absolute hunk */
+        relocation = sym->value;
       else
-	{
-	  relocation = (sym->value + target_section->output_offset) -
-	    (r->address + sec->output_offset);
-	  if (size == 0)
-	    relocation--;
-	  addval = false;
-	  copy = 0;
-	}
+        {
+          relocation = (sym->value + target_section->output_offset) -
+            (r->address + sec->output_offset);
+          if (size == 0)
+            relocation--;
+          addval = false;
+          copy = 0;
+        }
       break;
 
-    case 2:			/* 32 bit reloc, abs. or relative */
+    case 2:                     /* 32 bit reloc, abs. or relative */
       DPRINT (10, ("32 bit\n"));
       size = 2;
-      if (target_section == bfd_abs_section_ptr)	/* Ref to absolute hunk */
-	relocation = sym->value;
-      else if (target_section == bfd_com_section_ptr)	/* ref to common */
-	{
-	  relocation = 0;
-	  copy = true;
-	}
+      if (target_section == bfd_abs_section_ptr)        /* Ref to absolute hunk */
+        relocation = sym->value;
+      else if (target_section == bfd_com_section_ptr)   /* ref to common */
+        {
+          relocation = 0;
+          copy = true;
+        }
       else
-	{
-	  /* If we access a symbol in the .bss section, we have to convert
-	     this to an access to .data section */
-	  /* This is done through a change to the output section of
-	     the symbol... */
-	  if (amiga_base_relative
-	      && (strcmp (sym->section->output_section->name, ".bss") == 0))
-	    {
-	      /* get value for .data section */
-	      bfd *ibfd;
-	      asection *s;
+        {
+          /* If we access a symbol in the .bss section, we have to convert
+             this to an access to .data section */
+          /* This is done through a change to the output section of
+             the symbol... */
+          if (amiga_base_relative
+              && (strcmp (sym->section->output_section->name, ".bss") == 0))
+            {
+              /* get value for .data section */
+              bfd *ibfd;
+              asection *s;
 
-	      ibfd = target_section->output_section->owner;
-	      for (s = ibfd->sections; s != NULL; s = s->next)
-		if (strcmp (s->name, ".data") == 0)
-		  {
-		    sym->section->output_section = s;
-		    sym->section->output_offset += s->_raw_size;
-		  }
-	    }
-	  relocation = 0;
-	  copy = true;
-	}
+              ibfd = target_section->output_section->owner;
+              for (s = ibfd->sections; s != NULL; s = s->next)
+                if (strcmp (s->name, ".data") == 0)
+                  {
+                    sym->section->output_section = s;
+                    sym->section->output_offset += s->_raw_size;
+                  }
+            }
+          relocation = 0;
+          copy = true;
+        }
       DPRINT (10, ("target->out=%s(%lx), sec->out=%s(%lx), symbol=%s\n",
-		   target_section->output_section->name,
-		   target_section->output_section, sec->output_section->name,
-		   sec->output_section, sym->name));
+                   target_section->output_section->name,
+                   target_section->output_section, sec->output_section->name,
+                   sec->output_section, sym->name));
       break;
 
-    case 9:			/* 16 bit base relative */
-    case 10:			/* 32 bit base relative */
+    case 9:                     /* 16 bit base relative */
+    case 10:                    /* 32 bit base relative */
       DPRINT (10, ("32/16 bit baserel\n"));
       /* We use the symbol ___a4_init as base */
       size = r->howto->type - 8;
 
     baserel:
       if (target_section == bfd_abs_section_ptr)
-	{
-	  relocation = sym->value;
-	}
-      else if (target_section == bfd_com_section_ptr)	/* Error.. */
-	{
-	  relocation = 0;
-	  copy = false;
-	  ret = bfd_reloc_undefined;
-	  fprintf (stderr, "Baserelative relocation to common \"%s\"\n",
-		   sym->name);
+        {
+          relocation = sym->value;
+        }
+      else if (target_section == bfd_com_section_ptr)   /* Error.. */
+        {
+          relocation = 0;
+          copy = false;
+          ret = bfd_reloc_undefined;
+          fprintf (stderr, "Baserelative relocation to common \"%s\"\n",
+                   sym->name);
 
-	  DPRINT (10, ("Ref to common symbol...aout_perf_reloc\n"));
-	}
-      else			/* Target section and sec need not be the same... */
-	{
-	  if (!(AMIGA_DATA (target_section->output_section->owner)->baserel))
+          DPRINT (10, ("Ref to common symbol...aout_perf_reloc\n"));
+        }
+      else                      /* Target section and sec need not be the same... */
+        {
+          if (!(AMIGA_DATA (target_section->output_section->owner)->baserel))
 
-	    {
-	      fprintf (stderr,
-		       "Base symbol for base relative reloc not defined,"
-		       "section %s, reloc to symbol %s\n", sec->name,
-		       sym->name);
-	      copy = false;
-	      ret = bfd_reloc_notsupported;
-	      DPRINT (10,
-		      ("target->out=%s(%lx), sec->out=%s(%lx), symbol=%s\n",
-		       target_section->output_section->name,
-		       target_section->output_section,
-		       sec->output_section->name, sec->output_section,
-		       sym->name));
+            {
+              fprintf (stderr,
+                       "Base symbol for base relative reloc not defined,"
+                       "section %s, reloc to symbol %s\n", sec->name,
+                       sym->name);
+              copy = false;
+              ret = bfd_reloc_notsupported;
+              DPRINT (10,
+                      ("target->out=%s(%lx), sec->out=%s(%lx), symbol=%s\n",
+                       target_section->output_section->name,
+                       target_section->output_section,
+                       sec->output_section->name, sec->output_section,
+                       sym->name));
 
-	      break;
-	    }
+              break;
+            }
 
-	  /* If target->out is .bss, add the value of the .data section....
-	     to sym, set new output_section */
-	  if (strcmp (target_section->output_section->name, ".bss") == 0)
-	    {
-	      bfd *ibfd;
-	      asection *s;
+          /* If target->out is .bss, add the value of the .data section....
+             to sym, set new output_section */
+          if (strcmp (target_section->output_section->name, ".bss") == 0)
+            {
+              bfd *ibfd;
+              asection *s;
 
-	      ibfd = target_section->output_section->owner;
+              ibfd = target_section->output_section->owner;
 
-	      for (s = ibfd->sections; s != NULL; s = s->next)
-		if (strcmp (s->name, ".data") == 0)
-		  {
-		    sym->section->output_offset += s->_raw_size;
-		    sym->section->output_section = s;
-		  }
-	    }
+              for (s = ibfd->sections; s != NULL; s = s->next)
+                if (strcmp (s->name, ".data") == 0)
+                  {
+                    sym->section->output_offset += s->_raw_size;
+                    sym->section->output_section = s;
+                  }
+            }
 
-	  relocation = sym->value + target_section->output_offset - 0x7ffe;
+          relocation = sym->value + target_section->output_offset - 0x7ffe;
 
-	  /* if the symbol is in bss, subtract the offset that gas has put
-	     into the opcode */
-	  if (target_section->index == 2)
-	    relocation -= abfd->tdata.aout_data->a.datasec->_raw_size;
+          /* if the symbol is in bss, subtract the offset that gas has put
+             into the opcode */
+          if (target_section->index == 2)
+            relocation -= abfd->tdata.aout_data->a.datasec->_raw_size;
 
-	  addval = true;
-	  copy = false;
-	  sign = true;
+          addval = true;
+          copy = false;
+          sign = true;
 
-	  DPRINT (20,
-		  ("symbol=%s (0x%lx)\nsection %s (0x%lx; %s; output=0x%lx)"
-		   "\nrelocation @0x%lx\n\n", sym->name, sym->value,
-		   sym->section->name, (unsigned long) sym->section,
-		   sym->section->owner->filename, sym->section->output_offset,
-		   r->address));
-	}
+          DPRINT (20,
+                  ("symbol=%s (0x%lx)\nsection %s (0x%lx; %s; output=0x%lx)"
+                   "\nrelocation @0x%lx\n\n", sym->name, sym->value,
+                   sym->section->name, (unsigned long) sym->section,
+                   sym->section->owner->filename, sym->section->output_offset,
+                   r->address));
+        }
       DPRINT (10, ("target->out=%s(%lx), sec->out=%s(%lx), symbol=%s\n",
-		   target_section->output_section->name,
-		   target_section->output_section, sec->output_section->name,
-		   sec->output_section, sym->name));
+                   target_section->output_section->name,
+                   target_section->output_section, sec->output_section->name,
+                   sec->output_section, sym->name));
       break;
 
     default:
@@ -874,7 +874,7 @@ aout_perform_reloc (abfd, r, data, sec, obfd, error_message)
       fprintf (stderr, "Unsupported reloc: %d\n", r->howto->type);
       break;
 
-    }				/* Of switch */
+    }                           /* Of switch */
 
   /* Add in relocation */
   if (relocation != 0)
@@ -883,7 +883,7 @@ aout_perform_reloc (abfd, r, data, sec, obfd, error_message)
     else
       ret = my_set_to (data, r->address, size, relocation, sign);
 
-  if (copy)			/* Copy reloc to output section */
+  if (copy)                     /* Copy reloc to output section */
     {
       DPRINT (5, ("Copying reloc\n"));
       target_section = sec->output_section;
@@ -891,7 +891,7 @@ aout_perform_reloc (abfd, r, data, sec, obfd, error_message)
       target_section->orelocation[target_section->reloc_count++] = r;
     }
   DPRINT (5,
-	  ("Leaving aout_perf_reloc with %d (OK=%d)\n", ret, bfd_reloc_ok));
+          ("Leaving aout_perf_reloc with %d (OK=%d)\n", ret, bfd_reloc_ok));
   return ret;
 }
 
@@ -932,7 +932,7 @@ amiga_final_link (abfd, info)
   for (o = abfd->sections; o != NULL; o = o->next)
     for (p = o->link_order_head; p != NULL; p = p->next)
       if (p->type == bfd_indirect_link_order)
-	p->u.indirect.section->linker_mark = true;
+        p->u.indirect.section->linker_mark = true;
 
   /* Build the output symbol table.  */
   for (sub = info->input_bfds; sub != (bfd *) NULL; sub = sub->link_next)
@@ -946,8 +946,8 @@ amiga_final_link (abfd, info)
   wginfo.output_bfd = abfd;
   wginfo.psymalloc = &outsymalloc;
   _bfd_generic_link_hash_traverse (_bfd_generic_hash_table (info),
-				   _bfd_generic_link_write_global_symbol,
-				   (PTR) & wginfo);
+                                   _bfd_generic_link_write_global_symbol,
+                                   (PTR) & wginfo);
 
   DPRINT (10, ("Accumulated global symbols\n"));
 
@@ -962,101 +962,101 @@ amiga_final_link (abfd, info)
     {
       /* If section is .data, find .bss and add that length */
       if (!info->relocateable && amiga_base_relative &&
-	  (strcmp (o->name, ".data") == 0))
-	{
-	  if (abfd->xvec->flavour != bfd_target_amiga_flavour)	/* oops */
-	    {
-	      fprintf (stderr, "You can't use base relative linking with"
-		       " partial links.\n");
-	    }
-	  else
-	    {
+          (strcmp (o->name, ".data") == 0))
+        {
+          if (abfd->xvec->flavour != bfd_target_amiga_flavour)  /* oops */
+            {
+              fprintf (stderr, "You can't use base relative linking with"
+                       " partial links.\n");
+            }
+          else
+            {
 #if 0
-	      for (act_sec = abfd->sections; act_sec != NULL;
-		   act_sec = act_sec->next)
-		if (strcmp (act_sec->name, ".bss") == 0)
-		  amiga_per_section (o)->disk_size = o->_raw_size +
-		    act_sec->_raw_size;
+              for (act_sec = abfd->sections; act_sec != NULL;
+                   act_sec = act_sec->next)
+                if (strcmp (act_sec->name, ".bss") == 0)
+                  amiga_per_section (o)->disk_size = o->_raw_size +
+                    act_sec->_raw_size;
 #endif
-	    }
-	}			/* Of base-relative linking */
+            }
+        }                       /* Of base-relative linking */
 
       DPRINT (10, ("Section in output bfd is %s (%lx)\n", o->name, o));
 
       o->reloc_count = 0;
       for (p = o->link_order_head;
-	   p != (struct bfd_link_order *) NULL; p = p->next)
-	{
-	  if (p->type == bfd_section_reloc_link_order
-	      || p->type == bfd_symbol_reloc_link_order)
-	    ++o->reloc_count;
-	  else if (p->type == bfd_indirect_link_order)
-	    {
-	      asection *input_section;
-	      bfd *input_bfd;
-	      long relsize;
-	      arelent **relocs;
-	      asymbol **symbols;
-	      long reloc_count;
+           p != (struct bfd_link_order *) NULL; p = p->next)
+        {
+          if (p->type == bfd_section_reloc_link_order
+              || p->type == bfd_symbol_reloc_link_order)
+            ++o->reloc_count;
+          else if (p->type == bfd_indirect_link_order)
+            {
+              asection *input_section;
+              bfd *input_bfd;
+              long relsize;
+              arelent **relocs;
+              asymbol **symbols;
+              long reloc_count;
 
-	      input_section = p->u.indirect.section;
-	      input_bfd = input_section->owner;
+              input_section = p->u.indirect.section;
+              input_bfd = input_section->owner;
 
-	      DPRINT (10,
-		      ("\tIndirect section from bfd %s, section is %s(%lx)"
-		       " (COM=%lx)\n", input_bfd->filename,
-		       input_section->name, input_section,
-		       bfd_com_section_ptr));
+              DPRINT (10,
+                      ("\tIndirect section from bfd %s, section is %s(%lx)"
+                       " (COM=%lx)\n", input_bfd->filename,
+                       input_section->name, input_section,
+                       bfd_com_section_ptr));
 
-	      relsize = bfd_get_reloc_upper_bound (input_bfd, input_section);
-	      if (relsize < 0)
-		{
-		  DPRINT (10, ("Relsize<0.I..in bfd %s, sec %s\n",
-			       input_bfd->filename, input_section->name));
-		  return false;
-		}
+              relsize = bfd_get_reloc_upper_bound (input_bfd, input_section);
+              if (relsize < 0)
+                {
+                  DPRINT (10, ("Relsize<0.I..in bfd %s, sec %s\n",
+                               input_bfd->filename, input_section->name));
+                  return false;
+                }
 
-	      relocs = (arelent **) malloc ((size_t) relsize);
+              relocs = (arelent **) malloc ((size_t) relsize);
 
-	      if (!relocs && relsize != 0)
-		{
-		  bfd_set_error (bfd_error_no_memory);
-		  return false;
-		}
-	      symbols = _bfd_generic_link_get_symbols (input_bfd);
-	      reloc_count = bfd_canonicalize_reloc (input_bfd,
-						    input_section,
-						    relocs, symbols);
-	      if (reloc_count < 0)
-		{
-		  DPRINT (10, ("Relsize<0.II..in bfd %s, sec %s\n",
-			       input_bfd->filename, input_section->name));
-		  return false;
-		}
+              if (!relocs && relsize != 0)
+                {
+                  bfd_set_error (bfd_error_no_memory);
+                  return false;
+                }
+              symbols = _bfd_generic_link_get_symbols (input_bfd);
+              reloc_count = bfd_canonicalize_reloc (input_bfd,
+                                                    input_section,
+                                                    relocs, symbols);
+              if (reloc_count < 0)
+                {
+                  DPRINT (10, ("Relsize<0.II..in bfd %s, sec %s\n",
+                               input_bfd->filename, input_section->name));
+                  return false;
+                }
 
-	      BFD_ASSERT (reloc_count == input_section->reloc_count);
-	      o->reloc_count += reloc_count;
-	      free (relocs);
-	    }
-	}
+              BFD_ASSERT (reloc_count == input_section->reloc_count);
+              o->reloc_count += reloc_count;
+              free (relocs);
+            }
+        }
       if (o->reloc_count > 0)
-	{
-	  o->orelocation = ((arelent **)
-			    bfd_alloc (abfd,
-				       (o->reloc_count
-					* sizeof (arelent *))));
+        {
+          o->orelocation = ((arelent **)
+                            bfd_alloc (abfd,
+                                       (o->reloc_count
+                                        * sizeof (arelent *))));
 
-	  if (!o->orelocation)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return false;
-	    }
-	  /* o->flags |= SEC_RELOC; There may be no relocs. This can be
-	     determined only later */
-	  /* Reset the count so that it can be used as an index
-	     when putting in the output relocs.  */
-	  o->reloc_count = 0;
-	}
+          if (!o->orelocation)
+            {
+              bfd_set_error (bfd_error_no_memory);
+              return false;
+            }
+          /* o->flags |= SEC_RELOC; There may be no relocs. This can be
+             determined only later */
+          /* Reset the count so that it can be used as an index
+             when putting in the output relocs.  */
+          o->reloc_count = 0;
+        }
     }
 
   DPRINT (10, ("Got all relocs\n"));
@@ -1065,26 +1065,26 @@ amiga_final_link (abfd, info)
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     {
       for (p = o->link_order_head;
-	   p != (struct bfd_link_order *) NULL; p = p->next)
-	{
-	  switch (p->type)
-	    {
-	    case bfd_section_reloc_link_order:
-	    case bfd_symbol_reloc_link_order:
-	      if (!amiga_reloc_link_order (abfd, info, o, p))	/* We use an own routine */
-		return false;
-	      break;
-	    case bfd_indirect_link_order:
-	      if (!default_indirect_link_order (abfd, info, o, p, false))
-		/* Calls our get_relocated_section_contents */
-		return false;
-	      break;
-	    default:
-	      if (!_bfd_default_link_order (abfd, info, o, p))
-		return false;
-	      break;
-	    }
-	}
+           p != (struct bfd_link_order *) NULL; p = p->next)
+        {
+          switch (p->type)
+            {
+            case bfd_section_reloc_link_order:
+            case bfd_symbol_reloc_link_order:
+              if (!amiga_reloc_link_order (abfd, info, o, p))   /* We use an own routine */
+                return false;
+              break;
+            case bfd_indirect_link_order:
+              if (!default_indirect_link_order (abfd, info, o, p, false))
+                /* Calls our get_relocated_section_contents */
+                return false;
+              break;
+            default:
+              if (!_bfd_default_link_order (abfd, info, o, p))
+                return false;
+              break;
+            }
+        }
     }
   if (abfd->xvec->flavour == bfd_target_amiga_flavour && !info->relocateable)
     AMIGA_DATA (abfd)->IsLoadFile = true;
@@ -1142,19 +1142,19 @@ amiga_reloc_link_order (abfd, info, sec, link_order)
       struct generic_link_hash_entry *h;
 
       h = _bfd_generic_link_hash_lookup (_bfd_generic_hash_table (info),
-					 link_order->u.reloc.p->u.name,
-					 false, false, true);
+                                         link_order->u.reloc.p->u.name,
+                                         false, false, true);
       if (h == (struct generic_link_hash_entry *) NULL || !h->written)
-	{
-	  if (!((*info->callbacks->unattached_reloc)
-		(info, link_order->u.reloc.p->u.name,
-		 (bfd *) NULL, (asection *) NULL, (bfd_vma) 0)))
-	    return false;
-	  bfd_set_error (bfd_error_bad_value);
-	  DPRINT (5,
-		  ("Leaving amiga_reloc_link, bad value in hash lookup\n"));
-	  return false;
-	}
+        {
+          if (!((*info->callbacks->unattached_reloc)
+                (info, link_order->u.reloc.p->u.name,
+                 (bfd *) NULL, (asection *) NULL, (bfd_vma) 0)))
+            return false;
+          bfd_set_error (bfd_error_bad_value);
+          DPRINT (5,
+                  ("Leaving amiga_reloc_link, bad value in hash lookup\n"));
+          return false;
+        }
       r->relent.sym_ptr_ptr = &h->sym;
     }
   DPRINT (5, ("Got symbol for relocation\n"));
@@ -1171,7 +1171,7 @@ amiga_reloc_link_order (abfd, info, sec, link_order)
       sec->flags |= SEC_RELOC;
     }
   else
-    {				/* Try to apply the reloc */
+    {                           /* Try to apply the reloc */
       char *em = "";
       PTR data;
       bfd_reloc_status_type ret;
@@ -1185,16 +1185,19 @@ amiga_reloc_link_order (abfd, info, sec, link_order)
       data = (PTR) (sec->contents);
 
       if (bfd_get_flavour (abfd) == bfd_target_amiga_flavour)
-	ret = amiga_perform_reloc (abfd, (arelent *) r, data, sec, NULL, &em);
+        ret = amiga_perform_reloc (abfd, (arelent *) r, data, sec, NULL, &em);
       else
-	ret = aout_perform_reloc (abfd, (arelent *) r, data, sec, NULL, &em);
+        ret = aout_perform_reloc (abfd, (arelent *) r, data, sec, NULL, &em);
 
       if (ret != bfd_reloc_ok)
-	{
-	  DPRINT (5, ("Leaving amiga_reloc_link, value false\n"));
-	  return false;
-	}
+        {
+          DPRINT (5, ("Leaving amiga_reloc_link, value false\n"));
+          return false;
+        }
     }
   DPRINT (5, ("Leaving amiga_reloc_link\n"));
   return true;
 }
+
+/* vim : cinoptions=>4,n-2,{2,^-2,:2,=2,g0,h2,p5,t0,+2,(0,u0,w1,m1 : */
+/* vim : sw=2 sts=2 tw=79 fo-=ro fo+=cql : */

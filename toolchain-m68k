@@ -13,7 +13,7 @@ import string
 import sys
 
 URLS = \
-  ['git://github.com/cahirwpz/python-lhafile',
+  ['git://github.com/FrodeSolheim/python-lhafile',
    'ftp://ftp.gnu.org/gnu/m4/m4-1.4.17.tar.gz',
    'ftp://ftp.gnu.org/gnu/gawk/gawk-3.1.8.tar.gz',
    'ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.13.tar.gz',

@@ -197,6 +197,24 @@ def build():
   environ['LANG'] = 'C'
   environ['TERM'] = 'xterm'
 
+  find_executable('perl')
+  find_executable('patch')
+  find_executable('make')
+  find_executable('git')
+
+  with cwd('{archives}'):
+    for url in URLS:
+      if type(url) == tuple:
+        url, name = url[0], url[1]
+      else:
+        name = path.basename(url)
+      fetch(name, url)
+
+  unpack('python-lha', work_dir='{build}')
+  python_setup('python-lha')
+
+  add_site_dir('{host}')
+
   """
   Make sure we always choose known compiler (from the distro) and not one in
   user's path that could shadow the original one.
@@ -218,27 +236,9 @@ def build():
   environ['CC'] = ' '.join([find_executable(CC), ARCH])
   environ['CXX'] = ' '.join([find_executable(CXX), ARCH])
 
-  find_executable('perl')
-  find_executable('patch')
-  find_executable('make')
-  find_executable('git')
-
   environ['PATH'] = ":".join([path.join('{target}', 'bin'),
                               path.join('{host}', 'bin'),
                               environ['PATH']])
-
-  add_site_dir('{host}')
-
-  with cwd('{archives}'):
-    for url in URLS:
-      if type(url) == tuple:
-        url, name = url[0], url[1]
-      else:
-        name = path.basename(url)
-      fetch(name, url)
-
-  unpack('python-lha', work_dir='{build}')
-  python_setup('python-lha')
 
   unpack('{m4}')
   configure('{m4}', '--prefix={host}')

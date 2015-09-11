@@ -1,5 +1,5 @@
 --- ira/ira.c	2015-09-11 09:25:13.000000000 +0200
-+++ ira/ira.c	2015-09-11 09:19:33.000000000 +0200
++++ ira/ira.c	2015-09-11 10:29:42.000000000 +0200
 @@ -254,7 +254,7 @@
  	if (baseoff > 0)
  		fprintf(f,"+%hd,A%hu\n",baseoff,basereg);
@@ -36,6 +36,51 @@
  
  				if (!ptr3) base = area1;
  				if (area1<prgstart || area1>prgende || area2<prgstart || area2>prgende)
+@@ -1269,7 +1269,7 @@
+ 		for(modulcnt=0;modulcnt<modulcount;modulcnt++) {
+ 			if (!modultab[modulcnt])
+ 				if (!(pflags&KEEP_ZEROHUNKS)) continue;
+-			fprintf(targetfile,"\tINCLUDE\t\"%s.S%s\"\n",targetname,itoa(modulcnt));
++			fprintf(targetfile,"\tINCLUDE\t\"%s.S%s\"\n",targetname,itostr(modulcnt));
+ 		}
+ 		fprintf(targetfile,"\tEND\n");
+ 		fclose(targetfile);targetfile=0;
+@@ -1295,7 +1295,7 @@
+ 				}
+ 				strcpy(tsname,targetname);
+ 				strcat(tsname,".S");
+-				strcat(tsname,itoa(modulcnt));
++				strcat(tsname,itostr(modulcnt));
+ 				if (!(targetfile = fopen(tsname,"w")))
+ 					ExitPrg("Can't open %s\n",tsname);
+ 			}
+@@ -1481,7 +1481,7 @@
+ 				}
+ 				strcpy(tsname,targetname);
+ 				strcat(tsname,".S");
+-				strcat(tsname,itoa(modulcnt));
++				strcat(tsname,itostr(modulcnt));
+ 				if (!(targetfile = fopen(tsname,"w")))
+ 					ExitPrg("Can't open %s\n",tsname);
+ 			}
+@@ -1686,7 +1686,7 @@
+ 					} else {
+ 						if (tflag==1) {tptr[k++]='\"';tptr[k++]=',';}
+ 						if (tflag==2) tptr[k++]=',';
+-						strcpy(&tptr[k],itoa((ULONG)buf[j]));
++						strcpy(&tptr[k],itostr((ULONG)buf[j]));
+ 						if (buf[j]>99) k+=3;
+ 						else if (buf[j]>9) k+=2;
+ 						else k++;
+@@ -1726,7 +1726,7 @@
+ 						longs_per_line=0;
+ 						for(i=0;(ptr2-ptr1)>=sizeof(ULONG) && be32(buf)==0;ptr1+=sizeof(ULONG),buf+=sizeof(ULONG)) i++;
+ 						mnecat("DS.L");
+-						adrcat(itoa(i));
++						adrcat(itostr(i));
+ 						Ausgabe();
+ 					}
+ 					else {
 @@ -1833,7 +1833,7 @@
  	}
  
@@ -45,6 +90,289 @@
  	if (LabelAdr2[p2labind]==adr && p2labind<labcount) {
  		flag = 1;index=p2labind;
  		while(LabelAdr2[p2labind]==adr && p2labind<labcount) {
+@@ -1928,13 +1928,13 @@
+ 			}
+ 			if (pflags&OLDSTYLE) {
+ 				if (getlab) GetLabel(adr,mode);
+-				else adrcat(itoa((BYTE)(buf&0x00FF)));
++				else adrcat(itostr((BYTE)(buf&0x00FF)));
+ 				adrcat("(");
+ 			}
+ 			else {
+ 				adrcat("(");
+ 				if (getlab) GetLabel(adr,mode);
+-				else adrcat(itoa((BYTE)(buf&0x00FF)));
++				else adrcat(itostr((BYTE)(buf&0x00FF)));
+ 				adrcat(",");
+ 			}
+ 			if (mode==6) {
+@@ -1993,7 +1993,7 @@
+ 					}
+ 					else {
+ 						if (P2WriteReloc()) return((UWORD)0xffff);
+-						adrcat(itoa((WORD)be16(&buffer[prgcount-1])));
++						adrcat(itostr((WORD)be16(&buffer[prgcount-1])));
+ 					}
+ 					adrcat(".W");
+ 				}
+@@ -2052,7 +2052,7 @@
+ 				else adrcat(".W");
+ 				if (scale) {
+ 					adrcat("*");
+-					adrcat(itoa(1<<scale));
++					adrcat(itostr(1<<scale));
+ 				}
+ 				square1&=~4;
+ 				operand&=~4;
+@@ -2063,7 +2063,7 @@
+ 			if (operand&8) {
+ 				if (odsize==2) {
+ 					if (P2WriteReloc()) return((UWORD)0xffff);
+-					adrcat(itoa((WORD)be16(&buffer[prgcount-1])));
++					adrcat(itostr((WORD)be16(&buffer[prgcount-1])));
+ 					adrcat(".W");
+ 				}
+ 				if (odsize==3) {
+@@ -2077,7 +2077,7 @@
+ 						dtacat(itohex(be16(&buffer[prgcount++]),4));
+ 						if (P2WriteReloc()) return((UWORD)0xffff);
+ 						adr=(be16(&buffer[prgcount-2])<<16)+be16(&buffer[prgcount-1]);
+-						adrcat(itoa(adr));
++						adrcat(itostr(adr));
+ 					}
+ 					adrcat(".L");
+ 				}
+@@ -2098,13 +2098,13 @@
+ 			}
+ 			if (pflags&OLDSTYLE) {
+ 				if (getlab) GetLabel(adr,mode);
+-				else adrcat(itoa((BYTE)(buf&0x00FF)));
++				else adrcat(itostr((BYTE)(buf&0x00FF)));
+ 				adrcat("(");
+ 			}
+ 			else {
+ 				adrcat("(");
+ 				if (getlab) GetLabel(adr,mode);
+-				else adrcat(itoa((BYTE)(buf&0x00FF)));
++				else adrcat(itostr((BYTE)(buf&0x00FF)));
+ 				adrcat(",");
+ 			}
+ 			if (mode==6) {
+@@ -2119,7 +2119,7 @@
+ 			else adrcat(".W");
+ 			if (scale) {
+ 				adrcat("*");
+-				adrcat(itoa(1<<scale));
++				adrcat(itostr(1<<scale));
+ 			}
+ 		}
+ 	}
+@@ -2204,12 +2204,12 @@
+ 					}
+ 					else {
+ 						if (pflags&OLDSTYLE) {
+-							adrcat(itoa((WORD)buf));
++							adrcat(itostr((WORD)buf));
+ 							adrcat("(A");
+ 						}
+ 						else {
+ 							adrcat("(");
+-							adrcat(itoa((WORD)buf));
++							adrcat(itostr((WORD)buf));
+ 							adrcat(",A");
+ 						}
+ 						adrcat(itohex(reg,1));
+@@ -2230,7 +2230,7 @@
+ 						/* PEA  wegen den C-Proggies (Stackuebergabe) */
+ 						if (opcnumber==OPC_PEA ||
+ 						    (sourcetype==1 && NoPtrsArea(prgcount*2+prgstart)))
+-							adrcat(itoa(adr));
++							adrcat(itostr(adr));
+ 						else {
+ 							if (sourcetype == 1 && (adr >= prgstart && adr <= prgende))
+ 								GetLabel(adr,mode);
+@@ -2409,11 +2409,11 @@
+ 					break;
+ 		case 19: /* TRAP */
+ 					adrcat("#");
+-					adrcat(itoa(sigw&0xF));
++					adrcat(itostr(sigw&0xF));
+ 					break;
+ 		case 20: /* moveq */
+ 					adrcat("#");
+-					adrcat(itoa((BYTE)(sigw&0x00FF)));
++					adrcat(itostr((BYTE)(sigw&0x00FF)));
+ 					break;
+ 		case 21: /* Bcc */
+ 					if ((sigw&0x00ff)==0x00ff) {
+@@ -2449,7 +2449,7 @@
+ 					else {
+ 						if (P2WriteReloc()) return(-1);
+ 						adrcat("#");
+-						adrcat(itoa((WORD)buf));
++						adrcat(itostr((WORD)buf));
+ 					}
+ 					break;
+ 		case 23: /* BTST,BCLR,... IMMEDIATE&REGISTER,SOURCEOP ONLY */
+@@ -2473,7 +2473,7 @@
+ 							if (buf&0xFFE0)
+ 								mode=NOADRMODE;
+ 						}
+-						adrcat(itoa(buf));
++						adrcat(itostr(buf));
+ 					}
+ 					extens=0; /* Set extension to BYTE (undefined before) */
+ 					break;
+@@ -2489,7 +2489,7 @@
+ 						if (reg>7) mode=NOADRMODE;
+ 						adrcat("D");
+ 					}
+-					adrcat(itoa(reg));
++					adrcat(itostr(reg));
+ 					adrcat(":");
+ 					reg=(extra&0x001F);
+ 					if (extra&0x0020) {
+@@ -2498,14 +2498,14 @@
+ 					}
+ 					else
+ 						if (reg==0) reg = 32;
+-					adrcat(itoa(reg));
++					adrcat(itostr(reg));
+ 					adrcat("}");
+ 					if (((sigw&0x0700)>>8)&1) {
+ 						/* BFEXTU, BFEXTS, BFFFO, BFINS */
+ 						if (extra&0x8000) mode=NOADRMODE;
+ 						adrcat(",D");
+ 						reg=(extra&0x7000)>>12;
+-						adrcat(itoa(reg));
++						adrcat(itostr(reg));
+ 					}
+ 					else {
+ 						if (extra&0xF000) mode=NOADRMODE;
+@@ -2514,7 +2514,7 @@
+ 		case 26: /* RTM */
+ 					if (sigw&0x0008) adrcat("A");
+ 					else adrcat("D");
+-					adrcat(itoa(reg2));
++					adrcat(itostr(reg2));
+ 					break;
+ 		case 27: /* CAS2  SOURCE/DESTINATION */
+ 					buf = be16(&buffer[prgcount]);
+@@ -2525,24 +2525,24 @@
+ 					if (buf&0x0e38 || extra&0x0e38) mode=NOADRMODE;
+ 					else {
+ 						adrcat("D");
+-						adrcat(itoa(extra&7));
++						adrcat(itostr(extra&7));
+ 						adrcat(":");
+ 						adrcat("D");
+-						adrcat(itoa(buf&7));
++						adrcat(itostr(buf&7));
+ 						adrcat(",");
+ 						adrcat("D");
+-						adrcat(itoa((extra&0x01c0)>>6));
++						adrcat(itostr((extra&0x01c0)>>6));
+ 						adrcat(":");
+ 						adrcat("D");
+-						adrcat(itoa((buf&0x01c0)>>6));
++						adrcat(itostr((buf&0x01c0)>>6));
+ 						adrcat(",");
+ 						if (extra&0x8000) adrcat("(A");
+ 						else adrcat("(D");
+-						adrcat(itoa((extra&0x7000)>>12));
++						adrcat(itostr((extra&0x7000)>>12));
+ 						adrcat("):");
+ 						if (buf&0x8000) adrcat("(A");
+ 						else adrcat("(D");
+-						adrcat(itoa((buf&0x7000)>>12));
++						adrcat(itostr((buf&0x7000)>>12));
+ 						adrcat(")");
+ 					}
+ 					break;
+@@ -2553,10 +2553,10 @@
+ 					if (extra&0xfe38) mode=NOADRMODE;
+ 					else {
+ 						adrcat("D");
+-						adrcat(itoa(extra&7));
++						adrcat(itostr(extra&7));
+ 						adrcat(",");
+ 						adrcat("D");
+-						adrcat(itoa((extra&0x01c0)>>6));
++						adrcat(itostr((extra&0x01c0)>>6));
+ 					}
+ 					break;
+ 		case 29: /* DIVIDE/MULTIPLY LONG  SIGNED/UNSIGNED */
+@@ -2569,21 +2569,21 @@
+ 						if (opcnumber == OPC_DIVL) {
+ 							if (!(extra&0x0400) && reg!=creg) mnecat("L");
+ 							adrcat("D");
+-							adrcat(itoa(creg));
++							adrcat(itostr(creg));
+ 							if ((extra&0x0400) ||
+ 							    (!(extra&0x0400) && reg!=creg)) {
+ 								adrcat(":D");
+-								adrcat(itoa(reg));
++								adrcat(itostr(reg));
+ 							}
+ 						}
+ 						else {  /* mul?.l */
+ 							if (extra&0x0400) {
+ 								adrcat("D");
+-								adrcat(itoa(creg));
++								adrcat(itostr(creg));
+ 								adrcat(":");
+ 							}
+ 							adrcat("D");
+-							adrcat(itoa(reg));
++							adrcat(itostr(reg));
+ 						}
+ 						mnecat(".L");
+ 					}
+@@ -2595,7 +2595,7 @@
+ 						if (P2WriteReloc()) return(-1);
+ 						if (P2WriteReloc()) return(-1);
+ 						adrcat("#");
+-						adrcat(itoa(displace));
++						adrcat(itostr(displace));
+ 					}
+ 					break;
+ 		case 31: /* MOVE16 POSTINCREMENT ONLY (DESTINATION) */
+@@ -2603,7 +2603,7 @@
+ 					else {
+ 						if (P2WriteReloc()) return(-1);
+ 						adrcat("(A");
+-						adrcat(itoa((buf&0x7000)>>12));
++						adrcat(itostr((buf&0x7000)>>12));
+ 						adrcat(")+");
+ 					}
+ 					break;
+@@ -2640,7 +2640,7 @@
+ 						if (sigw&1) {
+ 							if (buf&0x8000) adrcat("A");
+ 							else adrcat("D");
+-							adrcat(itoa(reg));
++							adrcat(itostr(reg));
+ 							adrcat(",");
+ 						}
+ 						if (creg&0x0800) creg=(creg%8)+9;
+@@ -2650,7 +2650,7 @@
+ 							adrcat(",");
+ 							if (buf&0x8000) adrcat("A");
+ 							else adrcat("D");
+-							adrcat(itoa(reg));
++							adrcat(itostr(reg));
+ 						}
+ 					}
+ 					break;
+@@ -2660,7 +2660,7 @@
+ 						reg=(extra&0x7000)>>12;
+ 						if (extra&0x8000) adrcat("A");
+ 						else adrcat("D");
+-						adrcat(itoa(reg));
++						adrcat(itostr(reg));
+ 					}
+ 					break;
+ 	}
 @@ -2806,7 +2806,7 @@
  				if (!(strnicmp(odata,"OMPAT=",6))) {
  					char c,*p = odata+6;

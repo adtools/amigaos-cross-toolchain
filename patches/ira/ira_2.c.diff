@@ -1,6 +1,6 @@
 --- ira/ira_2.c	2015-09-11 09:25:13.000000000 +0200
-+++ ira/ira_2.c	2015-09-11 09:17:20.000000000 +0200
-@@ -586,7 +588,7 @@
++++ ira/ira_2.c	2015-09-11 10:29:42.000000000 +0200
+@@ -586,7 +586,7 @@
  
  ULONG FileLength(UBYTE *name)
  {
@@ -9,7 +9,21 @@
  	FILE *file;
  	if (name) {
  		if (!(file = fopen(name,"rb")))
-@@ -828,9 +830,9 @@
+@@ -811,11 +811,11 @@
+ 		/* label outside of smalldata section always based on SECSTRT_n */
+ 		if (!GetSymbol(moduloffs[basesec])) {
+ 			adrcat("SECSTRT_");
+-			adrcat(itoa(basesec));
++			adrcat(itostr(basesec));
+ 		}
+ 		if (adr > (LONG)moduloffs[basesec])
+ 			adrcat("+");
+-		adrcat(itoa(adr-moduloffs[basesec]));
++		adrcat(itostr(adr-moduloffs[basesec]));
+ 		fprintf(stderr,"Base relative label not in section: %s\n",adrbuf);
+ 		return;
+ 	}
+@@ -828,9 +828,9 @@
  	}
  	if (LabelAdr[r]!=adr) {
  		fprintf(stderr,"ADR=%08lx not found! (mode=%d) relocount=%ld nextreloc=%ld\n",(unsigned long)adr,(int)adrmode,(long)relocount,(long)nextreloc);
@@ -22,7 +36,22 @@
  		adrcat("LAB_");
  		adrcat(itohex(adr,8));
  		return;
-@@ -857,7 +859,7 @@
+@@ -845,24 +845,24 @@
+ 		if (LabelAdr2[r] == moduloffs[RelocMod[nextreloc]]) {
+ 			if (!GetSymbol(LabelAdr[r2])) {
+ 				adrcat("SECSTRT_");
+-				adrcat(itoa(RelocMod[nextreloc]));
++				adrcat(itostr(RelocMod[nextreloc]));
+ 			}
+ 			if ((dummy=RelocOff[nextreloc])) {
+ 				if ((LONG)RelocOff[nextreloc] > 0) adrcat("+");
+-				adrcat(itoa(RelocOff[nextreloc]));
++				adrcat(itostr(RelocOff[nextreloc]));
+ 			}
+ 			else if ((dummy = LabelAdr[r2]-LabelAdr2[r])) {
+ 				adrcat("+");
+-				adrcat(itoa(dummy));
++				adrcat(itostr(dummy));
  			}
  		} else {
  			if (!GetSymbol(LabelAdr[r2])) {
@@ -31,7 +60,27 @@
  				adrcat(buf);
  			}
  			if ((dummy = LabelAdr[r2]-LabelAdr2[r])) {
-@@ -892,7 +894,7 @@
+ 				adrcat("+");
+-				adrcat(itoa(dummy));
++				adrcat(itostr(dummy));
+ 			}
+ 		}
+ 	}
+@@ -881,23 +881,23 @@
+ 		if (i >= 0) {
+ 			if (!GetSymbol(LabelAdr[r2])) {
+ 				adrcat("SECSTRT_");
+-				adrcat(itoa(i));
++				adrcat(itostr(i));
+ 			}
+ 			if (adr > (LONG)moduloffs[i]) {
+ 				adrcat("+");
+-				adrcat(itoa(adr-moduloffs[i]));
++				adrcat(itostr(adr-moduloffs[i]));
+ 			}
+ 			else if (adr < (LONG)moduloffs[i])
+-				adrcat(itoa(adr-moduloffs[i]));
++				adrcat(itostr(adr-moduloffs[i]));
  		}
  		else {
  			if (!GetSymbol(LabelAdr[r2])) {
@@ -40,3 +89,35 @@
  				adrcat(buf);
  			}
  			if ((dummy = LabelAdr[r2]-LabelAdr2[r])) {
+ 				adrcat("+");
+-				adrcat(itoa(dummy));
++				adrcat(itostr(dummy));
+ 			}
+ 		}
+ 	}
+@@ -1307,7 +1307,7 @@
+ 	TEXT symbol[32];
+ 
+ 	strcpy(symbol,name);
+-	if (number) strcat(symbol,itoa(number));
++	if (number) strcat(symbol,itostr(number));
+ 	InsertReloc(refptr+prgstart,symptr,0L,module);
+ 	InsertSymbol(symbol,symptr);
+ 	InsertLabel(symptr);
+@@ -1410,13 +1410,13 @@
+ 							if (ptr && (ptr != 0xFFFFFFFF)) {
+ 								if (k-j > l) {
+ 									strcpy(name,"LIBFUNC");
+-									if (number) strcat(name,itoa(number));
++									if (number) strcat(name,itostr(number));
+ 									strcat(name,"_");
+-									strcat(name,itoa(k-j-l-1));
++									strcat(name,itostr(k-j-l-1));
+ 								}
+ 								else {
+ 									strcpy(name,FuncName[k-j-1-relative]);
+-									if (number) strcat(name,itoa(number));
++									if (number) strcat(name,itostr(number));
+ 								}
+ 								if (relative==0)
+ 									InsertReloc(refptr+prgstart,ptr,0L,module);

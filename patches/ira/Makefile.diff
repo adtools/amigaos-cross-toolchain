@@ -5,7 +5,7 @@
  CC	= gcc
  CCOUT	= -o 
 -COPTS	= -c -O2
-+COPTS	= -c -O2 -Wall -Wno-pointer-sign
++COPTS	= -c -O2 -Wall -Wno-pointer-sign -Wno-unused-result
  LD	= $(CC)
  LDOUT	= $(CCOUT)
  LDFLAGS	=

@@ -372,6 +372,7 @@ def build():
   make('{gcc}', 'install', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 
   unpack('ira', top_dir='.', work_dir='{build}')
+  patch('ira', work_dir='{build}')
   make('ira')
 
   install_tools()

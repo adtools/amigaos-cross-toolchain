@@ -1,0 +1,42 @@
+--- ira/ira_2.c	2015-09-11 09:25:13.000000000 +0200
++++ ira/ira_2.c	2015-09-11 09:17:20.000000000 +0200
+@@ -586,7 +588,7 @@
+ 
+ ULONG FileLength(UBYTE *name)
+ {
+-	LONG len;
++	LONG len = 0;
+ 	FILE *file;
+ 	if (name) {
+ 		if (!(file = fopen(name,"rb")))
+@@ -828,9 +830,9 @@
+ 	}
+ 	if (LabelAdr[r]!=adr) {
+ 		fprintf(stderr,"ADR=%08lx not found! (mode=%d) relocount=%ld nextreloc=%ld\n",(unsigned long)adr,(int)adrmode,(long)relocount,(long)nextreloc);
+-		fprintf(stderr,"LabelAdr[l=%lu]=%08lx\n",l,(unsigned long)LabelAdr[l]);
+-		fprintf(stderr,"LabelAdr[m=%lu]=%08lx\n",m,(unsigned long)LabelAdr[m]);
+-		fprintf(stderr,"LabelAdr[r=%lu]=%08lx\n\n",r,(unsigned long)LabelAdr[r]);
++		fprintf(stderr,"LabelAdr[l=%u]=%08lx\n",l,(unsigned long)LabelAdr[l]);
++		fprintf(stderr,"LabelAdr[m=%u]=%08lx\n",m,(unsigned long)LabelAdr[m]);
++		fprintf(stderr,"LabelAdr[r=%u]=%08lx\n\n",r,(unsigned long)LabelAdr[r]);
+ 		adrcat("LAB_");
+ 		adrcat(itohex(adr,8));
+ 		return;
+@@ -857,7 +859,7 @@
+ 			}
+ 		} else {
+ 			if (!GetSymbol(LabelAdr[r2])) {
+-				sprintf(buf,"LAB_%04lX",(unsigned)r);
++				sprintf(buf,"LAB_%04X",(unsigned)r);
+ 				adrcat(buf);
+ 			}
+ 			if ((dummy = LabelAdr[r2]-LabelAdr2[r])) {
+@@ -892,7 +894,7 @@
+ 		}
+ 		else {
+ 			if (!GetSymbol(LabelAdr[r2])) {
+-				sprintf(buf,"LAB_%04lX",(unsigned)r);
++				sprintf(buf,"LAB_%04X",(unsigned)r);
+ 				adrcat(buf);
+ 			}
+ 			if ((dummy = LabelAdr[r2]-LabelAdr2[r])) {

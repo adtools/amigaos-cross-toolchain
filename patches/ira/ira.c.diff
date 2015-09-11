@@ -1,0 +1,73 @@
+--- ira/ira.c	2015-09-11 09:25:13.000000000 +0200
++++ ira/ira.c	2015-09-11 09:19:33.000000000 +0200
+@@ -254,7 +254,7 @@
+ 	if (baseoff > 0)
+ 		fprintf(f,"+%hd,A%hu\n",baseoff,basereg);
+ 	else if (baseoff < 0)
+-		fprintf(f,"-%hd,A%hu\n",-baseoff,basereg);
++		fprintf(f,"-%hd,A%hu\n",(WORD)-baseoff,basereg);
+ 	else
+ 		fprintf(f,",A%hu\n",basereg);
+ }
+@@ -479,7 +479,7 @@
+ 	FILE  *configfile;
+ 	ULONG  machine;
+ 
+-	if (configfile=fopen(configname,"r")) {
++	if ((configfile=fopen(configname,"r"))) {
+ 		fclose(configfile);
+ 		ExitPrg("Config file \"%s\" is already present! Remove it first.",
+ 		        configname);
+@@ -508,7 +508,7 @@
+ 	if (pflags&BASEREG2) {
+ 		fprintf(configfile,"BASEREG %u\n",(unsigned)basereg);
+ 		fprintf(configfile,"BASEADR $%lX\n",(unsigned long)baseadr);
+-		fprintf(configfile,"BASEOFF %h\n",baseoff);
++		fprintf(configfile,"BASEOFF %hu\n",baseoff);
+ 	}
+ 
+ 	for(i=0;i<SymbolCount;i++)
+@@ -648,7 +648,7 @@
+ 			if (ptr1 && (ptr2 = strchr(ptr1+1,'$'))) stch_l(ptr2+1,&area2);
+ 			if (ptr1 && ptr2 && (ptr3 = strchr(ptr2+1,'$'))) stch_l(ptr3+1,&base);
+ 			if (ptr1 && ptr2) {
+-				int sz;
++				int sz = 0;
+ 
+ 				if (!ptr3) base = area1;
+ 				if (area1<prgstart || area1>prgende || area2<prgstart || area2>prgende)
+@@ -1833,7 +1833,7 @@
+ 	}
+ 
+ 	/* Labels fuer aktuelle Adresse schreiben */
+-	if (LabelAdr2[p2labind]<adr && p2labind<labcount) fprintf(stderr,"%lx adr=%lx This=%?x\n",(unsigned long)p2labind,(unsigned long)adr,(unsigned long)LabelAdr2[p2labind]);
++	if (LabelAdr2[p2labind]<adr && p2labind<labcount) fprintf(stderr,"%lx adr=%lx This=%lx\n",(unsigned long)p2labind,(unsigned long)adr,(unsigned long)LabelAdr2[p2labind]);
+ 	if (LabelAdr2[p2labind]==adr && p2labind<labcount) {
+ 		flag = 1;index=p2labind;
+ 		while(LabelAdr2[p2labind]==adr && p2labind<labcount) {
+@@ -2806,7 +2806,7 @@
+ 				if (!(strnicmp(odata,"OMPAT=",6))) {
+ 					char c,*p = odata+6;
+ 
+-					while (c = *p++) {
++					while ((c = *p++)) {
+ 						switch (tolower((unsigned)c)) {
+ 							case 'b': bitrange=1; break;
+ 							case 'i': immedbyte=1; break;
+@@ -3657,7 +3657,6 @@
+ STATIC int AutoScan(void)
+ {
+ FILE  *file;
+-ULONG  seg;
+ ULONG  dummy;
+ 
+ 	if (!(file = fopen(sourcename,"rb")))
+@@ -3710,7 +3709,7 @@
+ 	if (pflags&SHOW_RELOCINFO) printf("  Unit    : %s\n",StdName);
+ 
+ 
+-	while (hunk = readbe32(sourcefile)) {  /* Modulart (Code,Data,...) */
++	while ((hunk = readbe32(sourcefile))) {  /* Modulart (Code,Data,...) */
+ 
+ 		if ((hunk>>30) == 3)
+ 			length = readbe32(sourcefile); /* Aufwaertskompatibel */

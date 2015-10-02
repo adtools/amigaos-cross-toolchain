@@ -201,6 +201,7 @@ def build():
   find_executable('patch')
   find_executable('make')
   find_executable('git')
+  find_executable('yacc')
 
   with cwd('{archives}'):
     for url in URLS:

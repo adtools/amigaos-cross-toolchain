@@ -3,7 +3,7 @@
 from fnmatch import fnmatch
 from glob import glob
 from logging import debug, info, error
-from os import path, environ
+from os import path
 import contextlib
 import distutils.spawn
 import os
@@ -450,12 +450,14 @@ def make(name, target=None, **makevars):
     execute('make', *args)
 
 
-def require_header(header, symbol = False, value = False):
+def require_header(header, lang, msg = '', symbol = False, value = False):
   debug('require_header "%s"', header)
-  cmd = environ['CC'].split() + ['-fsyntax-only', '-x', 'c', '-']
-  proc = subprocess.Popen(cmd, stdin = subprocess.PIPE, env = environ)
 
-  stdin_line = '#include ' + header
+  cmd = {'c':'{cc}', 'c++':'{cxx}'}[lang]
+  cmd = fill_in(cmd).split() + ['-fsyntax-only', '-x', lang, '-']
+  proc = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+
+  stdin_line = '#include <' + header + '>'
   if symbol:
     if value:
       stdin_line += """\n#if %s != %s
@@ -466,11 +468,16 @@ def require_header(header, symbol = False, value = False):
                          #error
                          #endif """ % (symbol)
 
-  proc.communicate(stdin_line)
+  (result_stdout, result_stderr) = proc.communicate(stdin_line)
   proc.wait()
 
-  if proc.returncode != 0:
-    panic('require_header "%s" failed', header)
+  cmd = ' '.join(cmd)
+
+  if proc.returncode == 0:
+    debug('output from "%s":\n%s', cmd, result_stdout)
+  else:
+    debug('error output from "%s":\n%s', cmd, result_stderr)
+    panic('require_header failed: %s', msg)
 
 
 __all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'chmod', 'execute',

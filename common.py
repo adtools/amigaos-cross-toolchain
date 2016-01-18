@@ -3,7 +3,7 @@
 from fnmatch import fnmatch
 from glob import glob
 from logging import debug, info, error
-from os import path
+from os import path, environ
 import contextlib
 import distutils.spawn
 import os
@@ -450,8 +450,31 @@ def make(name, target=None, **makevars):
     execute('make', *args)
 
 
+def require_header(header, symbol = False, value = False):
+  debug('require_header "%s"', header)
+  cmd = environ['CC'].split() + ['-fsyntax-only', '-x', 'c', '-']
+  proc = subprocess.Popen(cmd, stdin = subprocess.PIPE, env = environ)
+
+  stdin_line = '#include ' + header
+  if symbol:
+    if value:
+      stdin_line += """\n#if %s != %s
+                         #error
+                         #endif """ % (symbol, value)
+    else:
+      stdin_line += """\n#ifndef %s
+                         #error
+                         #endif """ % (symbol)
+
+  proc.communicate(stdin_line)
+  proc.wait()
+
+  if proc.returncode != 0:
+    panic('require_header "%s" failed', header)
+
+
 __all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'chmod', 'execute',
            'rmtree', 'mkdir', 'copy', 'copytree', 'unarc', 'fetch', 'cwd',
            'symlink', 'remove', 'move', 'find', 'textfile', 'env', 'path',
            'add_site_dir', 'python_setup', 'recipe', 'unpack', 'patch',
-           'configure', 'make']
+           'configure', 'make', 'require_header']

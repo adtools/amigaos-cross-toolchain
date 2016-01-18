@@ -241,6 +241,14 @@ def build():
                               path.join('{host}', 'bin'),
                               environ['PATH']])
 
+  """
+  When we have a working compiler in our path, we can also check if the
+  required headers/libraries are present.
+  """
+
+  require_header('<python2.7/python.h>')
+  require_header('<ncurses.h>', symbol = 'NCURSES_VERSION_MAJOR', value = 5)
+
   unpack('{m4}')
   configure('{m4}', '--prefix={host}')
   make('{m4}')

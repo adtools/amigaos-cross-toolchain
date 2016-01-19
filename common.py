@@ -450,8 +450,38 @@ def make(name, target=None, **makevars):
     execute('make', *args)
 
 
+def require_header(header, lang, msg = '', symbol = False, value = False):
+  debug('require_header "%s"', header)
+
+  cmd = {'c':'{cc}', 'c++':'{cxx}'}[lang]
+  cmd = fill_in(cmd).split() + ['-fsyntax-only', '-x', lang, '-']
+  proc = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+
+  stdin_line = '#include <' + header + '>'
+  if symbol:
+    if value:
+      stdin_line += """\n#if %s != %s
+                         #error
+                         #endif """ % (symbol, value)
+    else:
+      stdin_line += """\n#ifndef %s
+                         #error
+                         #endif """ % (symbol)
+
+  (result_stdout, result_stderr) = proc.communicate(stdin_line)
+  proc.wait()
+
+  cmd = ' '.join(cmd)
+
+  if proc.returncode == 0:
+    debug('output from "%s":\n%s', cmd, result_stdout)
+  else:
+    debug('error output from "%s":\n%s', cmd, result_stderr)
+    panic('require_header failed: %s', msg)
+
+
 __all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'chmod', 'execute',
            'rmtree', 'mkdir', 'copy', 'copytree', 'unarc', 'fetch', 'cwd',
            'symlink', 'remove', 'move', 'find', 'textfile', 'env', 'path',
            'add_site_dir', 'python_setup', 'recipe', 'unpack', 'patch',
-           'configure', 'make']
+           'configure', 'make', 'require_header']

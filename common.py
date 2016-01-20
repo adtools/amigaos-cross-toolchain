@@ -342,6 +342,7 @@ def recipe(name, nargs=0):
       else:
         target = fill_in(name)
       target = target.replace('_', '-')
+      target = target.replace('/', '-')
       stamp = path.join('{stamps}', target)
       if not path.exists('{stamps}'):
         mkdir('{stamps}')

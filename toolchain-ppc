@@ -3,7 +3,6 @@
 # Build cross toolchain for AmigaOS 4.x / PowerPC target.
 
 from fnmatch import fnmatch
-from glob import glob
 from logging import info
 from os import environ
 import argparse
@@ -12,7 +11,7 @@ import platform
 import sys
 
 URLS = \
-  ['git://github.com/cahirwpz/python-lhafile',
+  ['git://github.com/FrodeSolheim/python-lhafile',
    'ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2',
    'ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz',
    'ftp://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2',
@@ -35,24 +34,12 @@ from common import * # NOQA
 def prepare_sdk():
   info('preparing {sdk}')
 
-  base = ''
-  clib2 = ''
-  newlib = ''
+  target = path.join('{target}', 'ppc-amigaos/SDK')
 
-  with cwd('{sources}'):
-    for arc in ['base.lha', 'clib2-*.lha', 'newlib-*.lha']:
-      info('extracting "%s"' % arc)
-      execute('lha', '-xifq', path.join('{archives}', '{sdk}.lha'),
-              path.join('SDK_Install', arc))
-    base = path.join('{sources}', glob('base*.lha')[0])
-    clib2 = path.join('{sources}', glob('clib2*.lha')[0])
-    newlib = path.join('{sources}', glob('newlib*.lha')[0])
-
-  with cwd(path.join('{target}', 'ppc-amigaos/SDK')):
-    execute('lha', '-xf', clib2, 'clib2/*')
-    execute('lha', '-xf', newlib, 'newlib/*')
-    execute('lha', '-xf', base, 'Include/*')
-    move('Include', 'include')
+  unpack('{sdk}', work_dir='{archives}', top_dir='SDK_Install', dst_dir='SDK')
+  unpack('SDK/base', top_dir='Include', dst_dir=path.join(target, 'include'))
+  unpack('SDK/clib2', top_dir='clib2', dst_dir=path.join(target, 'clib2'))
+  unpack('SDK/newlib', top_dir='newlib', dst_dir=path.join(target, 'newlib'))
 
 
 def build():
@@ -182,6 +169,7 @@ def clean():
   rmtree('{sources}')
   rmtree('{host}')
   rmtree('{build}')
+  rmtree('{tmpdir}')
 
 
 if __name__ == "__main__":

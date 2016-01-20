@@ -201,6 +201,8 @@ if __name__ == "__main__":
   parser.add_argument('action',
                       choices=['build', 'clean'],
                       default='build', help='perform action')
+  parser.add_argument('args', metavar='ARGS', type=str, nargs='*',
+                      help='action arguments')
   parser.add_argument('--binutils', choices=['2.18', '2.23.2'], default='2.18',
                       help='desired binutils version')
   parser.add_argument('--gcc', choices=['4.2.4', '4.9.1'], default='4.2.4',

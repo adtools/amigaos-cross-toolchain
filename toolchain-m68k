@@ -117,8 +117,8 @@ def build_vbcc():
     'n', 'y', 'unsigned short',
     'n', 'y', 'signed int',
     'n', 'y', 'unsigned int',
-    'n', 'y', 'signed long',
-    'n', 'y', 'unsigned long',
+    'n', 'y', 'signed long long',
+    'n', 'y', 'unsigned long long',
     'n', 'y', 'float',
     'n', 'y', 'double')
   make('vbcc', TARGET='m68k', ETCDIR='\\"{target}/etc/\\"', CONFIG=config)
@@ -240,6 +240,15 @@ def build():
   environ['PATH'] = ":".join([path.join('{target}', 'bin'),
                               path.join('{host}', 'bin'),
                               environ['PATH']])
+
+  setvar(cc = environ['CC'], cxx = environ['CXX'])
+
+  """
+  When we have a working compiler in our path, we can also check if the
+  required headers/libraries are present.
+  """
+
+  require_header('ncurses.h', 'c', 'libncurses-dev 5.x missing', 'NCURSES_VERSION_MAJOR', 5)
 
   unpack('{m4}')
   configure('{m4}', '--prefix={host}')

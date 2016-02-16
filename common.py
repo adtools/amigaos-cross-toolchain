@@ -451,34 +451,30 @@ def make(name, target=None, **makevars):
     execute('make', *args)
 
 
-def require_header(header, lang, msg = '', symbol = False, value = False):
+def require_header(header, lang, msg='', symbol=None, value=None):
   debug('require_header "%s"', header)
 
-  cmd = {'c':'{cc}', 'c++':'{cxx}'}[lang]
-  cmd = fill_in(cmd).split() + ['-fsyntax-only', '-x', lang, '-']
-  proc = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+  cmd = {'c': '{cc}', 'c++': '{cxx}'}[lang]
+  cmd = fill_in(cmd).split()
+  proc = subprocess.Popen(cmd + ['-fsyntax-only', '-x', lang, '-'],
+                          stdin=subprocess.PIPE,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE)
 
-  stdin_line = '#include <' + header + '>'
+  proc_stdin = ['#include <%s>' % header]
   if symbol:
     if value:
-      stdin_line += """\n#if %s != %s
-                         #error
-                         #endif """ % (symbol, value)
+      proc_stdin.append("#if %s != %s" % (symbol, value))
     else:
-      stdin_line += """\n#ifndef %s
-                         #error
-                         #endif """ % (symbol)
+      proc_stdin.append("#ifndef %s" % symbol)
+    proc_stdin.append("#error")
+    proc_stdin.append("#endif")
 
-  (result_stdout, result_stderr) = proc.communicate(stdin_line)
+  proc_stdout, proc_stderr = proc.communicate('\n'.join(proc_stdin))
   proc.wait()
 
-  cmd = ' '.join(cmd)
-
-  if proc.returncode == 0:
-    debug('output from "%s":\n%s', cmd, result_stdout)
-  else:
-    debug('error output from "%s":\n%s', cmd, result_stderr)
-    panic('require_header failed: %s', msg)
+  if proc.returncode:
+    panic(msg)
 
 
 __all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'chmod', 'execute',

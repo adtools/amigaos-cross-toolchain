@@ -197,12 +197,6 @@ def build():
   environ['LANG'] = 'C'
   environ['TERM'] = 'xterm'
 
-  find_executable('perl')
-  find_executable('patch')
-  find_executable('make')
-  find_executable('git')
-  find_executable('yacc')
-
   with cwd('{archives}'):
     for url in URLS:
       if type(url) == tuple:
@@ -210,9 +204,6 @@ def build():
       else:
         name = path.basename(url)
       fetch(name, url)
-
-  unpack('python-lha', work_dir='{build}')
-  python_setup('python-lha')
 
   add_site_dir('{host}')
 
@@ -241,14 +232,29 @@ def build():
                               path.join('{host}', 'bin'),
                               environ['PATH']])
 
-  setvar(cc = environ['CC'], cxx = environ['CXX'])
+  setvar(cc=environ['CC'], cxx=environ['CXX'])
 
   """
-  When we have a working compiler in our path, we can also check if the
-  required headers/libraries are present.
+  When we have a working compiler in our path, we shoule also check if the
+  required programs, headers and libraries are present.
   """
 
-  require_header('ncurses.h', 'c', 'libncurses-dev 5.x missing', 'NCURSES_VERSION_MAJOR', 5)
+  find_executable('perl')
+  find_executable('patch')
+  find_executable('make')
+  find_executable('git')
+  find_executable('yacc')
+
+  require_header('ncurses.h', 'c', 'libncurses5-dev package missing',
+                 'NCURSES_VERSION_MAJOR', 5)
+
+  py_ver = 'python%d.%d' % (sys.version_info.major, sys.version_info.minor)
+
+  require_header(path.join(py_ver, 'Python.h'), 'c',
+                 'python-dev package missing')
+
+  unpack('python-lha', work_dir='{build}')
+  python_setup('python-lha')
 
   unpack('{m4}')
   configure('{m4}', '--prefix={host}')

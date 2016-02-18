@@ -245,8 +245,7 @@ def build():
   find_executable('git')
   find_executable('yacc')
 
-  require_header('ncurses.h', 'c', 'libncurses5-dev package missing',
-                 'NCURSES_VERSION_MAJOR', 5)
+  require_header('ncurses.h', 'c', 'libncurses-dev package missing')
 
   py_ver = 'python%d.%d' % (sys.version_info.major, sys.version_info.minor)
 

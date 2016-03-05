@@ -454,7 +454,7 @@ def make(name, target=None, **makevars):
 def require_header(header, lang, msg='', symbol=None, value=None):
   debug('require_header "%s"', header)
 
-  cmd = {'c': '{cc}', 'c++': '{cxx}'}[lang]
+  cmd = {'c': os.environ['CC'], 'c++': os.environ['CXX']}[lang]
   cmd = fill_in(cmd).split()
   proc = subprocess.Popen(cmd + ['-fsyntax-only', '-x', lang, '-'],
                           stdin=subprocess.PIPE,

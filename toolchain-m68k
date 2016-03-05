@@ -216,6 +216,9 @@ def build():
   else:
     CC, CXX = 'gcc', 'g++'
 
+  CC = find_executable(CC)
+  CXX = find_executable(CXX)
+
   """
   On 64-bit architecture GNU Assembler crashes writing out an object, due to
   (probably) miscalculated structure sizes.  There could be some other bugs
@@ -225,10 +228,9 @@ def build():
 
   ARCH = '-m32' if platform.machine() == 'x86_64' else ''
 
-  environ['CC'] = ' '.join([find_executable(CC), ARCH])
-  environ['CXX'] = ' '.join([find_executable(CXX), ARCH])
-
-  environ['PATH'] = ":".join([path.join('{target}', 'bin'),
+  environ['CC'] = CC + ' ' + ARCH
+  environ['CXX'] = CXX + ' ' + ARCH
+  environ['PATH'] = ':'.join([path.join('{target}', 'bin'),
                               path.join('{host}', 'bin'),
                               environ['PATH']])
 
@@ -248,12 +250,12 @@ def build():
   require_header('ncurses.h', 'c', 'libncurses-dev package missing')
 
   py_ver = 'python%d.%d' % (sys.version_info.major, sys.version_info.minor)
+  with env(CC=CC, CXX=CXX):
+    require_header(path.join(py_ver, 'Python.h'), 'c',
+                   'python-dev package missing')
 
-  require_header(path.join(py_ver, 'Python.h'), 'c',
-                 'python-dev package missing')
-
-  unpack('python-lha', work_dir='{build}')
-  python_setup('python-lha')
+    unpack('python-lha', work_dir='{build}')
+    python_setup('python-lha')
 
   unpack('{m4}')
   configure('{m4}', '--prefix={host}')

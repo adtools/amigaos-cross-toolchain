@@ -22,7 +22,7 @@ URLS = \
    'ftp://ftp.gnu.org/gnu/binutils/binutils-2.9.1.tar.gz',
    'ftp://ftp.gnu.org/gnu/gcc/gcc-2.95.3/gcc-core-2.95.3.tar.gz',
    'ftp://ftp.gnu.org/gnu/gcc/gcc-2.95.3/gcc-g++-2.95.3.tar.gz',
-   ('http://fossies.org/linux/misc/old/flex-2.5.4a.tar.gz',
+   ('http://downloads.sourceforge.net/project/flex/flex/2.5.4.a/flex-2.5.4a.tar.gz',
     'flex-2.5.4.tar.gz'),
    'git://github.com/cahirwpz/libnix',
    'git://github.com/cahirwpz/fd2sfd',

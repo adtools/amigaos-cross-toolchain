@@ -1,6 +1,6 @@
 --- sfdc/SFDCompile.pod	2005-09-24 16:49:49.000000000 +0200
 +++ sfdc/SFDCompile.pod	2014-05-25 22:50:56.894529535 +0200
-@@ -326,7 +326,7 @@
+@@ -334,7 +334,7 @@
  =head1 NOTES
  
  Had I seen F<cvinclude.pl> before I started writing this program, I
@@ -9,7 +9,7 @@
  
  =head1 AUTHOR
  
-@@ -334,98 +334,114 @@
+@@ -342,98 +342,114 @@
  
  =head1 HISTORY
  

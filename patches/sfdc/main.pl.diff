@@ -1,15 +1,15 @@
 --- sfdc/main.pl	2005-09-24 16:49:49.000000000 +0200
 +++ sfdc/main.pl	2013-08-30 15:13:28.000000000 +0200
-@@ -418,7 +418,7 @@
+@@ -420,7 +420,7 @@
      my $comment   = '';
  
      my $result = {
--	copyright  => 'Copyright © 2001 Amiga, Inc.',
-+	copyright  => 'Copyright (c) 2001 Amiga, Inc.',
- 	id         => '',
- 	libname    => '',
- 	base       => '',
-@@ -849,8 +849,8 @@
+-      copyright  => 'Copyright © 2001 Amiga, Inc.',
++      copyright   => 'Copyright (c) 2001 Amiga, Inc.',
+       id         => '',
+       libname    => '',
+       base       => '',
+@@ -866,8 +866,8 @@
  
  
      # Make sure we have the same number of arguments as registers, or,
@@ -19,4 +19,4 @@
 +    # Tagcalls always have one extra, a la "Tag, ...".
  
      if (($prototype->{type} eq 'varargs' &&
- 	 $prototype->{subtype} eq 'tagcall' &&
+        $prototype->{subtype} eq 'tagcall' &&

@@ -384,7 +384,7 @@ def fetch(name, url):
   elif url.startswith('file'):
     if not path.exists(name):
       _, src = url.split('://')
-      copytree(src, name)
+      copy(src, name)
   else:
     panic('URL "%s" not recognized!', url)
 

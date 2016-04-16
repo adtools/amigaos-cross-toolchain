@@ -381,6 +381,10 @@ def fetch(name, url):
     else:
       with cwd(name):
         execute('git', 'pull')
+  elif url.startswith('file'):
+    if not path.exists(name):
+      _, src = url.split('://')
+      copytree(src, name)
   else:
     panic('URL "%s" not recognized!', url)
 

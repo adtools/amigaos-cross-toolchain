@@ -471,13 +471,17 @@ def process_sdk(sdk, dirname, files):
 
       if kind == 'fd2sfd':
         fd, protos = f[1:]
-        sfd = path.splitext(path.basename(fd))[0] + '.sfd'
+        sfd = path.splitext(path.basename(fd))[0]
+        if not fd.endswith('_lib'):
+          sfd = sfd + '_lib.sfd'
+        else:
+          sfd = sfd + '.sfd'
         info('fd2sfd: "%s" "%s" -> "%s"', fd, protos, sfd)
         execute('fd2sfd', '-o', sfd, fd, protos)
         copy(sfd, path.join('{target}/os-lib/sfd', sfd))
       elif kind == 'sfdc':
         source = f[1]
-        basename = re.sub(r'(_lib)?.sfd$', r'', path.basename(source))
+        basename = re.sub(r'_lib.sfd$', r'', path.basename(source))
 
         proto = path.join('{target}/os-include/proto', basename + '.h')
         inline = path.join('{target}/os-include/inline', basename + '.h')
@@ -494,7 +498,7 @@ def process_sdk(sdk, dirname, files):
                 '--output=' + lvo, source)
       elif kind == 'stubs':
         filename = f[1]
-        c_file = re.sub(r'(_lib)?\.sfd$', r'.c', path.basename(filename))
+        c_file = re.sub(r'_lib\.sfd$', r'.c', path.basename(filename))
 
         info('stubs: "%s" -> "%s"', filename, c_file)
         execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=autoopen',

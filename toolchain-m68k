@@ -335,7 +335,6 @@ def build():
   """
 
   unpack('{binutils}')
-  patch('{binutils}')
   configure('{binutils}',
             '--prefix={target}',
             '--host=i686-linux-gnu',
@@ -347,7 +346,6 @@ def build():
   patch('{ixemul}')
 
   unpack('{gcc}')
-  patch('{gcc}')
   with env(CC=environ['CC'] + ' -std=gnu89',
            CXX=environ['CXX'] + ' -std=gnu++98'):
     configure('{gcc}',

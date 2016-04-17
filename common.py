@@ -485,4 +485,4 @@ __all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'chmod', 'execute',
            'rmtree', 'mkdir', 'copy', 'copytree', 'unarc', 'fetch', 'cwd',
            'symlink', 'remove', 'move', 'find', 'textfile', 'env', 'path',
            'add_site_dir', 'python_setup', 'recipe', 'unpack', 'patch',
-           'configure', 'make', 'require_header']
+           'configure', 'make', 'require_header', 'touch']

@@ -19,9 +19,8 @@ URLS = \
    'ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.13.tar.gz',
    'ftp://ftp.gnu.org/gnu/bison/bison-1.35.tar.gz',
    'ftp://ftp.gnu.org/gnu/texinfo/texinfo-4.12.tar.gz',
-   'ftp://ftp.gnu.org/gnu/binutils/binutils-2.9.1.tar.gz',
-   'ftp://ftp.gnu.org/gnu/gcc/gcc-2.95.3/gcc-core-2.95.3.tar.gz',
-   'ftp://ftp.gnu.org/gnu/gcc/gcc-2.95.3/gcc-g++-2.95.3.tar.gz',
+   ('git://github.com/cahirwpz/amigaos-binutils-2.9.1', 'binutils-2.9.1'),
+   ('git://github.com/cahirwpz/amigaos-gcc-2.95.3', 'gcc-2.95.3'),
    ('http://downloads.sourceforge.net/project/flex/flex/2.5.4.a/flex-2.5.4a.tar.gz',
     'flex-2.5.4.tar.gz'),
    'git://github.com/cahirwpz/libnix',
@@ -337,8 +336,7 @@ def build():
   unpack('{ixemul}', top_dir='ixemul')
   patch('{ixemul}')
 
-  unpack('{gcc_core}', top_dir='{gcc}', dst_dir='{gcc}')
-  unpack('{gcc_gpp}', top_dir='{gcc}', dst_dir='{gcc}')
+  unpack('{gcc}')
   patch('{gcc}')
   with env(CC=environ['CC'] + ' -std=gnu89',
            CXX=environ['CXX'] + ' -std=gnu++98'):
@@ -349,6 +347,7 @@ def build():
               '--target=m68k-amigaos',
               '--enable-languages=c,c++',
               '--with-headers={sources}/{ixemul}/include')
+  touch('{sources}/{gcc}/gcc/c-parse.in')
   make('{gcc}', 'all-gcc',
        MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
   make('{gcc}', 'install-gcc',
@@ -604,8 +603,6 @@ if __name__ == "__main__":
          ixemul='ixemul-48.2',
          libm='libm-5.4',
          binutils='binutils-{binutils_ver}',
-         gcc_core='gcc-core-{gcc_ver}',
-         gcc_gpp='gcc-g++-{gcc_ver}',
          gcc='gcc-{gcc_ver}',
          gpp='g++-{gcc_ver}',
          patches=path.join('{top}', 'patches'),

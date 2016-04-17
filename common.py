@@ -445,13 +445,15 @@ def configure(name, *confopts, **kwargs):
 
 
 @recipe('make', 2)
-def make(name, target=None, **makevars):
+def make(name, target=None, makefile=None, **makevars):
   info('running make "%s"', target)
 
   with cwd(path.join('{build}', name)):
     args = ['%s=%s' % item for item in makevars.items()]
     if target is not None:
       args = [target] + args
+    if makefile is not None:
+      args = ['-f', makefile] + args
     execute('make', *args)
 
 

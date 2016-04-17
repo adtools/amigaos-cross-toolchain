@@ -23,6 +23,7 @@ URLS = \
    ('git://github.com/cahirwpz/amigaos-gcc-2.95.3', 'gcc-2.95.3'),
    ('http://downloads.sourceforge.net/project/flex/flex/2.5.4.a/flex-2.5.4a.tar.gz',
     'flex-2.5.4.tar.gz'),
+   'git://github.com/adtools/clib2',
    'git://github.com/cahirwpz/libnix',
    'git://github.com/cahirwpz/fd2sfd',
    'git://github.com/adtools/sfdc',
@@ -103,6 +104,15 @@ def install_libamiga():
   info('installing libamiga')
 
   copytree('{sources}/libamiga/lib', '{target}/lib')
+
+
+@recipe('clib2-install')
+def install_clib2():
+  info('installing clib2')
+
+  with cwd('{target}/m68k-amigaos/clib2'):
+    copytree('{build}/clib2/lib', 'lib')
+    copytree('{build}/clib2/include', 'include')
 
 
 @recipe('vbcc-build')
@@ -369,6 +379,10 @@ def build():
        RANLIB='m68k-amigaos-ranlib',
        LD='m68k-amigaos-ld')
   make('libnix', 'install')
+
+  unpack('clib2', work_dir='{build}', top_dir='library')
+  make('clib2', makefile='GNUmakefile.68k')
+  install_clib2()
 
   copy('{sources}/libnix/sources/headers/stabs.h',
        '{target}/m68k-amigaos/sys-include')

@@ -472,7 +472,7 @@ def process_sdk(sdk, dirname, files):
       if kind == 'fd2sfd':
         fd, protos = f[1:]
         sfd = path.splitext(path.basename(fd))[0]
-        if not fd.endswith('_lib'):
+        if not fd.endswith('_lib.fd'):
           sfd = sfd + '_lib.sfd'
         else:
           sfd = sfd + '.sfd'

@@ -104,5 +104,17 @@ Follow steps listed below:
 # ./toolchain-m68k --prefix=/opt/m68k-amigaos install-sdk ahi cgx mui
 ```
 
-**Note:** *If the build process fails, please write me an e-mail.  I'll try to help out. Don't forget to put into e-mail as much data about your environment as possible!*
+#### What if something goes wrong?
 
+If the build process fails, please write me an e-mail.  I'll try to help out. Don't forget to put into e-mail as much data about your environment as possible! 
+It's **vitally important** to send me a full log from build process. You can capture it by redirecting output to a file with following command:
+
+```
+# ./toolchain-m68k build 2>&1 | tee build.log
+```
+
+... but remember to cleanup your build environment beforehand with:
+
+```
+# rm -rf .build-m68k
+```

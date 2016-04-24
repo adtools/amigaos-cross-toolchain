@@ -66,7 +66,6 @@ def prepare_target():
           'vbcc-include', 'vbcc-lib')
 
   with cwd('{target}/m68k-amigaos'):
-    symlink('../os-include', 'include')
     symlink('../lib', 'lib')
 
 
@@ -91,6 +90,13 @@ def install_ndk():
             '--output={target}/os-include/inline/' + base + '.h', name)
     execute('sfdc', '--target=m68k-amigaos', '--mode=lvo',
             '--output={target}/os-include/lvo/' + base + '_lib.i', name)
+
+
+@recipe('headers-install')
+def headers_install():
+  info('installing ixemul header files')
+
+  copytree('{sources}/{ixemul}/include', '{target}/m68k-amigaos/include')
 
 
 @recipe('tools-install')
@@ -345,6 +351,7 @@ def build():
 
   unpack('{ixemul}', top_dir='ixemul')
   patch('{ixemul}')
+  headers_install()
 
   unpack('{gcc}')
   with env(CC=environ['CC'] + ' -std=gnu89',
@@ -354,8 +361,7 @@ def build():
               '--host=i686-linux-gnu',
               '--build=i686-linux-gnu',
               '--target=m68k-amigaos',
-              '--enable-languages=c,c++',
-              '--with-headers={sources}/{ixemul}/include')
+              '--enable-languages=c,c++')
   touch('{sources}/{gcc}/gcc/c-parse.in')
   make('{gcc}', 'all-gcc',
        MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
@@ -384,7 +390,7 @@ def build():
   install_clib2()
 
   copy('{sources}/libnix/sources/headers/stabs.h',
-       '{target}/m68k-amigaos/sys-include')
+       '{target}/m68k-amigaos/include')
 
   unpack('{libm}', top_dir='contrib/libm')
   with env(CC='m68k-amigaos-gcc -noixemul',

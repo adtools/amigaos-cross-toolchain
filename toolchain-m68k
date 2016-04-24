@@ -27,6 +27,7 @@ URLS = \
    'git://github.com/cahirwpz/libnix',
    'git://github.com/cahirwpz/fd2sfd',
    'git://github.com/adtools/sfdc',
+   'git://github.com/cahirwpz/libdebug',
    ('http://www.haage-partner.de/download/AmigaOS/NDK39.lha', 'NDK_3.9.lha'),
    ('ftp://ftp.exotica.org.uk/mirrors/geekgadgets/amiga/m68k/snapshots/' +
     '990529/bin/libamiga-bin.tgz', 'libamiga.tar.gz'),
@@ -396,6 +397,16 @@ def build():
   make('{libm}')
   make('{libm}', 'install')
 
+  unpack('{libdebug}')
+  with env(CC='m68k-amigaos-gcc -noixemul',
+           AR='m68k-amigaos-ar',
+           RANLIB='m68k-amigaos-ranlib'):
+    configure('{libdebug}',
+              '--prefix={target}',
+              '--host=m68k-amigaos')
+  make('{libdebug}')
+  make('{libdebug}', 'install')
+
   make('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
   make('{gcc}', 'install', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 
@@ -614,6 +625,7 @@ if __name__ == "__main__":
          NDK='NDK_3.9',
          ixemul='ixemul-48.2',
          libm='libm-5.4',
+         libdebug='libdebug',
          binutils='binutils-{binutils_ver}',
          gcc='gcc-{gcc_ver}',
          gpp='g++-{gcc_ver}',

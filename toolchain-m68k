@@ -255,6 +255,7 @@ def build():
   """
 
   find_executable('perl')
+  find_executable('gperf')
   find_executable('patch')
   find_executable('make')
   find_executable('git')
@@ -339,10 +340,12 @@ def build():
   """
 
   unpack('{binutils}')
-  configure('{binutils}',
-            '--prefix={target}',
-            '--host=i686-linux-gnu',
-            '--target=m68k-amigaos')
+  with env(CFLAGS='-g -O2 -Wall',
+           CXXFLAGS='-g -O2 -Wall'):
+    configure('{binutils}',
+              '--prefix={target}',
+              '--host=i686-linux-gnu',
+              '--target=m68k-amigaos')
   make('{binutils}')
   make('{binutils}', 'install')
 
@@ -351,8 +354,8 @@ def build():
   headers_install()
 
   unpack('{gcc}')
-  with env(CC=environ['CC'] + ' -std=gnu89',
-           CXX=environ['CXX'] + ' -std=gnu++98'):
+  with env(CFLAGS='-g -O2 -Wall -U__inline',
+           CXXFLAGS='-g -O2 -Wall -U__inline'):
     configure('{gcc}',
               '--prefix={target}',
               '--host=i686-linux-gnu',

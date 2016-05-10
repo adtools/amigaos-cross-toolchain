@@ -591,6 +591,17 @@ def install_sdk(*names):
     process_sdk(name, basename, files)
 
 
+def test():
+  install_sdk('mmu', 'mui')
+
+  environ['PATH'] = ":".join([path.join('{target}', 'bin'),
+                              environ['PATH']])
+
+  with cwd(path.join('{top}', 'examples')):
+    execute('make', 'clean')
+    execute('make')
+
+
 if __name__ == "__main__":
   logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 
@@ -606,7 +617,8 @@ if __name__ == "__main__":
 
   parser = argparse.ArgumentParser(description='Build cross toolchain.')
   parser.add_argument('action',
-                      choices=['build', 'list-sdk', 'install-sdk', 'clean'],
+                      choices=['build', 'list-sdk', 'install-sdk', 'clean',
+                               'test'],
                       default='build', help='perform action')
   parser.add_argument('args', metavar='ARGS', type=str, nargs='*',
                       help='action arguments')

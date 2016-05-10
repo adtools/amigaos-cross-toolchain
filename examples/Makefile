@@ -13,8 +13,8 @@ hello-ks13: CFLAGS += -m68000 -msmall-code
 hello-ks13: LDLIBS = -lnix13
 hello-ks13: hello-ks13.c
 
-# MacOSX BUG: hello-ks20: CC += -fbaserel 
-hello-ks20: CFLAGS += -m68000 -msmall-code
+hello-ks20: CC += -fbaserel32
+hello-ks20: CFLAGS += -m68020 -msmall-code
 hello-ks20: hello-ks20.c
 
 hello-stdio: CFLAGS += -m68020

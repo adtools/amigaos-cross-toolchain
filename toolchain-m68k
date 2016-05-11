@@ -94,6 +94,7 @@ def headers_install():
   info('installing ixemul header files')
 
   copytree('{sources}/{ixemul}/include', '{target}/m68k-amigaos/include')
+  symlink('{target}/m68k-amigaos/include', '{target}/m68k-amigaos/sys-include')
 
 
 @recipe('tools-install')

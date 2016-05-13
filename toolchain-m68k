@@ -341,7 +341,9 @@ def build():
   """
 
   unpack('{binutils}')
-  with env(CFLAGS='-g -O2 -Wall',
+  with env(CC=environ['CC'] + ' -std=gnu11',
+           CXX=environ['CXX'] + ' -std=gnu++11',
+           CFLAGS='-g -O2 -Wall',
            CXXFLAGS='-g -O2 -Wall'):
     configure('{binutils}',
               '--prefix={target}',
@@ -355,8 +357,10 @@ def build():
   headers_install()
 
   unpack('{gcc}')
-  with env(CFLAGS='-g -O2 -Wall -U__inline',
-           CXXFLAGS='-g -O2 -Wall -U__inline'):
+  with env(CC=environ['CC'] + ' -std=gnu11',
+           CXX=environ['CXX'] + ' -std=gnu++11',
+           CFLAGS='-g -O2 -Wall',
+           CXXFLAGS='-g -O2 -Wall'):
     configure('{gcc}',
               '--prefix={target}',
               '--host=i686-linux-gnu',

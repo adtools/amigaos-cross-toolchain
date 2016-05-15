@@ -36,10 +36,10 @@ Build process should produce following set of tools for **m68k-amigaos** target:
 
 There are no binary downloads provided for the time being. I do as much as possible to make the toolchain portable among Unix-like environments. Following platforms were tested and the toolchain is known to work for them:
 
- * Cygwin 1.7.18 (gcc 4.5.3)
- * Ubuntu 14.04 LTS 32-bit (gcc 4.8.2)
- * Ubuntu 14.04 LTS 64-bit (gcc 4.8.2) *Requires gcc-multilib package, and i386 libraries!*
- * MacOS X 10.9.3 (MacPorts - Apple's clang-503.0.40)
+ * Windows 7 SP1 32-bit (Cygwin 2.5.1, gcc 5.3.0)
+ * Ubuntu 16.04 LTS 32-bit (gcc 5.3.1)
+ * Ubuntu 16.04 LTS 64-bit (gcc 5.3.1) *Requires gcc-multilib package, and i386 libraries!*
+ * MacOS X 10.9.5 (MacPorts - Apple's clang-600.0.57)
  
 ### Documentation
 

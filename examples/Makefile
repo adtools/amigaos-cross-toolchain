@@ -1,43 +1,46 @@
-CC = m68k-amigaos-gcc -noixemul -s
-CXX = m68k-amigaos-g++ -noixemul -s
+CC = m68k-amigaos-gcc -s
+CXX = m68k-amigaos-g++ -s
 CFLAGS = -Os -Wall -fomit-frame-pointer
 CXXFLAGS = -Os -Wall -fomit-frame-pointer
 
-BINS = hello-ks13 hello-ks20 hello-stdio hello-iostream hello-mui test-mmu \
+BINS = hello-ks13 hello-ks20 hello-ks20.clib2 hello-stdio hello-stdio.clib2 \
+       hello-iostream hello-mui test-mmu \
        simple.library simple.library_r simple.device
 
 all: $(BINS) $(OBJS)
 
-hello-ks13: CC += -fbaserel 
-hello-ks13: CFLAGS += -m68000 -msmall-code
-hello-ks13: LDLIBS = -lnix13
 hello-ks13: hello-ks13.c
+	$(CC) -noixemul -fbaserel -m68000 -msmall-code $(CFLAGS) -o $@ $< -lnix13
 
-hello-ks20: CC += -fbaserel32
-hello-ks20: CFLAGS += -m68020 -msmall-code
 hello-ks20: hello-ks20.c
+	$(CC) -noixemul -fbaserel32 -m68020 -msmall-code $(CFLAGS) -o $@ $<
 
-hello-stdio: CFLAGS += -m68020
+hello-ks20.clib2: hello-ks20.c
+	$(CC) -mcrt=clib2 -fbaserel32 -m68020 -msmall-code $(CFLAGS) -o $@ $<
+
 hello-stdio: hello-stdio.c
+	$(CC) -noixemul -m68020 $(CFLAGS) -o $@ $<
 
-hello-iostream: CXXFLAGS += -m68020
+hello-stdio.clib2: hello-stdio.c
+	$(CC) -mcrt=clib2 -m68020 $(CFLAGS) -o $@ $<
+
 hello-iostream: hello-iostream.cpp
+	$(CXX) -noixemul -m68020 $(CXXFLAGS) -o $@ $<
 
-hello-mui: CFLAGS += -m68020 -msmall-code
-hello-mui: LDLIBS = -lmui
 hello-mui: hello-mui.c
+	$(CC) -noixemul -m68020 -msmall-code $(CFLAGS) -o $@ $< -lmui
 
-test-mmu: CFLAGS += -m68060 -msmall-code
 test-mmu: test-mmu.c
+	$(CC) -noixemul -m68060 -msmall-code $(CFLAGS) -o $@ $<
 
 simple.library: simple-library.c
-	$(CC) -ramiga-lib -fbaserel $(CFLAGS) -o $@ $^
+	$(CC) -noixemul -ramiga-lib -fbaserel $(CFLAGS) -o $@ $<
 
 simple.library_r: simple-library.c
-	$(CC) -ramiga-libr -resident $(CFLAGS) -o $@ $^
+	$(CC) -noixemul -ramiga-libr -resident $(CFLAGS) -o $@ $<
 
 simple.device: simple-device.c
-	$(CC) -ramiga-dev -fbaserel $(CFLAGS) -o $@ $^
+	$(CC) -noixemul -ramiga-dev -fbaserel $(CFLAGS) -o $@ $<
 
 clean:
 	rm -f $(BINS)

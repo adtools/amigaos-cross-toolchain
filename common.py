@@ -276,19 +276,18 @@ def unarc(name):
         continue
       with open(filename, 'w') as f:
         f.write(arc.read(item.filename))
+  elif name.endswith('.tar.gz') or name.endswith('.tar.bz2'):
+    with tarfile.open(name) as arc:
+      for item in arc.getmembers():
+        debug('extract "%s"' % item.name)
+        arc.extract(item)
+  elif name.endswith('.zip'):
+    with zipfile.ZipFile(name) as arc:
+      for item in arc.infolist():
+        debug('extract "%s"' % item.filename)
+        arc.extract(item)
   else:
-    if name.endswith('.tar.gz') or name.endswith('.tar.bz2'):
-      module = tarfile
-    elif name.endswith('.zip'):
-      module = zipfile
-    else:
-      raise RuntimeError('Unrecognized archive: "%s"', name)
-
-    arc = module.open(name, 'r')
-    for item in arc:
-      debug('extract "%s"' % item.name)
-      arc.extract(item)
-    arc.close()
+    raise RuntimeError('Unrecognized archive: "%s"', name)
 
 
 @fill_in_args

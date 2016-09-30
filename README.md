@@ -3,7 +3,9 @@ AmigaOS cross compiler for Linux / MacOSX / Windows
 
 **Author:** [Krystian Bacławski](mailto:krystian.baclawski@gmail.com)
 
-**Short description:** Cross toolchain build script for AmigaOS m68k and ppc targets. Supported host platforms are Linux, MacOSX and Windows (Cygwin).
+**Short description:** Cross toolchain build script for AmigaOS m68k and ppc targets. Supported host platforms are Linux, MacOSX and Windows (with [MSYS2](https://msys2.github.io/)).
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=47CV5JMRW9BRA)
 
 ### Overview
 
@@ -36,9 +38,9 @@ Build process should produce following set of tools for **m68k-amigaos** target:
 
 There are no binary downloads provided for the time being. I do as much as possible to make the toolchain portable among Unix-like environments. Following platforms were tested and the toolchain is known to work for them:
 
- * Windows 7 SP1 32-bit (Cygwin 2.5.1, gcc 5.3.0)
- * Ubuntu 16.04 LTS 32-bit (gcc 5.3.1)
- * Ubuntu 16.04 LTS 64-bit (gcc 5.3.1) *Requires gcc-multilib package, and i386 libraries!*
+ * Windows 7 SP1 32-bit (MSYS2 2.6.0, gcc 5.3.0)
+ * Ubuntu 16.04 LTS 32-bit (gcc 5.4.0)
+ * Ubuntu 16.04 LTS 64-bit (gcc 5.4.0) *Requires gcc-multilib package, and i386 libraries!*
  * MacOS X 10.9.5 (MacPorts - Apple's clang-600.0.57)
  
 ### Documentation
@@ -65,15 +67,16 @@ AmigaOS specific documents:
 
 You have to have following packages installed in your system:
 
- * GNU gcc 4.x **32-bit version!** or Clang
- * libncurses5-dev **32-bit version!**
- * GNU make
- * python-dev
- * perl
+ * GNU gcc 5.x **32-bit version!** or Clang
+ * Python 2.7.x
+ * libncurses-dev
+ * python-dev 2.7
+ * GNU make 4.x
+ * perl 5.22
  * git
- * subversion
- * patch
- * yacc
+ * GNU patch
+ * GNU gperf
+ * GNU bison
 
 *For MacOSX users*: you'll likely need to have [MacPorts](http://www.macports.org) or [Homebrew](http://brew.sh) installed in order to build the toolchain.
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python -B
+#!/usr/bin/env python2.7 -B
 
 from fnmatch import fnmatch
 from glob import glob
@@ -357,8 +357,8 @@ def recipe(name, nargs=0):
 @recipe('python-setup', 1)
 def python_setup(name):
   with cwd(path.join('{build}', name)):
-    execute('python', 'setup.py', 'build')
-    execute('python', 'setup.py', 'install', '--prefix={host}')
+    execute(sys.executable, 'setup.py', 'build')
+    execute(sys.executable, 'setup.py', 'install', '--prefix={host}')
 
 
 @recipe('fetch', 1)
@@ -456,30 +456,34 @@ def make(name, target=None, makefile=None, **makevars):
     execute('make', *args)
 
 
-def require_header(header, lang, msg='', symbol=None, value=None):
-  debug('require_header "%s"', header)
+def require_header(headers, lang='c', errmsg='', symbol=None, value=None):
+  debug('require_header "%s"', headers[0])
 
-  cmd = {'c': os.environ['CC'], 'c++': os.environ['CXX']}[lang]
-  cmd = fill_in(cmd).split()
-  proc = subprocess.Popen(cmd + ['-fsyntax-only', '-x', lang, '-'],
-                          stdin=subprocess.PIPE,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE)
+  for header in headers:
+    cmd = {'c': os.environ['CC'], 'c++': os.environ['CXX']}[lang]
+    cmd = fill_in(cmd).split()
+    opts = ['-fsyntax-only', '-x', lang, '-']
+    proc = subprocess.Popen(cmd + opts,
+                            stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
 
-  proc_stdin = ['#include <%s>' % header]
-  if symbol:
-    if value:
-      proc_stdin.append("#if %s != %s" % (symbol, value))
-    else:
-      proc_stdin.append("#ifndef %s" % symbol)
-    proc_stdin.append("#error")
-    proc_stdin.append("#endif")
+    proc_stdin = ['#include <%s>' % header]
+    if symbol:
+      if value:
+        proc_stdin.append("#if %s != %s" % (symbol, value))
+      else:
+        proc_stdin.append("#ifndef %s" % symbol)
+        proc_stdin.append("#error")
+        proc_stdin.append("#endif")
 
-  proc_stdout, proc_stderr = proc.communicate('\n'.join(proc_stdin))
-  proc.wait()
+    proc_stdout, proc_stderr = proc.communicate('\n'.join(proc_stdin))
+    proc.wait()
 
-  if proc.returncode:
-    panic(msg)
+    if proc.returncode == 0:
+      return
+
+  panic(errmsg)
 
 
 __all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'chmod', 'execute',

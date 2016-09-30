@@ -1,4 +1,4 @@
-#!/usr/bin/python -B
+#!/usr/bin/python2.7 -B
 
 # Build cross toolchain for AmigaOS <= 3.9 / M68k target.
 
@@ -19,6 +19,7 @@ URLS = \
    'ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.13.tar.gz',
    'ftp://ftp.gnu.org/gnu/bison/bison-1.35.tar.gz',
    'ftp://ftp.gnu.org/gnu/texinfo/texinfo-4.12.tar.gz',
+   'git://git.savannah.gnu.org/automake',
    ('git://github.com/cahirwpz/amigaos-binutils-2.9.1', 'binutils-2.9.1'),
    ('git://github.com/cahirwpz/amigaos-gcc-2.95.3', 'gcc-2.95.3'),
    ('http://downloads.sourceforge.net/project/flex/flex/2.5.4.a/flex-2.5.4a.tar.gz',
@@ -201,12 +202,22 @@ def install_vbcc_toolchain():
   move(config, '{target}/etc/vc.config')
 
 
+def update_autotools(dst):
+  copy('{archives}/automake/lib/config.guess', path.join(dst, 'config.guess'))
+  copy('{archives}/automake/lib/config.sub', path.join(dst, 'config.sub'))
+
+
 def build():
   for var in environ.keys():
     if var not in ['_', 'LOGNAME', 'HOME', 'SHELL', 'TMPDIR', 'PWD']:
       del environ[var]
 
-  environ['PATH'] = '/usr/bin:/bin'
+  PATH = ['/usr/bin', '/bin']
+
+  if fnmatch(platform.system(), 'MSYS_NT*'):
+    PATH.append('/usr/bin/core_perl') # pod2text, pod2man
+
+  environ['PATH'] = ":".join(PATH)
   environ['LANG'] = 'C'
   environ['TERM'] = 'xterm'
 
@@ -232,17 +243,8 @@ def build():
   CC = find_executable(CC)
   CXX = find_executable(CXX)
 
-  """
-  On 64-bit architecture GNU Assembler crashes writing out an object, due to
-  (probably) miscalculated structure sizes.  There could be some other bugs
-  lurking there in 64-bit mode, but I have little incentive chasing them.
-  Just compile everything in 32-bit mode and forget about the issues.
-  """
-
-  ARCH = '-m32' if platform.machine() == 'x86_64' else ''
-
-  environ['CC'] = CC + ' ' + ARCH
-  environ['CXX'] = CXX + ' ' + ARCH
+  environ['CC'] = CC
+  environ['CXX'] = CXX
   environ['PATH'] = ':'.join([path.join('{target}', 'bin'),
                               path.join('{host}', 'bin'),
                               environ['PATH']])
@@ -255,18 +257,21 @@ def build():
   """
 
   find_executable('perl')
+  find_executable('pod2text')
+  find_executable('pod2man')
   find_executable('gperf')
   find_executable('patch')
   find_executable('make')
   find_executable('git')
   find_executable('yacc')
 
-  require_header('ncurses.h', 'c', 'libncurses-dev package missing')
+  require_header(['ncurses.h', 'ncurses/ncurses.h'],
+                 lang='c', errmsg='libncurses-dev package missing')
 
   py_ver = 'python%d.%d' % (sys.version_info.major, sys.version_info.minor)
   with env(CC=CC, CXX=CXX):
-    require_header(path.join(py_ver, 'Python.h'), 'c',
-                   'python-dev package missing')
+    require_header([path.join(py_ver, 'Python.h')],
+                   lang='c', errmsg='python-dev package missing')
 
     unpack('python-lha', work_dir='{build}')
     python_setup('python-lha')
@@ -277,6 +282,7 @@ def build():
   make('{m4}', 'install')
 
   unpack('{gawk}')
+  update_autotools('{sources}/{gawk}')
   configure('{gawk}', '--prefix={host}')
   make('{gawk}')
   make('{gawk}', 'install')
@@ -287,16 +293,19 @@ def build():
   make('{flex}', 'install')
 
   unpack('{bison}')
+  update_autotools('{sources}/{bison}/config')
   configure('{bison}', '--prefix={host}')
   make('{bison}')
   make('{bison}', 'install')
 
   unpack('{texinfo}')
+  update_autotools('{sources}/{texinfo}/build-aux')
   configure('{texinfo}', '--prefix={host}')
   make('{texinfo}')
   make('{texinfo}', 'install')
 
   unpack('{autoconf}')
+  update_autotools('{sources}/{autoconf}')
   configure('{autoconf}', '--prefix={host}')
   make('{autoconf}')
   make('{autoconf}', 'install')
@@ -319,6 +328,7 @@ def build():
 
   unpack('fd2sfd')
   patch('fd2sfd')
+  update_autotools('{sources}/fd2sfd')
   configure('fd2sfd', '--prefix={target}', copy_source=True)
   make('fd2sfd')
   make('fd2sfd', 'install')
@@ -334,12 +344,27 @@ def build():
   install_ndk()
 
   """
+  On 64-bit architecture GNU Assembler crashes writing out an object, due to
+  (probably) miscalculated structure sizes.  There could be some other bugs
+  lurking there in 64-bit mode, but I have little incentive chasing them.
+  Just compile everything in 32-bit mode and forget about the issues.
+  """
+
+  ARCH = '-m32' if platform.machine() == 'x86_64' else ''
+
+  environ['CC'] = CC + ' ' + ARCH
+  environ['CXX'] = CXX + ' ' + ARCH
+
+  setvar(cc=environ['CC'], cxx=environ['CXX'])
+
+  """
   Older gcc compilers (i.e. 2.95.3 and 3.4.6) and binutils have to be tricked
   into thinking that they're being compiled on Linux IA-32 machine. Theirs
   config.guess script knows nothing about x86-64 or darwin.
   """
 
   unpack('{binutils}')
+  update_autotools('{sources}/{binutils}')
   with env(CC=environ['CC'] + ' -std=gnu11',
            CXX=environ['CXX'] + ' -std=gnu++11',
            CFLAGS='-g -O2 -Wall',
@@ -355,6 +380,9 @@ def build():
   patch('{ixemul}')
 
   unpack('{gcc}')
+  update_autotools('{sources}/{gcc}')
+  update_autotools('{sources}/{gcc}/gcc')
+  update_autotools('{sources}/{gcc}/texinfo')
   with env(CC=environ['CC'] + ' -std=gnu11',
            CXX=environ['CXX'] + ' -std=gnu++11',
            CFLAGS='-g -O2 -Wall',
@@ -396,6 +424,7 @@ def build():
        '{target}/m68k-amigaos/libnix/include')
 
   unpack('{libm}', top_dir='contrib/libm')
+  update_autotools('{sources}/{libm}')
   with env(CC='m68k-amigaos-gcc -noixemul',
            AR='m68k-amigaos-ar',
            RANLIB='m68k-amigaos-ranlib'):
@@ -407,6 +436,7 @@ def build():
   make('{libm}', 'install')
 
   unpack('{libdebug}')
+  update_autotools('{sources}/{libdebug}')
   with env(CC='m68k-amigaos-gcc -noixemul',
            AR='m68k-amigaos-ar',
            RANLIB='m68k-amigaos-ranlib'):
@@ -617,7 +647,7 @@ if __name__ == "__main__":
     panic('I need Python 2.7 to run!')
 
   if not (platform.system() in ['Darwin', 'Linux'] or
-          fnmatch(platform.system(), 'CYGWIN*')):
+          fnmatch(platform.system(), 'MSYS_NT*')):
     panic('Build on %s not supported!', platform.system())
 
   if platform.machine() not in ['i686', 'x86_64']:

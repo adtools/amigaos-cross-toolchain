@@ -108,18 +108,18 @@ def find_executable(name):
 @fill_in_args
 def find(root, **kwargs):
   only_files = kwargs.get('only_files', False)
-  include = kwargs.get('include', None)
-  exclude = kwargs.get('exclude', None)
+  include = kwargs.get('include', ['*'])
+  exclude = kwargs.get('exclude', [''])
   lst = []
   for name in sorted(os.listdir(root)):
-    if exclude and any(fnmatch(name, pat) for pat in exclude):
-      continue
-    if include and not any(fnmatch(name, pat) for pat in include):
-      continue
     fullname = path.join(root, name)
-    if not (path.isdir(fullname) and only_files):
-      lst.append(fullname)
-    if path.isdir(fullname):
+    is_dir = path.isdir(fullname)
+    excluded = any(fnmatch(name, pat) for pat in exclude)
+    included = any(fnmatch(name, pat) for pat in include)
+    if included and not excluded:
+      if not (is_dir and only_files):
+        lst.append(fullname)
+    if is_dir and not excluded:
       lst.extend(find(fullname, **kwargs))
   return lst
 

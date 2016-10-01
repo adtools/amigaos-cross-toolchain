@@ -3,6 +3,7 @@
 # Build cross toolchain for AmigaOS <= 3.9 / M68k target.
 
 from fnmatch import fnmatch
+from glob import glob
 from logging import info
 from os import environ
 import argparse
@@ -207,6 +208,20 @@ def update_autotools(dst):
   copy('{archives}/automake/lib/config.sub', path.join(dst, 'config.sub'))
 
 
+def touch_genfiles(dst):
+  """
+  For binutils and gcc we want to make sure C source & headers file doesn't get
+  regenerated. Otherwise it can cause weird errors later in the build process
+  (e.g. in ldexp.c:560)
+  """
+  for name in find(dst, include=['*.l', '*.y']):
+    basename = path.splitext(name)[0]
+    for c_file in glob(basename + '.c'):
+      touch(c_file)
+    for h_file in glob(basename + '.h'):
+      touch(h_file)
+
+
 def build():
   for var in environ.keys():
     if var not in ['_', 'LOGNAME', 'HOME', 'SHELL', 'TMPDIR', 'PWD']:
@@ -365,6 +380,7 @@ def build():
 
   unpack('{binutils}')
   update_autotools('{sources}/{binutils}')
+  touch_genfiles('{sources}/{binutils}')
   with env(CC=environ['CC'] + ' -std=gnu11',
            CXX=environ['CXX'] + ' -std=gnu++11',
            CFLAGS='-g -O2 -Wall',
@@ -383,6 +399,7 @@ def build():
   update_autotools('{sources}/{gcc}')
   update_autotools('{sources}/{gcc}/gcc')
   update_autotools('{sources}/{gcc}/texinfo')
+  touch_genfiles('{sources}/{gcc}')
   with env(CC=environ['CC'] + ' -std=gnu11',
            CXX=environ['CXX'] + ' -std=gnu++11',
            CFLAGS='-g -O2 -Wall',
@@ -498,7 +515,7 @@ def read_sdk(filename):
 def list_sdk():
   print 'Available SDKs:'
 
-  for filename in find('{top}/sdk', include='*.sdk'):
+  for filename in find('{top}/sdk', include=['*.sdk']):
     info, _ = read_sdk(filename)
     name = path.splitext(path.basename(filename))[0]
     print ' - %s %s : %s' % (name, info['version'], info['short'])
@@ -646,8 +663,8 @@ if __name__ == "__main__":
   if not sys.version_info[:2] == (2, 7):
     panic('I need Python 2.7 to run!')
 
-  if not (platform.system() in ['Darwin', 'Linux'] or
-          fnmatch(platform.system(), 'MSYS_NT*')):
+  if not any(fnmatch(platform.system(), pat)
+             for pat in ['Darwin', 'Linux', 'CYGWIN_NT*', 'MSYS_NT*']):
     panic('Build on %s not supported!', platform.system())
 
   if platform.machine() not in ['i686', 'x86_64']:

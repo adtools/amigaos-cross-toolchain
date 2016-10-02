@@ -281,12 +281,10 @@ def build():
   unpack('{automake}')
 
   py_ver = 'python%d.%d' % (sys.version_info.major, sys.version_info.minor)
-  with env(CC=CC, CXX=CXX):
-    require_header([path.join(py_ver, 'Python.h')],
-                   lang='c', errmsg='python-dev package missing')
-
-    unpack('python-lha', work_dir='{build}')
-    python_setup('python-lha')
+  require_header([path.join(py_ver, 'Python.h')],
+                 lang='c', errmsg='python-dev package missing')
+  unpack('python-lha', work_dir='{build}')
+  python_setup('python-lha')
 
   unpack('{m4}')
   configure('{m4}', '--prefix={host}')

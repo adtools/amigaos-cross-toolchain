@@ -5,7 +5,7 @@ from glob import glob
 from logging import debug, info, error
 from os import path
 import contextlib
-import distutils.spawn
+from distutils import spawn, sysconfig
 import os
 import shutil
 import site
@@ -101,7 +101,7 @@ def topdir(name):
 
 @fill_in_args
 def find_executable(name):
-  return (distutils.spawn.find_executable(name) or
+  return (spawn.find_executable(name) or
           panic('Executable "%s" not found!', name))
 
 
@@ -292,8 +292,9 @@ def unarc(name):
 
 @fill_in_args
 def add_site_dir(dirname):
-  dirname = path.join(dirname, 'lib', 'python%d.%d' % sys.version_info[:2],
-                      'site-packages')
+  prefix = sysconfig.EXEC_PREFIX
+  destlib = sysconfig.get_config_var('DESTLIB')
+  dirname = path.join(dirname, destlib[len(prefix) + 1:], 'site-packages')
   info('adding "%s" to python site dirs', topdir(dirname))
   site.addsitedir(dirname)
 

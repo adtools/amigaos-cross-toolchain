@@ -14,29 +14,21 @@ import string
 import sys
 
 URLS = \
-  ['git://github.com/FrodeSolheim/python-lhafile',
-   'ftp://ftp.gnu.org/gnu/m4/m4-1.4.17.tar.gz',
+  ['ftp://ftp.gnu.org/gnu/m4/m4-1.4.17.tar.gz',
    'ftp://ftp.gnu.org/gnu/gawk/gawk-3.1.8.tar.gz',
    'ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.13.tar.gz',
    'ftp://ftp.gnu.org/gnu/bison/bison-1.35.tar.gz',
    'ftp://ftp.gnu.org/gnu/texinfo/texinfo-4.12.tar.gz',
-   'git://git.savannah.gnu.org/automake',
-   ('git://github.com/cahirwpz/amigaos-binutils-2.9.1', 'binutils-2.9.1'),
-   ('git://github.com/cahirwpz/amigaos-gcc-2.95.3', 'gcc-2.95.3'),
-   ('http://downloads.sourceforge.net/project/flex/flex/2.5.4.a/flex-2.5.4a.tar.gz',
+   'ftp://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz',
+   ('http://downloads.sf.net/project/flex/flex/2.5.4.a/flex-2.5.4a.tar.gz',
     'flex-2.5.4.tar.gz'),
-   'git://github.com/adtools/clib2',
-   'git://github.com/cahirwpz/libnix',
-   'git://github.com/cahirwpz/fd2sfd',
-   'git://github.com/adtools/sfdc',
-   'git://github.com/cahirwpz/libdebug',
    ('http://www.haage-partner.de/download/AmigaOS/NDK39.lha', 'NDK_3.9.lha'),
    ('ftp://ftp.exotica.org.uk/mirrors/geekgadgets/amiga/m68k/snapshots/' +
     '990529/bin/libamiga-bin.tgz', 'libamiga.tar.gz'),
    ('ftp://ftp.exotica.org.uk/mirrors/geekgadgets/amiga/m68k/snapshots/' +
     '990529/src/libm-5.4-src.tgz', 'libm-5.4.tar.gz'),
-   ('http://sourceforge.net/projects/amiga/files/ixemul.library/48.2/' +
-    'ixemul-src.lha/download', 'ixemul-48.2.lha'),
+   ('http://downloads.sf.net/project/amiga/ixemul.library/48.2/ixemul-src.lha',
+    'ixemul-48.2.lha'),
    'http://sun.hasenbraten.de/vasm/release/vasm.tar.gz',
    'http://sun.hasenbraten.de/vlink/release/vlink.tar.gz',
    'http://www.ibaug.de/vbcc/vbcc.tar.gz',
@@ -105,20 +97,20 @@ def install_tools():
   copy('{build}/ira/ira', '{target}/bin')
 
 
-@recipe('libamiga-install')
+@recipe('{libamiga}-install')
 def install_libamiga():
   info('installing libamiga')
 
-  copytree('{sources}/libamiga/lib', '{target}/m68k-amigaos/libnix/lib')
+  copytree('{sources}/{libamiga}/lib', '{target}/m68k-amigaos/libnix/lib')
 
 
-@recipe('clib2-install')
+@recipe('{clib2}-install')
 def install_clib2():
   info('installing clib2')
 
   with cwd('{target}/m68k-amigaos/clib2'):
-    copytree('{build}/clib2/lib', 'lib')
-    copytree('{build}/clib2/include', 'include')
+    copytree('{build}/{clib2}/lib', 'lib')
+    copytree('{build}/{clib2}/include', 'include')
 
 
 @recipe('vbcc-build')
@@ -204,8 +196,8 @@ def install_vbcc_toolchain():
 
 
 def update_autotools(dst):
-  copy('{archives}/automake/lib/config.guess', path.join(dst, 'config.guess'))
-  copy('{archives}/automake/lib/config.sub', path.join(dst, 'config.sub'))
+  copy('{sources}/{automake}/lib/config.guess', path.join(dst, 'config.guess'))
+  copy('{sources}/{automake}/lib/config.sub', path.join(dst, 'config.sub'))
 
 
 def touch_genfiles(dst):
@@ -243,6 +235,9 @@ def build():
       else:
         name = path.basename(url)
       fetch(name, url)
+
+  execute('git', 'submodule', 'init');
+  execute('git', 'submodule', 'update');
 
   add_site_dir('{host}')
 
@@ -282,6 +277,8 @@ def build():
 
   require_header(['ncurses.h', 'ncurses/ncurses.h'],
                  lang='c', errmsg='libncurses-dev package missing')
+
+  unpack('{automake}')
 
   py_ver = 'python%d.%d' % (sys.version_info.major, sys.version_info.minor)
   with env(CC=CC, CXX=CXX):
@@ -341,10 +338,9 @@ def build():
 
   install_vbcc_toolchain()
 
-  unpack('fd2sfd')
-  patch('fd2sfd')
-  update_autotools('{sources}/fd2sfd')
-  configure('fd2sfd', '--prefix={target}', copy_source=True)
+  update_autotools('{submodules}/fd2sfd')
+  unpack('fd2sfd', work_dir='{build}')
+  configure('fd2sfd', '--prefix={target}', from_dir='{build}/fd2sfd')
   make('fd2sfd')
   make('fd2sfd', 'install')
 
@@ -378,9 +374,6 @@ def build():
   config.guess script knows nothing about x86-64 or darwin.
   """
 
-  unpack('{binutils}')
-  update_autotools('{sources}/{binutils}')
-  touch_genfiles('{sources}/{binutils}')
   with env(CC=environ['CC'] + ' -std=gnu11',
            CXX=environ['CXX'] + ' -std=gnu++11',
            CFLAGS='-g -O2 -Wall',
@@ -388,18 +381,15 @@ def build():
     configure('{binutils}',
               '--prefix={target}',
               '--host=i686-linux-gnu',
-              '--target=m68k-amigaos')
+              '--target=m68k-amigaos',
+              from_dir='{submodules}/{binutils}')
+  touch_genfiles('{submodules}/{binutils}')
   make('{binutils}')
   make('{binutils}', 'install')
 
   unpack('{ixemul}', top_dir='ixemul')
   patch('{ixemul}')
 
-  unpack('{gcc}')
-  update_autotools('{sources}/{gcc}')
-  update_autotools('{sources}/{gcc}/gcc')
-  update_autotools('{sources}/{gcc}/texinfo')
-  touch_genfiles('{sources}/{gcc}')
   with env(CC=environ['CC'] + ' -std=gnu11',
            CXX=environ['CXX'] + ' -std=gnu++11',
            CFLAGS='-g -O2 -Wall',
@@ -411,8 +401,9 @@ def build():
               '--target=m68k-amigaos',
               '--enable-languages=c,c++',
               '--enable-version-specific-runtime-libs',
-              '--with-headers={sources}/{ixemul}/include')
-  touch('{sources}/{gcc}/gcc/c-parse.in')
+              '--with-headers={sources}/{ixemul}/include',
+              from_dir='{submodules}/{gcc}')
+  touch_genfiles('{submodules}/{gcc}')
   make('{gcc}', 'all-gcc',
        MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
   make('{gcc}', 'install-gcc',
@@ -420,24 +411,24 @@ def build():
 
   headers_install()
 
-  unpack('libamiga', top_dir='.')
+  unpack('{libamiga}', top_dir='.')
   install_libamiga()
 
-  unpack('libnix')
-  configure('libnix',
+  configure('{libnix}',
             '--prefix={target}/m68k-amigaos/libnix',
             '--host=i686-linux-gnu',
-            '--target=m68k-amigaos')
-  make('libnix',
+            '--target=m68k-amigaos',
+            from_dir='{submodules}/{libnix}')
+  make('{libnix}',
        CC='m68k-amigaos-gcc',
        CPP='m68k-amigaos-gcc -E',
        AR='m68k-amigaos-ar',
        AS='m68k-amigaos-as',
        RANLIB='m68k-amigaos-ranlib',
        LD='m68k-amigaos-ld')
-  make('libnix', 'install')
+  make('{libnix}', 'install')
 
-  copy('{sources}/libnix/sources/headers/stabs.h',
+  copy('{submodules}/{libnix}/sources/headers/stabs.h',
        '{target}/m68k-amigaos/libnix/include')
 
   unpack('{libm}', top_dir='contrib/libm')
@@ -452,19 +443,18 @@ def build():
   make('{libm}')
   make('{libm}', 'install')
 
-  unpack('{libdebug}')
-  update_autotools('{sources}/{libdebug}')
   with env(CC='m68k-amigaos-gcc -noixemul',
            AR='m68k-amigaos-ar',
            RANLIB='m68k-amigaos-ranlib'):
     configure('{libdebug}',
               '--prefix={target}/m68k-amigaos/libnix',
-              '--host=m68k-amigaos')
+              '--host=m68k-amigaos',
+              from_dir='{submodules}/{libdebug}')
   make('{libdebug}')
   make('{libdebug}', 'install')
 
-  unpack('clib2', work_dir='{build}', top_dir='library')
-  make('clib2', makefile='GNUmakefile.68k')
+  unpack('{clib2}', work_dir='{build}', top_dir='library')
+  make('{clib2}', makefile='GNUmakefile.68k')
   install_clib2()
 
   make('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
@@ -693,11 +683,15 @@ if __name__ == "__main__":
          gawk='gawk-3.1.8',
          flex='flex-2.5.4',
          bison='bison-1.35',
+         automake='automake-1.15',
          autoconf='autoconf-2.13',
          texinfo='texinfo-4.12',
          NDK='NDK_3.9',
          ixemul='ixemul-48.2',
+         clib2='clib2',
          libm='libm-5.4',
+         libnix='libnix',
+         libamiga='libamiga',
          libdebug='libdebug',
          binutils='binutils-{binutils_ver}',
          gcc='gcc-{gcc_ver}',
@@ -709,7 +703,8 @@ if __name__ == "__main__":
          host=path.join('{top}', '.build-m68k', 'host'),
          tmpdir=path.join('{top}', '.build-m68k', 'tmp'),
          target=path.join('{top}', 'm68k-amigaos'),
-         archives=path.join('{top}', '.build-m68k', 'archives'))
+         archives=path.join('{top}', '.build-m68k', 'archives'),
+         submodules=path.join('{top}', 'submodules'))
 
   if args.prefix is not None:
     setvar(target=args.prefix)

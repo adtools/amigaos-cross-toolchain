@@ -391,7 +391,8 @@ def fetch(name, url):
 @recipe('unpack', 1)
 def unpack(name, work_dir='{sources}', top_dir=None, dst_dir=None):
   try:
-    src = glob(path.join('{archives}', name) + '*')[0]
+    src = (glob(path.join('{archives}', name) + '*') +
+           glob(path.join('{submodules}', name) + '*'))[0]
   except IndexError:
     panic('Missing files for "%s".', name)
 

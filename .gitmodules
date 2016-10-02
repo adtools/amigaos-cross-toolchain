@@ -1,0 +1,24 @@
+[submodule "submodules/binutils-2.9.1"]
+	path = submodules/binutils-2.9.1
+	url = git://github.com/cahirwpz/amigaos-binutils-2.9.1
+[submodule "submodules/gcc-2.95.3"]
+	path = submodules/gcc-2.95.3
+	url = git://github.com/cahirwpz/amigaos-gcc-2.95.3
+[submodule "submodules/clib2"]
+	path = submodules/clib2
+	url = git://github.com/adtools/clib2
+[submodule "submodules/libnix"]
+	path = submodules/libnix
+	url = git://github.com/cahirwpz/libnix
+[submodule "submodules/fd2sfd"]
+	path = submodules/fd2sfd
+	url = git://github.com/cahirwpz/fd2sfd
+[submodule "submodules/sfdc"]
+	path = submodules/sfdc
+	url = git://github.com/adtools/sfdc
+[submodule "submodules/libdebug"]
+	path = submodules/libdebug
+	url = git://github.com/cahirwpz/libdebug
+[submodule "submodules/python-lhafile"]
+	path = submodules/python-lhafile
+	url = git://github.com/FrodeSolheim/python-lhafile

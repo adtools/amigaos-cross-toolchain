@@ -362,11 +362,8 @@ def build():
   """
 
   ARCH = '-m32' if platform.machine() == 'x86_64' else ''
-
-  environ['CC'] = CC + ' ' + ARCH
-  environ['CXX'] = CXX + ' ' + ARCH
-
-  setvar(cc=environ['CC'], cxx=environ['CXX'])
+  CC = ' '.join([CC, ARCH, '-std=gnu11'])
+  CXX = ' '.join([CXX, ARCH, '-std=gnu++11'])
 
   """
   Older gcc compilers (i.e. 2.95.3 and 3.4.6) and binutils have to be tricked
@@ -374,26 +371,20 @@ def build():
   config.guess script knows nothing about x86-64 or darwin.
   """
 
-  with env(CC=environ['CC'] + ' -std=gnu11',
-           CXX=environ['CXX'] + ' -std=gnu++11',
-           CFLAGS='-g -O2 -Wall',
-           CXXFLAGS='-g -O2 -Wall'):
+  with env(CC=CC, CXX=CXX, CFLAGS='-g -O2 -Wall', CXXFLAGS='-g -O2 -Wall'):
     configure('{binutils}',
               '--prefix={target}',
               '--host=i686-linux-gnu',
               '--target=m68k-amigaos',
               from_dir='{submodules}/{binutils}')
-  touch_genfiles('{submodules}/{binutils}')
-  make('{binutils}')
-  make('{binutils}', 'install')
+    touch_genfiles('{submodules}/{binutils}')
+    make('{binutils}')
+    make('{binutils}', 'install')
 
   unpack('{ixemul}', top_dir='ixemul')
   patch('{ixemul}')
 
-  with env(CC=environ['CC'] + ' -std=gnu11',
-           CXX=environ['CXX'] + ' -std=gnu++11',
-           CFLAGS='-g -O2 -Wall',
-           CXXFLAGS='-g -O2 -Wall'):
+  with env(CC=CC, CXX=CXX, CFLAGS='-g -O2 -Wall', CXXFLAGS='-g -O2 -Wall'):
     configure('{gcc}',
               '--prefix={target}',
               '--host=i686-linux-gnu',
@@ -403,11 +394,11 @@ def build():
               '--enable-version-specific-runtime-libs',
               '--with-headers={sources}/{ixemul}/include',
               from_dir='{submodules}/{gcc}')
-  touch_genfiles('{submodules}/{gcc}')
-  make('{gcc}', 'all-gcc',
-       MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
-  make('{gcc}', 'install-gcc',
-       MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+    touch_genfiles('{submodules}/{gcc}')
+    make('{gcc}', 'all-gcc',
+         MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+    make('{gcc}', 'install-gcc',
+         MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 
   headers_install()
 
@@ -457,8 +448,9 @@ def build():
   make('{clib2}', makefile='GNUmakefile.68k')
   install_clib2()
 
-  make('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
-  make('{gcc}', 'install', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+  with env(CC=CC, CXX=CXX, CFLAGS='-g -O2 -Wall', CXXFLAGS='-g -O2 -Wall'):
+    make('{gcc}', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
+    make('{gcc}', 'install', MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 
   unpack('ira', top_dir='.', work_dir='{build}')
   patch('ira', work_dir='{build}')

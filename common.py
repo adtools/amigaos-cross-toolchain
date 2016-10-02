@@ -291,10 +291,15 @@ def unarc(name):
 
 
 @fill_in_args
-def add_site_dir(dirname):
+def find_site_dir(dirname):
   prefix = sysconfig.EXEC_PREFIX
   destlib = sysconfig.get_config_var('DESTLIB')
-  dirname = path.join(dirname, destlib[len(prefix) + 1:], 'site-packages')
+  return path.join(dirname, destlib[len(prefix) + 1:], 'site-packages')
+
+
+@fill_in_args
+def add_site_dir(dirname):
+  dirname = find_site_dir(dirname)
   info('adding "%s" to python site dirs', topdir(dirname))
   site.addsitedir(dirname)
 
@@ -356,10 +361,11 @@ def recipe(name, nargs=0):
 
 
 @recipe('python-setup', 1)
-def python_setup(name):
+def python_setup(name, **kwargs):
+  dest_dir = kwargs.get('dest_dir', '{host}')
   with cwd(path.join('{build}', name)):
     execute(sys.executable, 'setup.py', 'build')
-    execute(sys.executable, 'setup.py', 'install', '--prefix={host}')
+    execute(sys.executable, 'setup.py', 'install', '--prefix=' + dest_dir)
 
 
 @recipe('fetch', 1)
@@ -491,5 +497,5 @@ def require_header(headers, lang='c', errmsg='', symbol=None, value=None):
 __all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'chmod', 'execute',
            'rmtree', 'mkdir', 'copy', 'copytree', 'unarc', 'fetch', 'cwd',
            'symlink', 'remove', 'move', 'find', 'textfile', 'env', 'path',
-           'add_site_dir', 'python_setup', 'recipe', 'unpack', 'patch',
-           'configure', 'make', 'require_header', 'touch']
+           'add_site_dir', 'find_site_dir', 'python_setup', 'recipe',
+           'unpack', 'patch', 'configure', 'make', 'require_header', 'touch']

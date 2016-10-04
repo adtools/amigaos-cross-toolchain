@@ -1,11 +1,13 @@
 AmigaOS cross compiler for Linux / MacOSX / Windows
 ===
 
+##### It took me countless hours to put this fragile software together. The time I can spend to develop this project is limited. If you want binary builds, better support for Windows or any other [feature](https://github.com/cahirwpz/amigaos-cross-toolchain/wiki/TODO), please incentivize me by leaving a tip. I'd love to buy a new fast machine to shorten toolchain build time under virtual machines. Can you help it to happen by clicking a button below?
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=47CV5JMRW9BRA)
+
 **Author:** [Krystian Bacławski](mailto:krystian.baclawski@gmail.com)
 
 **Short description:** Cross toolchain build script for AmigaOS m68k and ppc targets. Supported host platforms are Linux, MacOSX and Windows (with [MSYS2](https://msys2.github.io/)).
-
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=47CV5JMRW9BRA)
 
 ### Overview
 

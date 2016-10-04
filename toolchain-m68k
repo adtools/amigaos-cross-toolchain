@@ -395,6 +395,8 @@ def build():
               '--with-headers={sources}/{ixemul}/include',
               from_dir='{submodules}/{gcc}')
     touch_genfiles('{submodules}/{gcc}')
+    touch('{submodules}/{gcc}/gcc/c-parse.gperf')
+    touch('{submodules}/{gcc}/gcc/configure')
     make('{gcc}', 'all-gcc',
          MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
     make('{gcc}', 'install-gcc',
@@ -437,6 +439,7 @@ def build():
   with env(CC='m68k-amigaos-gcc -noixemul',
            AR='m68k-amigaos-ar',
            RANLIB='m68k-amigaos-ranlib'):
+    touch('{submodules}/{libdebug}/configure')
     configure('{libdebug}',
               '--prefix={target}/m68k-amigaos/libnix',
               '--host=m68k-amigaos',

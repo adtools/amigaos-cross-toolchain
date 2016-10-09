@@ -150,7 +150,7 @@ def install_vbcc_toolchain():
   vasm = textfile(
     '#!/bin/sh',
     '',
-    '{prefix}/{target}/vasmm68k_mot -I{prefix}/ndk/include "$@"')
+    '{prefix}/{target}/vasmm68k_mot -I{prefix}/{target}/ndk/include "$@"')
   chmod(vasm, 0755)
   move(vasm, '{prefix}/bin/vasm')
 
@@ -172,13 +172,13 @@ def install_vbcc_toolchain():
            '{prefix}/{target}/vbcc/lib')
   config = textfile(
     ('-cc={prefix}/{target}/bin/vbccm68k -hunkdebug %s -o= %s %s -O=%ld' +
-     ' -quiet -I{prefix}/{target}/vbcc/include -I{prefix}/ndk/include'),
+     ' -quiet -I{prefix}/{target}/vbcc/include -I{prefix}/{target}/ndk/include'),
     ('-ccv={prefix}/{target}/bin/vbccm68k -hunkdebug %s -o= %s %s -O=%ld' +
-     ' -I{prefix}/{target}/vbcc/include -I{prefix}/ndk/include'),
+     ' -I{prefix}/{target}/vbcc/include -I{prefix}/{target}/ndk/include'),
     ('-as={prefix}/{target}/bin/vasmm68k_mot -Fhunk -phxass -opt-fconst' +
-     ' -nowarn=62 -quiet -I{prefix}/ndk/include %s -o %s'),
+     ' -nowarn=62 -quiet -I{prefix}/{target}/ndk/include %s -o %s'),
     ('-asv={prefix}/{target}/bin/vasmm68k_mot -Fhunk -phxass -opt-fconst' +
-     ' -nowarn=62 -I{prefix}/ndk/include %s -o %s'),
+     ' -nowarn=62 -I{prefix}/{target}/ndk/include %s -o %s'),
     '-rm=rm %s',
     '-rmv=rm -v %s',
     ('-ld={prefix}/bin/vlink -bamigahunk -x -Bstatic -Cvbcc -nostdlib' +
@@ -464,9 +464,9 @@ def build():
   install_clib2()
 
   with env(CC=CC, CXX=CXX, CFLAGS='-g -O2 -Wall', CXXFLAGS='-g -O2 -Wall'):
-    make('{gcc}', 'cross',
+    make('{gcc}', 'all-target',
          MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
-    make('{gcc}', 'install-gcc-cross',
+    make('{gcc}', 'install-target',
          MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
 
   unpack('ira', top_dir='.', work_dir='{build}')
@@ -563,14 +563,14 @@ def process_sdk(sdk, dirname, files):
           sfd = sfd + '.sfd'
         info('fd2sfd: "%s" "%s" -> "%s"', fd, protos, sfd)
         execute('fd2sfd', '-o', sfd, fd, protos)
-        copy(sfd, path.join('{prefix}/ndk/lib/sfd', sfd))
+        copy(sfd, path.join('{prefix}/{target}/ndk/lib/sfd', sfd))
       elif kind == 'sfdc':
         source = f[1]
         basename = re.sub(r'_lib.sfd$', r'', path.basename(source))
 
-        proto = path.join('{prefix}/ndk/include/proto', basename + '.h')
-        inline = path.join('{prefix}/ndk/include/inline', basename + '.h')
-        lvo = path.join('{prefix}/ndk/include/lvo', basename + '.i')
+        proto = path.join('{prefix}/{target}/ndk/include/proto', basename + '.h')
+        inline = path.join('{prefix}/{target}/ndk/include/inline', basename + '.h')
+        lvo = path.join('{prefix}/{target}/ndk/include/lvo', basename + '.i')
 
         info('sfdc: "%s" -> "%s"', source, proto)
         execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=proto',
@@ -613,14 +613,14 @@ def process_sdk(sdk, dirname, files):
           copy(source, path.join('{prefix}/{target}/guide', name))
         elif any(name.endswith(ext) for ext in ['.h', '.i']):
           lastdir = path.basename(path.dirname(f[1]))
-          mkdir(path.join('{prefix}/ndk/include', lastdir))
-          copy(source, path.join('{prefix}/ndk/include', lastdir, name))
+          mkdir(path.join('{prefix}/{target}/ndk/include', lastdir))
+          copy(source, path.join('{prefix}/{target}/ndk/include', lastdir, name))
         elif name.endswith('.fd'):
-          mkdir('{prefix}/ndk/lib/fd')
-          copy(source, path.join('{prefix}/ndk/lib/fd', name))
+          mkdir('{prefix}/{target}/ndk/lib/fd')
+          copy(source, path.join('{prefix}/{target}/ndk/lib/fd', name))
         elif name.endswith('.sfd'):
-          mkdir('{prefix}/ndk/lib/sfd')
-          copy(source, path.join('{prefix}/ndk/lib/sfd', name))
+          mkdir('{prefix}/{target}/ndk/lib/sfd')
+          copy(source, path.join('{prefix}/{target}/ndk/lib/sfd', name))
 
 
 def install_sdk(*names):

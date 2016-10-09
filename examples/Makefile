@@ -3,9 +3,11 @@ CXX = m68k-amigaos-g++ -g
 CFLAGS = -Os -Wall -fomit-frame-pointer
 CXXFLAGS = -Os -Wall -fomit-frame-pointer
 
-BINS = hello-ks13 hello-ks20 hello-ks20.clib2 hello-stdio hello-stdio.clib2 \
-       hello-stdio.nix13 hello-iostream hello-mui test-mmu \
-       simple.library simple.library_r simple.device
+BINS = hello-ks13 hello-ks20 hello-ks20.clib2 \
+       hello-stdio hello-stdio.clib2 hello-stdio.nix13 \
+       hello-mui test-mmu \
+       simple.library simple.library_r simple.device \
+       hello-iostream 
 
 all: $(BINS) $(OBJS)
 

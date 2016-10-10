@@ -350,7 +350,6 @@ def build():
   make('fd2sfd', 'install')
 
   unpack('sfdc')
-  patch('sfdc')
   configure('sfdc', '--prefix={prefix}', copy_source=True)
   make('sfdc')
   make('sfdc', 'install')

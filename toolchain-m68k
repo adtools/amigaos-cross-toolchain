@@ -728,7 +728,7 @@ if __name__ == "__main__":
     getLogger().setLevel(logging.INFO)
 
   if args.prefix is not None:
-    setvar(target=args.prefix)
+    setvar(prefix=args.prefix)
 
   if not path.exists('{prefix}'):
     mkdir('{prefix}')

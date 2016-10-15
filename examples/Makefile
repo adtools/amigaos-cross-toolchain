@@ -7,7 +7,7 @@ BINS = hello-ks13 hello-ks20 hello-ks20.clib2 \
        hello-stdio hello-stdio.clib2 hello-stdio.nix13 \
        hello-mui test-mmu \
        simple.library simple.library_r simple.device \
-       hello-iostream 
+       test-ctors hello-iostream 
 
 all: $(BINS) $(OBJS)
 
@@ -30,7 +30,13 @@ hello-stdio.clib2: hello-stdio.c
 	$(CC) -mcrt=clib2 -m68020 $(CFLAGS) -o $@ $<
 
 hello-iostream: hello-iostream.cpp
-	$(CXX) -noixemul -m68020 $(CXXFLAGS) -o $@ $<
+	$(CXX) -noixemul -m68020 $(CXXFLAGS) -o $@ $^
+
+test-ctors: test-ctors.cpp
+	$(CXX) -noixemul -m68020 $(CXXFLAGS) -D__A -c -o test-ctors-a.o $<
+	$(CXX) -noixemul -m68020 $(CXXFLAGS) -D__B -c -o test-ctors-b.o $<
+	$(CXX) -noixemul -m68020 $(CXXFLAGS) -c -o test-ctors.o $<
+	$(CXX) -noixemul -m68020 $(CXXFLAGS) -o $@ test-ctors*.o
 
 hello-mui: hello-mui.c
 	$(CC) -noixemul -m68020 -msmall-code $(CFLAGS) -o $@ $< -lmui

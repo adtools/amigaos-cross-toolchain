@@ -4,7 +4,7 @@
 
 from fnmatch import fnmatch
 from glob import glob
-from logging import info
+from logging import info, getLogger
 from os import environ
 import argparse
 import logging
@@ -46,7 +46,6 @@ MULTILIB = [('', []),
             ('libb/libm020/libm881',
              ['-fbaserel', '-DSMALL_DATA', '-m68020', '-m68881']),
             ('libb32/libm020', ['-fbaserel32', '-DSMALL_DATA', '-m68020'])]
-
 
 from common import * # NOQA
 
@@ -259,6 +258,12 @@ def build():
 
   CC = find_executable(CC)
   CXX = find_executable(CXX)
+  FLAGS = '-g -O2'
+
+  if getLogger().isEnabledFor(logging.DEBUG):
+    FLAGS += ' -Wall'
+  else:
+    FLAGS += ' -w'
 
   environ['CC'] = CC
   environ['CXX'] = CXX
@@ -375,7 +380,7 @@ def build():
   config.guess script knows nothing about x86-64 or darwin.
   """
 
-  with env(CC=CC, CXX=CXX, CFLAGS='-g -O2 -Wall', CXXFLAGS='-g -O2 -Wall'):
+  with env(CC=CC, CXX=CXX, CFLAGS=FLAGS, CXXFLAGS=FLAGS):
     configure('{binutils}',
               '--prefix={prefix}',
               '--infodir={prefix}/{target}/info',
@@ -393,7 +398,7 @@ def build():
   unpack('{ixemul}', top_dir='ixemul')
   patch('{ixemul}')
 
-  with env(CC=CC, CXX=CXX, CFLAGS='-g -O2 -Wall', CXXFLAGS='-g -O2 -Wall'):
+  with env(CC=CC, CXX=CXX, CFLAGS=FLAGS, CXXFLAGS=FLAGS):
     configure('{gcc}',
               '--prefix={prefix}',
               '--infodir={prefix}/{target}/info',
@@ -462,7 +467,7 @@ def build():
   make('{clib2}', makefile='GNUmakefile.68k')
   install_clib2()
 
-  with env(CC=CC, CXX=CXX, CFLAGS='-g -O2 -Wall', CXXFLAGS='-g -O2 -Wall'):
+  with env(CC=CC, CXX=CXX, CFLAGS=FLAGS, CXXFLAGS=FLAGS):
     make('{gcc}', 'all-target',
          MAKEINFO='makeinfo', CFLAGS_FOR_TARGET='-noixemul')
     make('{gcc}', 'install-target',
@@ -682,6 +687,7 @@ if __name__ == "__main__":
                       help='desired binutils version')
   parser.add_argument('--gcc', choices=['2.95.3'], default='2.95.3',
                       help='desired gcc version')
+  parser.add_argument('-q', '--quiet', action='store_true')
   parser.add_argument('--prefix', type=str, default=None,
                       help='installation directory')
   args = parser.parse_args()
@@ -717,6 +723,9 @@ if __name__ == "__main__":
          prefix=path.join('{top}', 'm68k-amigaos'),
          archives=path.join('{top}', '.build-m68k', 'archives'),
          submodules=path.join('{top}', 'submodules'))
+
+  if args.quiet:
+    getLogger().setLevel(logging.INFO)
 
   if args.prefix is not None:
     setvar(target=args.prefix)

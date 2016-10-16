@@ -6,4 +6,6 @@ python:
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y gperf gcc-multilib
-script: ./toolchain-m68k --quiet build
+script:
+  - ./toolchain-m68k --quiet build
+  - ./toolchain-m68k --quiet test

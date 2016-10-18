@@ -229,6 +229,8 @@ def textfile(*lines):
 
 @fill_in_args
 def download(url, name):
+  info('download "%s" to "%s"', url, topdir(name))
+
   u = urllib2.urlopen(url)
   meta = u.info()
   try:

@@ -264,6 +264,7 @@ def build():
     FLAGS += ' -Wall'
   else:
     FLAGS += ' -w'
+    environ['MAKEFLAGS'] = '--silent'
 
   environ['CC'] = CC
   environ['CXX'] = CXX

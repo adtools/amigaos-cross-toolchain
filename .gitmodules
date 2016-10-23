@@ -22,3 +22,6 @@
 [submodule "submodules/python-lhafile"]
 	path = submodules/python-lhafile
 	url = git://github.com/FrodeSolheim/python-lhafile
+[submodule "submodules/fd2pragma"]
+	path = submodules/fd2pragma
+	url = https://github.com/adtools/fd2pragma.git

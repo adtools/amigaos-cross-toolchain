@@ -91,6 +91,13 @@ def headers_install():
   copytree('{sources}/{ixemul}/include', '{prefix}/{target}/libnix/include')
 
 
+@recipe('fd2pragma-install')
+def install_fd2pragma():
+  info('installing fd2pragma')
+
+  copy('{build}/fd2pragma/fd2pragma', '{prefix}/bin')
+
+
 @recipe('tools-install')
 def install_tools():
   info('installing extra tools')
@@ -354,6 +361,10 @@ def build():
   configure('fd2sfd', '--prefix={prefix}', from_dir='{build}/fd2sfd')
   make('fd2sfd')
   make('fd2sfd', 'install')
+
+  unpack('fd2pragma', work_dir='{build}')
+  make('fd2pragma')
+  install_fd2pragma()
 
   unpack('sfdc')
   configure('sfdc', '--prefix={prefix}', copy_source=True)

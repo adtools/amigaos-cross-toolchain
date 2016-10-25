@@ -695,7 +695,7 @@ if __name__ == "__main__":
                       default='build', help='perform action')
   parser.add_argument('args', metavar='ARGS', type=str, nargs='*',
                       help='action arguments')
-  parser.add_argument('--binutils', choices=['2.9.1'], default='2.9.1',
+  parser.add_argument('--binutils', choices=['2.9.1', '2.14'], default='2.9.1',
                       help='desired binutils version')
   parser.add_argument('--gcc', choices=['2.95.3'], default='2.95.3',
                       help='desired gcc version')

@@ -156,7 +156,7 @@ def install_vbcc_toolchain():
   vasm = textfile(
     '#!/bin/sh',
     '',
-    '{prefix}/{target}/vasmm68k_mot -I{prefix}/{target}/ndk/include "$@"')
+    '{prefix}/{target}/bin/vasmm68k_mot -I{prefix}/{target}/ndk/include "$@"')
   chmod(vasm, 0755)
   move(vasm, '{prefix}/bin/vasm')
 

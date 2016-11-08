@@ -219,7 +219,8 @@ if __name__ == "__main__":
          host=path.join('{top}', '.build-ppc', 'host'),
          tmpdir=path.join('{top}', '.build-ppc', 'tmpdir'),
          target=path.join('{top}', 'ppc-amigaos'),
-         archives=path.join('{top}', '.build-ppc', 'archives'))
+         archives=path.join('{top}', '.build-ppc', 'archives'),
+         submodules=path.join('{top}', 'submodules'))
 
   if args.prefix is not None:
     setvar(target=args.prefix)

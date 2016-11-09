@@ -205,6 +205,7 @@ def install_vbcc_toolchain():
     '-ul=-l%s',
     '-cf=-F%s',
     '-ml=500')
+  chmod(config, 0644)
   move(config, '{prefix}/etc/vc.config')
 
 

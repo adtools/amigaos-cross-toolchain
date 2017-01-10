@@ -91,6 +91,18 @@ def headers_install():
   copytree('{sources}/{ixemul}/include', '{prefix}/{target}/libnix/include')
 
 
+@recipe('fd2sfd-install')
+def install_fd2sfd():
+  info('installing fd2sfd')
+
+  mkdir('{prefix}/{target}/ndk/include/inline')
+
+  copy('{build}/fd2sfd/fd2sfd', '{prefix}/bin')
+  for header in ['m68k-amigaos/macros.h', 'm68k-amigaos/alib.h', 'stubs.h']:
+      copy(path.join('{build}/fd2sfd/cross/share', header),
+           '{prefix}/{target}/ndk/include/inline')
+
+
 @recipe('fd2pragma-install')
 def install_fd2pragma():
   info('installing fd2pragma')
@@ -361,7 +373,7 @@ def build():
   unpack('fd2sfd', work_dir='{build}')
   configure('fd2sfd', '--prefix={prefix}', from_dir='{build}/fd2sfd')
   make('fd2sfd')
-  make('fd2sfd', 'install')
+  install_fd2sfd()
 
   unpack('fd2pragma', work_dir='{build}')
   make('fd2pragma')

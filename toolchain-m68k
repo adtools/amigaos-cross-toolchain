@@ -57,7 +57,7 @@ def prepare_target():
   with cwd('{prefix}'):
     mkdir('bin', 'etc', '{target}')
   with cwd('{prefix}/{target}'):
-    mkdir('bin', 'ndk/include', 'ndk/include/lvo',
+    mkdir('bin', 'ndk/include/inline', 'ndk/include/lvo',
           'ndk/lib', 'ndk/lib/fd', 'ndk/lib/sfd')
 
 
@@ -95,12 +95,9 @@ def headers_install():
 def install_fd2sfd():
   info('installing fd2sfd')
 
-  mkdir('{prefix}/{target}/ndk/include/inline')
-
   copy('{build}/fd2sfd/fd2sfd', '{prefix}/bin')
-  for header in ['m68k-amigaos/macros.h', 'm68k-amigaos/alib.h', 'stubs.h']:
-      copy(path.join('{build}/fd2sfd/cross/share', header),
-           '{prefix}/{target}/ndk/include/inline')
+  copy('{build}/fd2sfd/cross/share/{target}/alib.h',
+       '{prefix}/{target}/ndk/include/inline')
 
 
 @recipe('fd2pragma-install')
@@ -108,6 +105,9 @@ def install_fd2pragma():
   info('installing fd2pragma')
 
   copy('{build}/fd2pragma/fd2pragma', '{prefix}/bin')
+  for header in ['macros.h', 'stubs.h']:
+      copy(path.join('{build}/fd2pragma/Include/inline', header),
+           '{prefix}/{target}/ndk/include/inline')
 
 
 @recipe('tools-install')

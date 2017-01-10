@@ -1,5 +1,5 @@
 Short: m68k MMU control library
-Version: 43.11
+Version: 46.3
 Url: http://aminet.net/docs/misc/MuManual.lha
 
 MuManual/Autodocs/68040 = 68040.guide 
@@ -13,20 +13,18 @@ MuManual/Autodocs/disassembler.doc
 MuManual/Autodocs/exceptions.doc
 MuManual/Autodocs/fpsp = fpsp.guide 
 MuManual/Autodocs/fpsp.doc
+MuManual/Autodocs/memory = memory.guide
 MuManual/Autodocs/memory.doc
 MuManual/Autodocs/mmu = mmu.guide 
 MuManual/Autodocs/mmu.doc
 MuManual/Autodocs/mmuexternals.doc
+MuManual/Autodocs/mmures = mmures.guide
 MuManual/Autodocs/mmures.doc
-MuManual/Include/68040_lib.fd
-MuManual/Include/68060_lib.fd
-MuManual/Include/680x0_lib.fd
 MuManual/Include/clib/68040_protos.h
 MuManual/Include/clib/68060_protos.h
 MuManual/Include/clib/680x0_protos.h
 MuManual/Include/clib/disassembler_protos.h
 MuManual/Include/clib/mmu_protos.h
-MuManual/Include/disassembler_lib.fd
 MuManual/Include/libraries/68040.h
 MuManual/Include/libraries/68040.i
 MuManual/Include/libraries/68060.h
@@ -49,18 +47,21 @@ MuManual/Include/mmu/mmubase.h
 MuManual/Include/mmu/mmubase.i
 MuManual/Include/mmu/mmutags.h
 MuManual/Include/mmu/mmutags.i
-MuManual/Include/mmu_lib.fd
 MuManual/Include/pragmas/68040_pragmas.h
 MuManual/Include/pragmas/68060_pragmas.h
 MuManual/Include/pragmas/680x0_pragmas.h
 MuManual/Include/pragmas/disassembler_pragmas.h
 MuManual/Include/pragmas/mmu_pragmas.h
-MuManual/Manual/mmudoc_600.ps = mmudoc.ps
-fd2sfd : MuManual/Include/68040_lib.fd MuManual/Include/clib/68040_protos.h
-fd2sfd : MuManual/Include/68060_lib.fd MuManual/Include/clib/68060_protos.h
-fd2sfd : MuManual/Include/680x0_lib.fd MuManual/Include/clib/680x0_protos.h
-fd2sfd : MuManual/Include/disassembler_lib.fd MuManual/Include/clib/disassembler_protos.h
-fd2sfd : MuManual/Include/mmu_lib.fd MuManual/Include/clib/mmu_protos.h
+MuManual/fd/68040_lib.fd
+MuManual/fd/68060_lib.fd
+MuManual/fd/680x0_lib.fd
+MuManual/fd/disassembler_lib.fd
+MuManual/Manual/mmudoc.pdf
+fd2sfd : MuManual/fd/68040_lib.fd MuManual/Include/clib/68040_protos.h
+fd2sfd : MuManual/fd/68060_lib.fd MuManual/Include/clib/68060_protos.h
+fd2sfd : MuManual/fd/680x0_lib.fd MuManual/Include/clib/680x0_protos.h
+fd2sfd : MuManual/fd/disassembler_lib.fd MuManual/Include/clib/disassembler_protos.h
+fd2sfd : MuManual/fd/mmu_lib.fd MuManual/Include/clib/mmu_protos.h
 sfdc : 68040_lib.sfd
 sfdc : 68060_lib.sfd
 sfdc : 680x0_lib.sfd

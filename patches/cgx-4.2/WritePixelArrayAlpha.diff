@@ -1,0 +1,25 @@
+--- CGraphX/C/Include/clib/cybergraphics_protos.h.orig	2017-01-11 00:55:08.000000000 +0100
++++ CGraphX/C/Include/clib/cybergraphics_protos.h	2017-01-11 00:54:31.000000000 +0100
+@@ -44,6 +44,8 @@
+ void         UnLockBitMap(APTR);
+ ULONG        WritePixelArray(APTR, UWORD, UWORD, UWORD, struct RastPort *, UWORD,
+                              UWORD, UWORD, UWORD, UBYTE);
++ULONG        WritePixelArrayAlpha(APTR, UWORD, UWORD, UWORD, struct RastPort *,
++                                  UWORD, UWORD, UWORD, UWORD, ULONG);
+ ULONG        WriteLUTPixelArray(APTR, UWORD, UWORD, UWORD, struct RastPort *, APTR,
+ 			        UWORD, UWORD, UWORD, UWORD, UBYTE);
+ LONG         WriteRGBPixel(struct RastPort *, UWORD, UWORD, ULONG);
+--- CGraphX/FD/cybergraphics_lib.fd.orig	2017-01-11 00:50:21.000000000 +0100
++++ CGraphX/FD/cybergraphics_lib.fd	2017-01-11 00:52:18.000000000 +0100
+@@ -67,4 +67,11 @@
+ ##public
+ *
+ WriteLUTPixelArray(srcRect,SrcX,SrcY,SrcMod,RastPort,ColorTab,DestX,DestY,SizeX,SizeY,CTFormat)(a0,d0,d1,d2,a1,a2,d3,d4,d5,d6,d7)
++*
++##private
++cgfxPrivate8()()
++cgfxPrivate9()()
++##public
++*
++WritePixelArrayAlpha(Src,SrcX,SrcY,SrcMod,RastPort,DestX,DestY,Width,Height,GlobalAlpha)(a0,d0,d1,d2,a1,d3,d4,d5,d6,d7)
+ ##end

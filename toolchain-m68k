@@ -578,8 +578,8 @@ def add_lib(src, libname):
 
 
 @recipe('install-sdk', 1)
-def process_sdk(sdk, dirname, files):
-  with cwd(path.join('{sources}', dirname)):
+def process_sdk(sdk, lib_name, files):
+  with cwd(path.join('{sources}', sdk)):
     for f in files:
       kind = f[0]
 
@@ -621,7 +621,7 @@ def process_sdk(sdk, dirname, files):
       elif kind == 'lib':
         filename = f[1]
         c_file = re.sub(r'_lib.sfd$', r'.c', path.basename(filename))
-        lib_file = 'lib' + sdk + '.a'
+        lib_file = 'lib' + lib_name + '.a'
 
         info('lib: %s -> %s', filename, c_file)
         execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=stubs',
@@ -667,14 +667,18 @@ def install_sdk(*names):
 
     desc, files = read_sdk(filename)
 
+    pkg = name + '-' + desc['version']
+    _, ext = path.splitext(path.basename(desc['url']))
+
     with cwd('{archives}'):
-      fetch(path.basename(desc['url']), desc['url'])
+      fetch(pkg + ext, desc['url'])
 
-    basename = path.splitext(path.basename(desc['url']))[0]
+    unpack(pkg, top_dir='.')
 
-    unpack(basename, top_dir='.')
+    if path.isdir(path.join('{patches}', pkg)):
+      patch(pkg, work_dir=path.join('{sources}', pkg))
 
-    process_sdk(name, basename, files)
+    process_sdk(pkg, name, files)
 
 
 def test():

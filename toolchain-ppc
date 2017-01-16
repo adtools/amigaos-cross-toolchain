@@ -18,6 +18,7 @@ URLS = \
    'ftp://ftp.gnu.org/gnu/texinfo/texinfo-4.12.tar.gz',
    'http://isl.gforge.inria.fr/isl-0.12.2.tar.bz2',
    'http://www.bastoul.net/cloog/pages/download/cloog-0.18.4.tar.gz',
+   'ftp://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz',
    ('http://hyperion-entertainment.biz/index.php/downloads' +
     '?view=download&amp;format=raw&amp;file=69', 'SDK_53.24.lha'),
    ('svn://svn.code.sf.net/p/adtools/code/trunk/binutils', 'binutils-2.18'),
@@ -28,6 +29,12 @@ URLS = \
 
 
 from common import * # NOQA
+
+
+def update_autotools(dst):
+  remove(path.join(dst, 'config.guess'), path.join(dst, 'config.sub'))
+  copy('{sources}/{automake}/lib/config.guess', path.join(dst, 'config.guess'))
+  copy('{sources}/{automake}/lib/config.sub', path.join(dst, 'config.sub'))
 
 
 @recipe('{sdk}-prepare')
@@ -79,15 +86,22 @@ def build():
         name = path.basename(url)
       fetch(name, url)
 
+  unpack('{automake}')
+
+  py_ver = 'python%d.%d' % (sys.version_info.major, sys.version_info.minor)
+  require_header([path.join(py_ver, 'Python.h')],
+                 lang='c', errmsg='python-dev package missing')
   unpack('python-lha', work_dir='{build}')
   python_setup('python-lha')
 
   unpack('{texinfo}')
+  update_autotools('{sources}/{texinfo}/build-aux')
   configure('{texinfo}', '--prefix={host}')
   make('{texinfo}')
   make('{texinfo}', 'install')
 
   unpack('{gmp}')
+  update_autotools('{sources}/{gmp}')
   configure('{gmp}',
             '--disable-shared',
             '--prefix={host}')
@@ -95,6 +109,7 @@ def build():
   make('{gmp}', 'install')
 
   unpack('{mpfr}')
+  update_autotools('{sources}/{mpfr}')
   configure('{mpfr}',
             '--disable-shared',
             '--prefix={host}',
@@ -103,6 +118,7 @@ def build():
   make('{mpfr}', 'install')
 
   unpack('{mpc}')
+  update_autotools('{sources}/{mpc}')
   configure('{mpc}',
             '--disable-shared',
             '--prefix={host}',
@@ -112,6 +128,7 @@ def build():
   make('{mpc}', 'install')
 
   unpack('{isl}')
+  update_autotools('{sources}/{isl}')
   configure('{isl}',
             '--disable-shared',
             '--prefix={host}',
@@ -120,6 +137,7 @@ def build():
   make('{isl}', 'install')
 
   unpack('{cloog}')
+  update_autotools('{sources}/{cloog}')
   configure('{cloog}',
             '--disable-shared',
             '--prefix={host}',
@@ -178,8 +196,8 @@ if __name__ == "__main__":
   if not sys.version_info[:2] == (2, 7):
     panic('I need Python 2.7 to run!')
 
-  if not (platform.system() in ['Darwin', 'Linux'] or
-          fnmatch(platform.system(), 'CYGWIN*')):
+  if not any(fnmatch(platform.system(), pat)
+             for pat in ['Darwin', 'Linux', 'CYGWIN_NT*', 'MSYS_NT*']):
     panic('Build on %s not supported!', platform.system())
 
   if platform.machine() not in ['i686', 'x86_64']:
@@ -209,6 +227,7 @@ if __name__ == "__main__":
          isl='isl-0.12.2',
          cloog='cloog-0.18.4',
          texinfo='texinfo-4.12',
+         automake='automake-1.15',
          binutils='binutils-{binutils_ver}',
          sdk='SDK_53.24',
          gcc='gcc-{gcc_ver}',

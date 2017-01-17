@@ -148,6 +148,7 @@ def build():
   make('{cloog}', 'install')
 
   with env(CFLAGS='-Wno-error'):
+    update_autotools('{archives}/{binutils}')
     configure('{binutils}',
               '--prefix={target}',
               '--target=ppc-amigaos',
@@ -163,6 +164,7 @@ def build():
                    CC=find_executable(CC) + ' -m32',
                    CXX=find_executable(CXX) + ' -m32')
 
+  update_autotools('{archives}/{gcc}')
   with env(**gcc_env):
     configure('{gcc}',
               '--prefix={target}',

@@ -569,7 +569,7 @@ def add_lib(src, libname):
   obj = re.sub(r'\.a$', r'.o', libname)
 
   for libdir, cflags in MULTILIB:
-    lib = path.join('{prefix}/{target}/libnix/lib', libdir, libname)
+    lib = path.join('{prefix}/{target}/lib', libdir, libname)
     info('lib: "%s" -> "%s"', obj, lib)
     cflags = list(cflags) + ['-noixemul', '-c', '-o', obj, src]
     execute('m68k-amigaos-gcc', '-Wall', '-O3', '-fomit-frame-pointer', *cflags)
@@ -592,14 +592,14 @@ def process_sdk(sdk, lib_name, files):
           sfd = sfd + '.sfd'
         info('fd2sfd: "%s" "%s" -> "%s"', fd, protos, sfd)
         execute('fd2sfd', '-o', sfd, fd, protos)
-        copy(sfd, path.join('{prefix}/{target}/ndk/lib/sfd', sfd))
+        copy(sfd, path.join('{prefix}/{target}/lib/sfd', sfd))
       elif kind == 'sfdc':
         source = f[1]
         basename = re.sub(r'_lib.sfd$', r'', path.basename(source))
 
-        proto = path.join('{prefix}/{target}/ndk/include/proto', basename + '.h')
-        inline = path.join('{prefix}/{target}/ndk/include/inline', basename + '.h')
-        lvo = path.join('{prefix}/{target}/ndk/include/lvo', basename + '.i')
+        proto = path.join('{prefix}/{target}/include/proto', basename + '.h')
+        inline = path.join('{prefix}/{target}/include/inline', basename + '.h')
+        lvo = path.join('{prefix}/{target}/include/lvo', basename + '.i')
 
         info('sfdc: "%s" -> "%s"', source, proto)
         execute('sfdc', '--quiet', '--target=m68k-amigaos', '--mode=proto',
@@ -635,21 +635,17 @@ def process_sdk(sdk, lib_name, files):
           name = path.basename(f[1])
 
         if any(name.endswith(ext) for ext in ['.doc', '.html', '.pdf', '.ps']):
-          mkdir('{prefix}/{target}/doc')
           copy(source, path.join('{prefix}/{target}/doc', name))
         elif name.endswith('.guide'):
-          mkdir('{prefix}/{target}/guide')
           copy(source, path.join('{prefix}/{target}/guide', name))
         elif any(name.endswith(ext) for ext in ['.h', '.i']):
           lastdir = path.basename(path.dirname(f[1]))
-          mkdir(path.join('{prefix}/{target}/ndk/include', lastdir))
-          copy(source, path.join('{prefix}/{target}/ndk/include', lastdir, name))
+          mkdir(path.join('{prefix}/{target}/include', lastdir))
+          copy(source, path.join('{prefix}/{target}/include', lastdir, name))
         elif name.endswith('.fd'):
-          mkdir('{prefix}/{target}/ndk/lib/fd')
-          copy(source, path.join('{prefix}/{target}/ndk/lib/fd', name))
+          copy(source, path.join('{prefix}/{target}/lib/fd', name))
         elif name.endswith('.sfd'):
-          mkdir('{prefix}/{target}/ndk/lib/sfd')
-          copy(source, path.join('{prefix}/{target}/ndk/lib/sfd', name))
+          copy(source, path.join('{prefix}/{target}/lib/sfd', name))
 
 
 def install_sdk(*names):
@@ -658,6 +654,13 @@ def install_sdk(*names):
                               environ['PATH']])
 
   add_site_dir('{host}')
+
+  with cwd('{prefix}/{target}'):
+    mkdir('doc', 'guide', 'include/proto', 'include/inline', 'include/lvo',
+          'lib/fd', 'lib/sfd')
+
+    for d, _ in MULTILIB:
+      mkdir(path.join('lib', d))
 
   for name in names:
     filename = path.join('{top}/sdk', name + '.sdk')

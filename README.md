@@ -93,23 +93,23 @@ Follow steps listed below:
 
 1. Fetch *amigaos-cross-toolchain* project to your local drive:  
 
-    ```
-# git clone git://github.com/cahirwpz/amigaos-cross-toolchain.git
-# cd amigaos-cross-toolchain
+```
+    # git clone git://github.com/cahirwpz/amigaos-cross-toolchain.git
+    # cd amigaos-cross-toolchain
 ```
 
 2. Run `toolchain-m68k` or `toolchain-ppc` script (with `--prefix` option to specify where to install the toolchain). Note, that the destination directory must be writable by the user. 
 
-    ```
-# ./toolchain-m68k --prefix=/opt/m68k-amigaos build
+```
+    # ./toolchain-m68k --prefix=/opt/m68k-amigaos build
 ```
 
 3. Wait for the result :-)
 
 4. *(optional)* Install additional SDKs (e.g. AHI, CyberGraphX, Magic User Interface, etc.):
 
-    ```
-# ./toolchain-m68k --prefix=/opt/m68k-amigaos install-sdk ahi cgx mui
+```
+    # ./toolchain-m68k --prefix=/opt/m68k-amigaos install-sdk ahi cgx mui
 ```
 
 #### What if something goes wrong?
@@ -118,11 +118,11 @@ If the build process fails, please write me an e-mail.  I'll try to help out. Do
 It's **vitally important** to send me a full log from build process. You can capture it by redirecting output to a file with following command:
 
 ```
-# ./toolchain-m68k build 2>&1 | tee build.log
+    # ./toolchain-m68k build 2>&1 | tee build.log
 ```
 
 ... but remember to cleanup your build environment beforehand with:
 
 ```
-# rm -rf .build-m68k
+    # rm -rf .build-m68k
 ```

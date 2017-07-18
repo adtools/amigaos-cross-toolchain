@@ -190,29 +190,30 @@ def install_vbcc_toolchain():
            '{prefix}/{target}/vbcc/lib')
   config = textfile(
     ('-cc={prefix}/{target}/bin/vbccm68k -hunkdebug %s -o= %s %s -O=%ld' +
-     ' -quiet -I{prefix}/{target}/vbcc/include -I{prefix}/{target}/ndk/include'),
+     ' -quiet -I{prefix}/{target}/vbcc/include -I{prefix}/{target}/ndk/include' +
+     ' -I{prefix}/{target}/include'),
     ('-ccv={prefix}/{target}/bin/vbccm68k -hunkdebug %s -o= %s %s -O=%ld' +
-     ' -I{prefix}/{target}/vbcc/include -I{prefix}/{target}/ndk/include'),
+     ' -I{prefix}/{target}/vbcc/include -I{prefix}/{target}/ndk/include' +
+     ' -I{prefix}/{target}/include'),
     ('-as={prefix}/{target}/bin/vasmm68k_mot -Fhunk -phxass -opt-fconst' +
-     ' -nowarn=62 -quiet -I{prefix}/{target}/ndk/include %s -o %s'),
+     ' -nowarn=62 -quiet -I{prefix}/{target}/ndk/include' +
+     ' -I{prefix}/{target}/include %s -o %s'),
     ('-asv={prefix}/{target}/bin/vasmm68k_mot -Fhunk -phxass -opt-fconst' +
-     ' -nowarn=62 -I{prefix}/{target}/ndk/include %s -o %s'),
+     ' -nowarn=62 -I{prefix}/{target}/ndk/include' +
+     ' -I{prefix}/{target}/include %s -o %s'),
     '-rm=rm %s',
     '-rmv=rm -v %s',
     ('-ld={prefix}/bin/vlink -bamigahunk -x -Bstatic -Cvbcc -nostdlib' +
      ' {prefix}/{target}/vbcc/lib/startup.o %s %s' +
-     ' -L{prefix}/{target}/vbcc/lib' +
-     ' -L{prefix}/{target}/vbcc/include -lvc -o %s'),
+     ' -L{prefix}/{target}/vbcc/lib -lvc -o %s'),
     ('-l2={prefix}/bin/vlink -bamigahunk -x -Bstatic -Cvbcc -nostdlib' +
      ' %s %s -L{prefix}/{target}/vbcc/lib' +
      ' -L{prefix}/{target}/vbcc/include -o %s'),
     ('-ldv={prefix}/bin/vlink -bamigahunk -t -x -Bstatic -Cvbcc -nostdlib' +
      ' {prefix}/{target}/vbcc/lib/startup.o %s %s' +
-     ' -L{prefix}/{target}/vbcc/lib' +
-     ' -L{prefix}/{target}/vbcc/include -lvc -o %s'),
+     ' -L{prefix}/{target}/vbcc/lib -lvc -o %s'),
     ('-l2v={prefix}/bin/vlink -bamigahunk -t -x -Bstatic -Cvbcc -nostdlib' +
-     ' %s %s -L{prefix}/{target}/vbcc/lib' +
-     ' -L{prefix}/{target}/vbcc/include -o %s'),
+     ' %s %s -L{prefix}/{target}/vbcc/lib -o %s'),
     '-ldnodb=-s -Rshort',
     '-ul=-l%s',
     '-cf=-F%s',

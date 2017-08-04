@@ -27,6 +27,7 @@ Build process should produce following set of tools for **m68k-amigaos** target:
  * IRA: portable M68000/010/020/030/040 reassembler for AmigaOS hunk-format
    executables, libraries, devices and raw binary files
  * vda68k: portable M68k disassembler for 68000-68060, 68851, 68881, 68882
+ * [amitools](https://github.com/cnvogelg/amitools/blob/master/README.md#contents) with [vamos](https://github.com/cnvogelg/amitools/blob/master/doc/vamos.md) AmigaOS emulator which is proven to run SAS/C
 
 ... and following set of tools for **ppc-amigaos** target:
 

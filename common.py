@@ -1,11 +1,14 @@
 #!/usr/bin/env python2.7 -B
 
+from __future__ import print_function
+
 from fnmatch import fnmatch
 from glob import glob
 from logging import debug, info, error
 from os import path
 import contextlib
 from distutils import spawn, sysconfig
+import fileinput
 import os
 import shutil
 import site
@@ -260,7 +263,7 @@ def download(url, name):
       sys.stdout.write(status)
       sys.stdout.flush()
 
-  print ""
+  print("")
 
 
 @fill_in_args
@@ -290,6 +293,18 @@ def unarc(name):
         arc.extract(item)
   else:
     raise RuntimeError('Unrecognized archive: "%s"', name)
+
+
+@fill_in_args
+def fix_python_shebang(filename, prefix):
+  PYTHON = fill_in('{python}')
+  SITEDIR = path.join(prefix, '{sitedir}')
+  for line in fileinput.input(files=[filename], inplace=True):
+    line = line.rstrip()
+    if line.startswith('#!'):
+      print('#!/usr/bin/env PYTHONPATH=%s %s' % (SITEDIR, PYTHON))
+    else:
+      print(line.rstrip())
 
 
 @fill_in_args
@@ -362,12 +377,36 @@ def recipe(name, nargs=0):
   return real_decorator
 
 
-@recipe('python-setup', 1)
-def python_setup(name, **kwargs):
-  dest_dir = kwargs.get('dest_dir', '{host}')
-  with cwd(path.join('{build}', name)):
-    execute(sys.executable, 'setup.py', 'build')
-    execute(sys.executable, 'setup.py', 'install', '--prefix=' + dest_dir)
+def extend_pythonpath(prefix):
+  SITEDIR = path.join(prefix, '{sitedir}')
+  try:
+    return ':'.join([os.environ['PYTHONPATH'], SITEDIR])
+  except KeyError:
+    return SITEDIR
+
+
+@recipe('pyinstall', 1)
+def pyinstall(name, **kwargs):
+  prefix = kwargs.get('prefix', '{prefix}')
+  mkdir(path.join(prefix, '{sitedir}'))
+  with env(PYTHONPATH=extend_pythonpath(prefix)):
+    execute('{python}', '-m', 'easy_install', '--prefix=' + prefix, name)
+
+@recipe('pyfixbin', 1)
+def pyfixbin(name, names, **kwargs):
+  prefix = kwargs.get('prefix', '{prefix}')
+  for name in names:
+    fix_python_shebang(path.join(prefix, 'bin', name), prefix)
+
+
+@recipe('pysetup', 1)
+def pysetup(name, **kwargs):
+  prefix = kwargs.get('prefix', '{prefix}')
+  mkdir(path.join(prefix, '{sitedir}'))
+  with env(PYTHONPATH=extend_pythonpath(prefix)):
+    with cwd(path.join('{build}', name)):
+      execute('{python}', 'setup.py', 'build')
+      execute('{python}', 'setup.py', 'install', '--prefix=' + prefix)
 
 
 @recipe('fetch', 1)
@@ -499,5 +538,6 @@ def require_header(headers, lang='c', errmsg='', symbol=None, value=None):
 __all__ = ['setvar', 'panic', 'cmpver', 'find_executable', 'chmod', 'execute',
            'rmtree', 'mkdir', 'copy', 'copytree', 'unarc', 'fetch', 'cwd',
            'symlink', 'remove', 'move', 'find', 'textfile', 'env', 'path',
-           'add_site_dir', 'find_site_dir', 'python_setup', 'recipe',
-           'unpack', 'patch', 'configure', 'make', 'require_header', 'touch']
+           'add_site_dir', 'find_site_dir', 'pysetup', 'pyinstall', 'recipe',
+           'unpack', 'patch', 'configure', 'make', 'require_header', 'touch',
+           'pyfixbin']

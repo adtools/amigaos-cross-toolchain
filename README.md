@@ -19,7 +19,7 @@ Build process should produce following set of tools for **m68k-amigaos** target:
  * gcc 2.95.3
  * g++ 2.95.3
  * libstdc++ 2.10
- * binutils 2.9.1 (assembler, linker, etc.)
+ * binutils 2.14 (assembler, linker, etc.)
  * libnix 2.2 (standard ANSI/C library replacement for AmigaOS)
  * libm 5.4 (provides math library implementation for non-FPU Amigas)
  * AmigaOS headers & libraries & autodocs (for AmigaOS 3.9)

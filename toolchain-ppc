@@ -11,13 +11,13 @@ import platform
 import sys
 
 URLS = \
-  ['ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2',
-   'ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz',
-   'ftp://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2',
-   'ftp://ftp.gnu.org/gnu/texinfo/texinfo-4.12.tar.gz',
+  ['https://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2',
+   'https://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz',
+   'https://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2',
+   'https://ftp.gnu.org/gnu/texinfo/texinfo-4.12.tar.gz',
    'http://isl.gforge.inria.fr/isl-0.12.2.tar.bz2',
    'http://www.bastoul.net/cloog/pages/download/cloog-0.18.4.tar.gz',
-   'ftp://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz',
+   'https://ftp.gnu.org/gnu/automake/automake-1.15.tar.gz',
    ('http://hyperion-entertainment.biz/index.php/downloads' +
     '?view=download&amp;format=raw&amp;file=69', 'SDK_53.24.lha'),
    ('svn://svn.code.sf.net/p/adtools/code/trunk/binutils', 'binutils-2.18'),

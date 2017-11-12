@@ -1,0 +1,35 @@
+version: 2
+
+defaults: &defaults
+  working_directory: ~/amigaos-cross-toolchain
+  docker:
+    - image: cahirwpz/amigaos-cross-toolchain-buildenv:latest
+
+jobs:
+  m68k:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: './toolchain-m68k --quiet build'
+      - store_artifacts:
+          path: m68k-amigaos
+      - save_cache:
+          key: m68k-amigaos-{{ .Branch }}-{{ .Revision }}
+          paths: m68k-amigaos
+
+  m68k-tests:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: m68k-amigaos-{{ .Branch }}-{{ .Revision }}
+      - run: './toolchain-m68k --quiet test'
+
+workflows:
+  version: 2
+  amigaos-cross-toolchain:
+    jobs:
+      - m68k
+      - m68k-tests:
+          requires:
+            - m68k

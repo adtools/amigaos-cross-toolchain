@@ -255,17 +255,6 @@ def build():
   environ['LANG'] = 'C'
   environ['TERM'] = 'xterm'
 
-  with cwd('{archives}'):
-    for url in URLS:
-      if type(url) == tuple:
-        url, name = url[0], url[1]
-      else:
-        name = path.basename(url)
-      fetch(name, url)
-
-  execute('git', 'submodule', 'init');
-  execute('git', 'submodule', 'update');
-
   add_site_dir('{prefix}')
 
   """
@@ -316,8 +305,21 @@ def build():
   require_header([path.join(py_ver, 'Python.h')],
                  lang='c', errmsg='python-dev package missing')
 
+  execute('git', 'submodule', 'init', 'submodules/python-lhafile');
+  execute('git', 'submodule', 'update', 'submodules/python-lhafile');
   unpack('python-lha', work_dir='{build}')
   pysetup('python-lha')
+
+  with cwd('{archives}'):
+    for url in URLS:
+      if type(url) == tuple:
+        url, name = url[0], url[1]
+      else:
+        name = path.basename(url)
+      fetch(name, url)
+
+  execute('git', 'submodule', 'init');
+  execute('git', 'submodule', 'update');
 
   unpack('{automake}')
 

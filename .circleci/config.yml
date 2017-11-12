@@ -25,11 +25,23 @@ jobs:
           key: m68k-amigaos-{{ .Branch }}-{{ .Revision }}
       - run: './toolchain-m68k --quiet test'
 
+  powerpc:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: './toolchain-ppc --quiet build'
+      - store_artifacts:
+          path: ppc-amigaos
+      - save_cache:
+          key: ppc-amigaos-{{ .Branch }}-{{ .Revision }}
+          paths: ppc-amigaos
+
 workflows:
   version: 2
   amigaos-cross-toolchain:
     jobs:
       - m68k
+      - powerpc
       - m68k-tests:
           requires:
             - m68k

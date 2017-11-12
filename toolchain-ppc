@@ -1,9 +1,9 @@
-#!/usr/bin/python -B
+#!/usr/bin/python2.7 -B
 
 # Build cross toolchain for AmigaOS 4.x / PowerPC target.
 
 from fnmatch import fnmatch
-from logging import info
+from logging import info, getLogger
 from os import environ
 import argparse
 import logging
@@ -11,8 +11,7 @@ import platform
 import sys
 
 URLS = \
-  ['git://github.com/FrodeSolheim/python-lhafile',
-   'ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2',
+  ['ftp://ftp.gnu.org/gnu/gmp/gmp-5.1.3.tar.bz2',
    'ftp://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz',
    'ftp://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2',
    'ftp://ftp.gnu.org/gnu/texinfo/texinfo-4.12.tar.gz',
@@ -39,9 +38,9 @@ def update_autotools(dst):
 
 @recipe('{sdk}-prepare')
 def prepare_sdk():
-  info('preparing {sdk}')
+  info('preparing AmigaOS 4.x SDK')
 
-  target = path.join('{target}', 'ppc-amigaos/SDK')
+  target = path.join('{prefix}', 'ppc-amigaos/SDK')
 
   unpack('{sdk}', work_dir='{archives}', top_dir='SDK_Install', dst_dir='SDK')
   unpack('SDK/base', top_dir='Include', dst_dir=path.join(target, 'include'))
@@ -54,29 +53,59 @@ def build():
     if var not in ['_', 'LOGNAME', 'HOME', 'SHELL', 'TMPDIR', 'PWD']:
       del environ[var]
 
-  environ['PATH'] = '/usr/bin:/bin'
+  PATH = ['/usr/bin', '/bin']
+
+  environ['PATH'] = ":".join(PATH)
   environ['LANG'] = 'C'
   environ['TERM'] = 'xterm'
 
+  add_site_dir('{prefix}')
+
+  """
+  Make sure we always choose known compiler (from the distro) and not one in
+  user's path that could shadow the original one.
+  """
   if platform.system() == 'Darwin':
     CC, CXX = 'clang', 'clang++'
   else:
     CC, CXX = 'gcc', 'g++'
 
-  environ['CC'] = find_executable(CC)
-  environ['CXX'] = find_executable(CXX)
+  CC = find_executable(CC)
+  CXX = find_executable(CXX)
+  FLAGS = '-g -O2'
 
+  if getLogger().isEnabledFor(logging.DEBUG):
+    FLAGS += ' -Wall'
+  else:
+    FLAGS += ' -w'
+    environ['MAKEFLAGS'] = '--silent'
+
+  environ['CC'] = CC
+  environ['CXX'] = CXX
+  environ['PATH'] = ':'.join([path.join('{prefix}', 'bin'),
+                              path.join('{host}', 'bin'),
+                              environ['PATH']])
+
+  setvar(cc=environ['CC'], cxx=environ['CXX'])
+
+  """
+  When we have a working compiler in our path, we shoule also check if the
+  required programs, headers and libraries are present.
+  """
   find_executable('patch')
   find_executable('bison')
   find_executable('flex')
   find_executable('make')
   find_executable('svn')
 
-  environ['PATH'] = ":".join([path.join('{target}', 'bin'),
-                              path.join('{host}', 'bin'),
-                              environ['PATH']])
+  py_ver = 'python%d.%d' % (sys.version_info.major, sys.version_info.minor)
+  require_header([path.join(py_ver, 'Python.h')],
+                 lang='c', errmsg='python-dev package missing')
 
-  add_site_dir('{host}')
+  execute('git', 'submodule', 'init', 'submodules/python-lhafile');
+  execute('git', 'submodule', 'update', 'submodules/python-lhafile');
+  unpack('python-lha', work_dir='{build}')
+  pysetup('python-lha')
 
   with cwd('{archives}'):
     for url in URLS:
@@ -88,11 +117,6 @@ def build():
 
   unpack('{automake}')
 
-  py_ver = 'python%d.%d' % (sys.version_info.major, sys.version_info.minor)
-  require_header([path.join(py_ver, 'Python.h')],
-                 lang='c', errmsg='python-dev package missing')
-  unpack('python-lha', work_dir='{build}')
-  python_setup('python-lha')
 
   unpack('{texinfo}')
   update_autotools('{sources}/{texinfo}/build-aux')
@@ -150,8 +174,8 @@ def build():
   with env(CFLAGS='-Wno-error'):
     update_autotools('{archives}/{binutils}')
     configure('{binutils}',
-              '--prefix={target}',
-              '--target=ppc-amigaos',
+              '--prefix={prefix}',
+              '--target={target}',
               from_dir='{archives}/{binutils}')
     make('{binutils}')
     make('{binutils}', 'install')
@@ -167,8 +191,8 @@ def build():
   update_autotools('{archives}/{gcc}')
   with env(**gcc_env):
     configure('{gcc}',
-              '--prefix={target}',
-              '--target=ppc-amigaos',
+              '--prefix={prefix}',
+              '--target={target}',
               '--with-bugurl="http://sf.net/p/adtools"',
               '--with-gmp={host}',
               '--with-mpfr={host}',
@@ -215,13 +239,15 @@ if __name__ == "__main__":
                       help='desired binutils version')
   parser.add_argument('--gcc', choices=['4.2.4', '4.9.1'], default='4.2.4',
                       help='desired gcc version')
+  parser.add_argument('-q', '--quiet', action='store_true')
   parser.add_argument('--prefix', type=str, default=None,
                       help='installation directory')
   args = parser.parse_args()
 
   setvar(top=path.abspath(path.dirname(sys.argv[0])),
          binutils_ver=args.binutils,
-         gcc_ver=args.gcc)
+         gcc_ver=args.gcc,
+         py_ver='python%d.%d' % (sys.version_info.major, sys.version_info.minor))
 
   setvar(gmp='gmp-5.1.3',
          mpfr='mpfr-3.1.3',
@@ -233,21 +259,28 @@ if __name__ == "__main__":
          binutils='binutils-{binutils_ver}',
          sdk='SDK_53.24',
          gcc='gcc-{gcc_ver}',
+         gpp='g++-{gcc_ver}',
+         target='ppc-amigaos',
+         python=sys.executable,
+         sitedir=path.join('lib', '{py_ver}', 'site-packages'),
          patches=path.join('{top}', 'patches'),
          stamps=path.join('{top}', '.build-ppc', 'stamps'),
          build=path.join('{top}', '.build-ppc', 'build'),
          sources=path.join('{top}', '.build-ppc', 'sources'),
          host=path.join('{top}', '.build-ppc', 'host'),
-         tmpdir=path.join('{top}', '.build-ppc', 'tmpdir'),
-         target=path.join('{top}', 'ppc-amigaos'),
+         tmpdir=path.join('{top}', '.build-ppc', 'tmp'),
+         prefix=path.join('{top}', 'ppc-amigaos'),
          archives=path.join('{top}', '.build-ppc', 'archives'),
          submodules=path.join('{top}', 'submodules'))
 
-  if args.prefix is not None:
-    setvar(target=args.prefix)
+  if args.quiet:
+    getLogger().setLevel(logging.INFO)
 
-  if not path.exists('{target}'):
-    mkdir('{target}')
+  if args.prefix is not None:
+    setvar(prefix=args.prefix)
+
+  if not path.exists('{prefix}'):
+    mkdir('{prefix}')
 
   action = args.action.replace('-', '_')
   globals()[action].__call__(*args.args)

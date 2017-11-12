@@ -11,4 +11,4 @@ RUN apt-get -q update && apt-get upgrade -y
 RUN apt-get install -y --no-install-recommends \
             git-core make gettext patch bison flex gperf ca-certificates \
             gcc g++ gcc-multilib libc6-dev libncurses-dev \
-            python2.7 libpython2.7-dev python-setuptools
+            python2.7 libpython2.7-dev python-setuptools subversion

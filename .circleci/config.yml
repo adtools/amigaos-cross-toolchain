@@ -10,9 +10,15 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - m68k-cache-{{ .Branch }}-{{ checksum ".circleci/DATESTAMP" }}
+      - run: './toolchain-m68k --quiet download'
+      - save_cache:
+          key: m68k-cache-{{ .Branch }}-{{ checksum ".circleci/DATESTAMP" }}
+          paths:
+            - .build-m68k
       - run: './toolchain-m68k --quiet build'
-      - store_artifacts:
-          path: m68k-amigaos
       - save_cache:
           key: m68k-amigaos-{{ .Branch }}-{{ .Revision }}
           paths: m68k-amigaos
@@ -29,9 +35,15 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - ppc-cache-{{ .Branch }}-{{ checksum ".circleci/DATESTAMP" }}
+      - run: './toolchain-ppc --quiet download'
+      - save_cache:
+          key: ppc-cache-{{ .Branch }}-{{ checksum ".circleci/DATESTAMP" }}
+          paths:
+            - .build-ppc
       - run: './toolchain-ppc --quiet build'
-      - store_artifacts:
-          path: ppc-amigaos
       - save_cache:
           key: ppc-amigaos-{{ .Branch }}-{{ .Revision }}
           paths: ppc-amigaos

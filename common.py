@@ -10,6 +10,7 @@ import contextlib
 from distutils import spawn, sysconfig
 import fileinput
 import os
+from multiprocessing import cpu_count
 import shutil
 import site
 import subprocess
@@ -417,7 +418,7 @@ def fetch(name, url):
     else:
       info('File "%s" already downloaded.', name)
   elif url.startswith('svn'):
-    execute('svn', 'export', '--quiet', url, name)
+    execute('svn', 'export', url, name)
   elif url.startswith('git'):
     if not path.exists(name):
       execute('git', 'clone', url, name)
@@ -489,7 +490,7 @@ def configure(name, *confopts, **kwargs):
 
 
 @recipe('make', 2)
-def make(name, target=None, makefile=None, **makevars):
+def make(name, target=None, makefile=None, parallel=False, **makevars):
   info('running make "%s"', target)
 
   with cwd(path.join('{build}', name)):
@@ -498,6 +499,8 @@ def make(name, target=None, makefile=None, **makevars):
       args = [target] + args
     if makefile is not None:
       args = ['-f', makefile] + args
+    if parallel:
+      args = ['-j%d' % cpu_count()] + args
     execute('make', *args)
 
 

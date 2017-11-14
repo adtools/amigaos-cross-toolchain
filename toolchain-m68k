@@ -418,6 +418,7 @@ def build():
               '--prefix={prefix}',
               '--infodir={prefix}/{target}/info',
               '--mandir={prefix}/share/man',
+              '--disable-nls',
               '--host=i686-linux-gnu',
               '--target=m68k-amigaos',
               from_dir='{submodules}/{binutils}')

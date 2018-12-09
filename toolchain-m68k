@@ -516,9 +516,9 @@ def build():
 
   install_tools()
 
-  pyinstall('amitools')
-  pyfixbin('amitools', ['fdtool', 'geotool', 'hunktool', 'rdbtool', 'romtool',
-                        'typetool', 'vamos', 'vamospath', 'xdfscan', 'xdftool'])
+  # pyinstall('amitools')
+  # pyfixbin('amitools', ['fdtool', 'geotool', 'hunktool', 'rdbtool', 'romtool',
+  #                       'typetool', 'vamos', 'vamospath', 'xdfscan', 'xdftool'])
 
 
 def clean():
